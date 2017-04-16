@@ -6,10 +6,12 @@ type Habitation struct {
 
 type Area struct {
 	Habitation
+	Name string
 }
 
 type Dwelling struct {
 	Habitation
+	Location *Area
 }
 
 func (h *Habitation) Resident(b *Being) (int, bool) {

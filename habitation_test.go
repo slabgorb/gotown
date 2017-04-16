@@ -7,7 +7,7 @@ import (
 )
 
 func TestPopulation(t *testing.T) {
-	h := Habitation{}
+	h := Area{}
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
 	}
@@ -24,5 +24,4 @@ func TestPopulation(t *testing.T) {
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
 	}
-
 }
