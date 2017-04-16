@@ -3,25 +3,39 @@ package townomatic_test
 import (
 	"fmt"
 	"testing"
+	"text/template"
 
 	. "github.com/slabgorb/townomatic"
 )
 
-var (
-	fa       = []FertileAge{FertileAge{Gender(Male), 12, 65}, FertileAge{Gender(Female), 12, 55}}
-	human, _ = NewSpecies("Human", []int{Male, Female}, fa, "{{.GivenName}} {{.FamilyName}}")
-	adam     = &Being{Name: Name{GivenName: "Adam", FamilyName: "Man"}, Species: human}
-	eve      = &Being{Name: Name{GivenName: "Eve", FamilyName: "Man"}, Species: human}
-)
+var nameTests = []struct {
+	pattern  string
+	name     Name
+	expected string
+}{
+	{"{{.GivenName}} {{.FamilyName}}", NewName("Adam", "Man"), "Adam Man"},
+	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", NewName("Adam", "Man", "The"), "Adam Man [The]"},
+	{"{{.FamilyName}}", NewName("Adam", "Man"), "Man"},
+}
 
 func TestName(t *testing.T) {
-	fmt.Println(adam.Species.NameTemplate)
-	if adam.String() != "Adam Man" {
-		t.Errorf("Expected 'Adam Man' got %v", adam.String())
+	for i, nt := range nameTests {
+		nameTemplate, _ := template.New(fmt.Sprintf("%v_nameTemplate", i)).Parse(nt.pattern)
+		actual := nt.name.Patterned(nameTemplate)
+		if actual != nt.expected {
+			t.Errorf("Name.Patterned() expected %s got %s", nt.expected, actual)
+		}
 	}
 }
 
-func TestReproduction(t *testing.T) {
-	adam.Reproduce(eve)
+func TestDeath(t *testing.T) {
+	adam := &Being{}
+	if !adam.Alive() {
+		t.Fail()
+	}
+	adam.Die()
+	if adam.Alive() {
+		t.Fail()
+	}
 
 }

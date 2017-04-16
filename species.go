@@ -16,6 +16,7 @@ type FertileAge struct {
 	End   int
 }
 
+// Species represents a species or a race.
 type Species struct {
 	Name         string
 	Genders      []Gender
