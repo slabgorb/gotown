@@ -2,13 +2,13 @@ package townomatic
 
 import "text/template"
 
+type Gender int
+
 const (
-	Asexual = iota
+	Asexual Gender = iota
 	Male
 	Female
 )
-
-type Gender int
 
 type FertileAge struct {
 	Gender
