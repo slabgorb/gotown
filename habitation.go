@@ -38,12 +38,17 @@ type Habitation struct {
 	Residents []*Being
 }
 
+func (h *Habitation) Add(hab *Habitation) {
+	hab.Location == h
+}
+
 type Area struct {
 	Habitation
 	Name string
 	Size
-	Ruler    *Being
-	Location *Area
+	Ruler     *Being
+	Location  *Area
+	Graveyard []*Being
 }
 
 func NewArea(name string, size Size, ruler *Being, location *Area) *Area {
