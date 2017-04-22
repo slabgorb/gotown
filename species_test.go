@@ -1,6 +1,10 @@
-package townomatic
+package gotown_test
 
-import "testing"
+import (
+	"testing"
+
+	. "github.com/slabgorb/gotown"
+)
 
 func testToString(t *testing.T) {
 	species := Species{Name: "Vampire"}

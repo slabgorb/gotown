@@ -1,10 +1,10 @@
-package townomatic_test
+package gotown_test
 
 import (
 	"testing"
 	"text/template"
 
-	. "github.com/slabgorb/townomatic"
+	. "github.com/slabgorb/gotown"
 )
 
 func TestPopulation(t *testing.T) {

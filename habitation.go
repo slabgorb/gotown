@@ -1,4 +1,4 @@
-package townomatic
+package gotown
 
 import (
 	"fmt"
@@ -38,17 +38,13 @@ type Habitation struct {
 	Residents []*Being
 }
 
-func (h *Habitation) Add(hab *Habitation) {
-	hab.Location == h
-}
-
 type Area struct {
 	Habitation
 	Name string
 	Size
 	Ruler     *Being
-	Location  *Area
 	Graveyard []*Being
+	Location  *Area
 }
 
 func NewArea(name string, size Size, ruler *Being, location *Area) *Area {

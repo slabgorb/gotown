@@ -1,4 +1,4 @@
-package townomatic
+package gotown
 
 import (
 	"bytes"

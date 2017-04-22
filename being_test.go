@@ -1,11 +1,11 @@
-package townomatic_test
+package gotown_test
 
 import (
 	"fmt"
 	"testing"
 	"text/template"
 
-	. "github.com/slabgorb/townomatic"
+	. "github.com/slabgorb/gotown"
 )
 
 var nameTests = []struct {
