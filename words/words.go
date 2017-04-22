@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
+	"strings"
 	"text/template"
 
 	"github.com/jinzhu/inflection"
@@ -64,7 +65,7 @@ func (n *Namer) Name() string {
 	tmpl := n.template()
 	buf := bytes.NewBuffer([]byte(""))
 	tmpl.Execute(buf, n.Words)
-	return buf.String()
+	return strings.Title(buf.String())
 }
 
 func NewNamer(patterns []string, words *Words) *Namer {
@@ -524,8 +525,8 @@ var BaseNamer = NewNamer(
 		"the {{.Adjective}} {{.PluralNoun}}",
 		"{{.StartNoun}} of the {{.Noun}}",
 		"{{.Prefix}}-{{.StartNoun}} of the {{.PluralNoun}}",
-		"{{.Prefix}}|{{.StartNoun}}",
+		"{{.Prefix}}{{.StartNoun}}",
 		"{{.StartNoun}} of the {{.PluralNoun}}",
 		"{{.PluralNoun}} of the {{.Noun}}",
-		"{{.Adjective}}|{{.StartNoun}}",
+		"{{.Adjective}}{{.StartNoun}}",
 	}, BaseWords)

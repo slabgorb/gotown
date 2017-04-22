@@ -37,7 +37,7 @@ var testTemplateTable = []struct {
 	expected string
 	f        testRandomStringFunc
 }{
-	{"", func() string { return BaseNamer.Name() }},
+	{"Taperedinfamy", func() string { return BaseNamer.Name() }},
 }
 
 func TestTemplating(t *testing.T) {
