@@ -33,14 +33,17 @@ var human = &Species{
 }
 var kingArthur = &Being{Name: NewName("Arthur", "Eld"), Species: human}
 
-var england = NewArea("Britain", Empire, kingArthur, nil)
+var england = NewArea(Empire, kingArthur, nil)
 
 var areaTest = []struct {
 	area     *Area
 	expected string
 }{
-	{england, "Britain, an Empire ruled by Arthur Eld."},
-	{NewArea("Camelot", Castle, nil, england), "Camelot, a Castle within Britain."},
+	{england, "Ultrabean, an Empire ruled by Arthur Eld."},
+	{NewArea(Castle, nil, england), "The Rounded Cinders, a Castle within Ultrabean."},
+	{NewArea(Castle, nil, england), "Diversions of the Silence, a Castle within Ultrabean."},
+	{NewArea(Town, nil, england), "Union of the Ones, a Town within Ultrabean."},
+	{NewArea(Castle, nil, england), "Hour of the Bank, a Castle within Ultrabean."},
 }
 
 func TestAreaName(t *testing.T) {

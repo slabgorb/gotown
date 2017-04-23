@@ -3,12 +3,14 @@ package gotown
 import (
 	"fmt"
 	"strings"
+
+	"github.com/slabgorb/gotown/words"
 )
 
-type Size int
+type AreaSize int
 
 const (
-	Hut Size = iota
+	Hut AreaSize = iota
 	Cottage
 	House
 	Tower
@@ -22,7 +24,7 @@ const (
 	Empire
 )
 
-func (s *Size) article() string {
+func (s *AreaSize) article() string {
 	art := "a"
 	vowels := []string{"A", "E", "I", "O", "U"}
 	for _, vowel := range vowels {
@@ -36,19 +38,36 @@ func (s *Size) article() string {
 
 type Habitation struct {
 	Residents []*Being
+	Name      string
+	*words.Namer
+}
+
+func (h *Habitation) SetNamer(namer *words.Namer) {
+	h.Namer = namer
+}
+
+type Graveyard struct {
+	Habitation
 }
 
 type Area struct {
 	Habitation
-	Name string
-	Size
-	Ruler     *Being
-	Graveyard []*Being
-	Location  *Area
+	Size  AreaSize
+	Ruler *Being
+	Graveyard
+	Location *Area
 }
 
-func NewArea(name string, size Size, ruler *Being, location *Area) *Area {
-	return &Area{Name: name, Size: size, Ruler: ruler, Location: location}
+func NewArea(size AreaSize, ruler *Being, location *Area) *Area {
+	var n words.Namer
+	if location != nil {
+		n = location.Namer
+	} else {
+		n = words.TownNamer.Name()
+	}
+	a := &Area{Size: size, Ruler: ruler, Location: location}
+	a.setNamer(n)
+	a.Name = a.Name()
 }
 
 func (a *Area) String() string {
