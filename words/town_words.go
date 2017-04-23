@@ -1,12 +1,8 @@
 package words
 
 var (
-	TownWords *Words
-	TownNamer *Namer
-)
-
-func init() {
-	TownNamer = NewNamer(
+	TownWords *Words = NewWords()
+	TownNamer *Namer = NewNamer(
 		[]string{"{{.Prefix}}{{.Suffix}}",
 			"{{.Prefix}} {{.Noun}}{{.Suffix}}",
 			"{{.ShortAdjective}}{{.ShortNoun}}{{.Suffix}}",
@@ -22,7 +18,9 @@ func init() {
 			"{{.Adjective}} {{.EndNoun}}"},
 		TownWords,
 	)
-	TownWords = NewWords()
+)
+
+func init() {
 	TownWords.Backup = BaseWords
 	TownWords.AddList(
 		"prefixes",
@@ -90,7 +88,7 @@ func init() {
 		},
 	)
 	TownWords.AddList(
-		"endNoun",
+		"endNouns",
 		[]string{
 			"crossing",
 			"field",

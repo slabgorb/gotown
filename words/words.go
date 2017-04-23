@@ -11,6 +11,8 @@ import (
 	"github.com/jinzhu/inflection"
 )
 
+const shortWord = 10
+
 func chooseRandomString(s []string) string {
 	return s[rand.Intn(len(s))]
 }
@@ -20,59 +22,77 @@ type Words struct {
 	Backup     *Words
 }
 
-func (w *Words) Noun() (string, bool) {
-	return w.withBackup(func() (string, bool) { return w.listFromKey("nouns") })
+func (w *Words) Noun() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("nouns")) })
 }
 
-func (w *Words) PluralNoun() (string, bool) {
-	if s, ok := w.Noun(); ok {
-		return inflection.Plural(s), true
+func (w *Words) PluralNoun() string {
+	if s := w.Noun(); s != "" {
+		return inflection.Plural(s)
 	}
-	return "", false
+	return ""
 }
 
-func (w *Words) Adjective() (string, bool) {
-	return w.withBackup(func() (string, bool) { return w.listFromKey("adjectives") })
+func (w *Words) Adjective() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("adjectives")) })
 }
 
-func (w *Words) withBackup(f func() (string, bool)) (string, bool) {
-	if s, ok := f(); ok {
-		log.Println(s)
-		return s, true
-	} else {
-		log.Println("Not ok", s)
+func (w *Words) Suffix() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("suffixes")) })
+}
+
+func (w *Words) ShortAdjective() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(shortFilter(w.listFromKey("adjectives"))) })
+}
+
+func (w *Words) ShortNoun() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(shortFilter(w.listFromKey("nouns"))) })
+}
+
+func shortFilter(list []string) []string {
+	newList := []string{}
+	for _, l := range list {
+		if len(l) <= shortWord {
+			newList = append(newList, l)
+		}
 	}
-	log.Println("checking backup")
+	return newList
+}
+
+func (w *Words) withBackup(f func(w *Words) string) string {
+	if s := f(w); s != "" {
+		return s
+	}
 	if w.Backup != nil {
 		return w.Backup.withBackup(f)
 	}
-	return "", false
+	return ""
 }
 
-func (w *Words) listFromKey(s string) (string, bool) {
+func (w *Words) listFromKey(s string) []string {
 	if list, ok := w.Dictionary[s]; ok {
-		return chooseRandomString(list), true
+		return list
 	} else {
-		return "", false
+		return []string{""}
 	}
 }
 
-func (w *Words) Prefix() (string, bool) {
-	return w.withBackup(func() (string, bool) { return w.listFromKey("prefixes") })
+func (w *Words) Prefix() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("prefixes")) })
 }
 
-func (w *Words) StartNoun() (string, bool) {
-	if r, ok := w.withBackup(func() (string, bool) { return w.listFromKey("startNouns") }); ok {
-		return r, ok
+func (w *Words) StartNoun() string {
+	if r := w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("startNouns")) }); r != "" {
+		return r
 	}
-	return w.withBackup(func() (string, bool) { return w.listFromKey("nouns") })
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("nouns")) })
 }
 
-func (w *Words) EndNoun() (string, bool) {
-	if r, ok := w.withBackup(func() (string, bool) { return w.listFromKey("endNouns") }); ok {
-		return r, ok
+func (w *Words) EndNoun() string {
+	if r := w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("endNouns")) }); r != "" {
+		return r
 	}
-	return w.withBackup(func() (string, bool) { return w.listFromKey("nouns") })
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("nouns")) })
 }
 
 func NewWords() *Words {
@@ -109,7 +129,10 @@ func lowercaseJoiners(s string) string {
 func (n *Namer) Name() string {
 	tmpl := n.template()
 	buf := bytes.NewBuffer([]byte(""))
-	tmpl.Execute(buf, n.Words)
+	err := tmpl.Execute(buf, n.Words)
+	if err != nil {
+		log.Println(err)
+	}
 	return lowercaseJoiners(strings.Title(buf.String()))
 }
 

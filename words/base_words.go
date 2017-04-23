@@ -2,12 +2,7 @@ package words
 
 var (
 	BaseWords *Words = NewWords()
-	BaseNamer *Namer
-)
-
-func init() {
-
-	BaseNamer = NewNamer([]string{
+	BaseNamer *Namer = NewNamer([]string{
 		"the {{.PluralNoun}} of the {{.Adjective}} {{.Noun}}",
 		"the {{.PluralNoun}}",
 		"the {{.Adjective}} {{.PluralNoun}}",
@@ -20,6 +15,9 @@ func init() {
 	},
 		BaseWords,
 	)
+)
+
+func init() {
 
 	BaseWords.AddList("prefixes", []string{
 		"arch", "dozen", "ecto", "ever", "many", "necro", "neo",

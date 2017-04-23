@@ -7,6 +7,7 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
+//go:generate stringer -type=AreaSize
 type AreaSize int
 
 const (
@@ -47,7 +48,7 @@ func (h *Habitation) SetNamer(namer *words.Namer) {
 }
 
 type Graveyard struct {
-	Habitation
+	*Area
 }
 
 type Area struct {
@@ -59,15 +60,16 @@ type Area struct {
 }
 
 func NewArea(size AreaSize, ruler *Being, location *Area) *Area {
-	var n words.Namer
+	var n *words.Namer
 	if location != nil {
 		n = location.Namer
 	} else {
-		n = words.TownNamer.Name()
+		n = words.TownNamer
 	}
 	a := &Area{Size: size, Ruler: ruler, Location: location}
-	a.setNamer(n)
-	a.Name = a.Name()
+	a.SetNamer(n)
+	a.Name = a.Namer.Name()
+	return a
 }
 
 func (a *Area) String() string {
