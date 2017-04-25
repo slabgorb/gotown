@@ -1,30 +1,34 @@
 package gotown_test
 
 import (
-	"fmt"
 	"testing"
-	"text/template"
 
 	. "github.com/slabgorb/gotown"
+	words "github.com/slabgorb/gotown/words"
 )
 
 var nameTests = []struct {
 	pattern  string
-	name     Name
 	expected string
 }{
-	{"{{.GivenName}} {{.FamilyName}}", NewName("Adam", "Man"), "Adam Man"},
-	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", NewName("Adam", "Man", "The"), "Adam Man [The]"},
-	{"{{.FamilyName}}", NewName("Adam", "Man"), "Man"},
+	{"{{.GivenName}} {{.FamilyName}}", "Something"},
+	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Something"},
+	{"{{.FamilyName}}", "Something"},
 }
 
 func TestName(t *testing.T) {
-	for i, nt := range nameTests {
-		nameTemplate, _ := template.New(fmt.Sprintf("%v_nameTemplate", i)).Parse(nt.pattern)
-		actual := nt.name.Patterned(nameTemplate)
-		if actual != nt.expected {
-			t.Errorf("Name.Patterned() expected %s got %s", nt.expected, actual)
+	for _, nt := range nameTests {
+		namer := words.NewNamer([]string{nt.pattern}, words.NorseMaleNameWords)
+		speciesGender := NewSpeciesGender(namer, Patronymic, 12, 65)
+		species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: speciesGender})
+		being := &Being{Species: species}
+		being.Randomize()
+		if being.Gender != Male {
+			t.Errorf("Expected Male got %s", being.Gender)
 		}
+		// if being.String() != nt.expected {
+		// 	t.Errorf("Expected %s got %s", nt.expected, being.String())
+		// }
 	}
 }
 

@@ -1,12 +1,7 @@
 package words
 
 import (
-	"bytes"
-	"fmt"
-	"log"
 	"math/rand"
-	"strings"
-	"text/template"
 
 	"github.com/jinzhu/inflection"
 )
@@ -95,51 +90,20 @@ func (w *Words) EndNoun() string {
 	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("nouns")) })
 }
 
+func (w *Words) GivenName() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("givenNames")) })
+}
+func (w *Words) Matronymic() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("matronymics")) })
+}
+func (w *Words) Patronymic() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("patronymics")) })
+}
+
 func NewWords() *Words {
 	return &Words{Dictionary: make(map[string][]string)}
 }
 
 func (w *Words) AddList(key string, list []string) {
 	w.Dictionary[key] = list
-}
-
-type Pattern string
-
-func (p Pattern) Template() *template.Template {
-	return template.Must(template.New(fmt.Sprint(p)).Parse(fmt.Sprint(p)))
-}
-
-type Namer struct {
-	Patterns []Pattern
-	*Words
-}
-
-func (n *Namer) template() *template.Template {
-	randomChoice := n.Patterns[rand.Intn(len(n.Patterns))]
-	return randomChoice.Template()
-}
-
-func lowercaseJoiners(s string) string {
-	s = strings.Replace(s, " Of ", " of ", -1)
-	s = strings.Replace(s, " The ", " the ", -1)
-	s = strings.Replace(s, " And ", " and ", -1)
-	return s
-}
-
-func (n *Namer) Name() string {
-	tmpl := n.template()
-	buf := bytes.NewBuffer([]byte(""))
-	err := tmpl.Execute(buf, n.Words)
-	if err != nil {
-		log.Println(err)
-	}
-	return lowercaseJoiners(strings.Title(buf.String()))
-}
-
-func NewNamer(patterns []string, words *Words) *Namer {
-	ps := []Pattern{}
-	for _, p := range patterns {
-		ps = append(ps, Pattern(p))
-	}
-	return &Namer{ps, words}
 }

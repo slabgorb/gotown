@@ -1,19 +1,22 @@
 package gotown
 
 import (
-	"bytes"
 	"fmt"
-	"text/template"
+	"math"
+	"math/rand"
+	"strings"
 )
 
 type Name struct {
 	GivenName  string
 	FamilyName string
 	OtherNames []string
+	Display    string
 }
 
-func NewName(names ...string) Name {
-	name := Name{}
+func NewName(fullName string) *Name {
+	name := &Name{Display: fullName}
+	names := strings.Split(fullName, " ")
 	if len(names) > 0 {
 		name.GivenName = names[0]
 	}
@@ -26,20 +29,44 @@ func NewName(names ...string) Name {
 	return name
 }
 
-func (n *Name) Patterned(t *template.Template) string {
-	buf := bytes.NewBuffer([]byte(""))
-	t.Execute(buf, n)
-	return buf.String()
-}
-
 type Being struct {
-	Name
+	*Name
 	*Species
-	Parents  []Being
+	Parents  map[Gender]*Being
 	Children []Being
 	Age      int
 	Gender
 	Dead bool
+}
+
+func (b *Being) genderedParent(gender Gender) *Being {
+	if parent, ok := b.Parents[gender]; ok {
+		return parent
+	}
+	return nil
+}
+
+func (b *Being) Father() *Being {
+	return b.genderedParent(Male)
+}
+
+func (b *Being) Mother() *Being {
+	return b.genderedParent(Female)
+}
+
+func (b *Being) Randomize() error {
+	if b.Species == nil {
+		return fmt.Errorf("Cannot randomize a being without a species")
+	}
+	possibleGenders := []Gender{}
+	for g, _ := range b.Species.Genders {
+		possibleGenders = append(possibleGenders, g)
+	}
+
+	b.Gender = possibleGenders[rand.Intn(len(possibleGenders))]
+	b.Name = b.Species.Genders[b.Gender].NameStrategy(b)
+	b.Age = rand.Intn(int(math.Floor(float64(b.Species.Genders[b.Gender].Fertility.End) * 1.3)))
+	return nil
 }
 
 func (b *Being) Reproduce(with *Being) ([]*Being, error) {
@@ -55,7 +82,7 @@ func (b *Being) Die() {
 }
 
 func (b *Being) String() string {
-	return b.Name.Patterned(b.Species.NameTemplate)
+	return b.Name.Display
 }
 
 func (b *Being) Alive() bool {
