@@ -11,9 +11,9 @@ var nameTests = []struct {
 	pattern  string
 	expected string
 }{
-	{"{{.GivenName}} {{.FamilyName}}", "Something"},
-	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Something"},
-	{"{{.FamilyName}}", "Something"},
+	{"{{.GivenName}} {{.FamilyName}}", "Audgrim Tjodrikson"},
+	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Borgi–Borgir Knutson"},
+	{"{{.FamilyName}}", "Iverson"},
 }
 
 func TestName(t *testing.T) {
@@ -26,10 +26,31 @@ func TestName(t *testing.T) {
 		if being.Gender != Male {
 			t.Errorf("Expected Male got %s", being.Gender)
 		}
-		// if being.String() != nt.expected {
-		// 	t.Errorf("Expected %s got %s", nt.expected, being.String())
-		// }
+		if being.String() != nt.expected {
+			t.Errorf("Expected %s got %s", nt.expected, being.String())
+		}
 	}
+}
+
+func TestInheritedName(t *testing.T) {
+	male := NewSpeciesGender(words.NorseMaleNamer, Patronymic, 12, 65)
+	female := NewSpeciesGender(words.NorseFemaleNamer, Matronymic, 12, 50)
+	species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: male, Female: female})
+	m := &Being{Species: species, Gender: Female}
+	m.Name = female.NameStrategy(m)
+	f := &Being{Species: species, Gender: Male}
+	m.Name = male.NameStrategy(m)
+	children, err := f.Reproduce(m)
+	if err != nil {
+		t.Errorf("%s", err)
+	}
+	child := children[0]
+
+	if child.Name.FamilyName != m.Name.GivenName+"dottir" {
+
+		t.Errorf("expected %s got %s", child.Name.FamilyName, m.Name.GivenName+"dottir")
+	}
+
 }
 
 func TestDeath(t *testing.T) {

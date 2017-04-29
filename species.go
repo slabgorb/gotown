@@ -1,6 +1,8 @@
 package gotown
 
 import (
+	"math/rand"
+
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -28,6 +30,7 @@ var (
 		name.Display = display
 		return name
 	}
+
 	Patrilineal NameStrategy = func(b *Being) *Name {
 		namer := b.Species.Genders[b.Gender].Namer
 		name := &Name{GivenName: namer.GivenName()}
@@ -40,6 +43,7 @@ var (
 		name.Display = display
 		return name
 	}
+
 	Matronymic NameStrategy = func(b *Being) *Name {
 		namer := b.Species.Genders[b.Gender].Namer
 		name := &Name{GivenName: namer.GivenName()}
@@ -52,6 +56,7 @@ var (
 		name.Display = display
 		return name
 	}
+
 	Patronymic NameStrategy = func(b *Being) *Name {
 		namer := b.Species.Genders[b.Gender].Namer
 		name := &Name{GivenName: namer.GivenName()}
@@ -64,6 +69,7 @@ var (
 		name.Display = display
 		return name
 	}
+
 	OneName NameStrategy = func(b *Being) *Name {
 		namer := b.Species.Genders[b.Gender].Namer
 		name := &Name{GivenName: namer.GivenName()}
@@ -94,8 +100,9 @@ type Fertility struct {
 
 // Species represents a species or a race.
 type Species struct {
-	Name    string
-	Genders map[Gender]*SpeciesGender
+	Name          string
+	Genders       map[Gender]*SpeciesGender
+	MultipleBirth func() int
 }
 
 // NewSpecies creates and initializes a *Species
@@ -103,6 +110,18 @@ func NewSpecies(name string, genders map[Gender]*SpeciesGender) *Species {
 	return &Species{
 		Name:    name,
 		Genders: genders,
+		MultipleBirth: func() int {
+			if rand.Float64() < 0.05 {
+				return 4
+			}
+			if rand.Float64() < 0.1 {
+				return 3
+			}
+			if rand.Float64() < 0.3 {
+				return 2
+			}
+			return 1
+		},
 	}
 }
 

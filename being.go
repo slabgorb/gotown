@@ -10,8 +10,12 @@ import (
 type Name struct {
 	GivenName  string
 	FamilyName string
-	OtherNames []string
+	Other      []string
 	Display    string
+}
+
+func (n *Name) OtherNames() string {
+	return strings.Join(n.Other, " ")
 }
 
 func NewName(fullName string) *Name {
@@ -24,7 +28,7 @@ func NewName(fullName string) *Name {
 		name.FamilyName = names[1]
 	}
 	if len(names) > 2 {
-		name.OtherNames = names[2:]
+		name.Other = names[2:]
 	}
 	return name
 }
@@ -33,7 +37,7 @@ type Being struct {
 	*Name
 	*Species
 	Parents  map[Gender]*Being
-	Children []Being
+	Children []*Being
 	Age      int
 	Gender
 	Dead bool
@@ -69,12 +73,23 @@ func (b *Being) Randomize() error {
 	return nil
 }
 
+// Reproduce creates new Being objects from the 'parent' beings
 func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	if with == nil && b.Gender != Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	children := []*Being{}
-	return children, nil
+	//children := []*Being{}
+
+	child := &Being{Species: b.Species}
+	child.Parents = map[Gender]*Being{
+		b.Gender:    b,
+		with.Gender: with,
+	}
+	child.Randomize()
+
+	b.Children = append(b.Children, child)
+
+	return b.Children, nil
 }
 
 func (b *Being) Die() {
@@ -82,7 +97,7 @@ func (b *Being) Die() {
 }
 
 func (b *Being) String() string {
-	return b.Name.Display
+	return strings.Trim(b.Name.Display, " ")
 }
 
 func (b *Being) Alive() bool {

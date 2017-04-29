@@ -7,21 +7,22 @@ import (
 	words "github.com/slabgorb/gotown/words"
 )
 
-func TestToString(t *testing.T) {
-	species := Species{Name: "Vampire"}
+var (
+	female = NewSpeciesGender(words.NorseFemaleNamer, Matronymic, 12, 48)
+	male   = NewSpeciesGender(words.NorseMaleNamer, Patronymic, 12, 65)
+	s      = NewSpecies("Northman", map[Gender]*SpeciesGender{
+		Female: female,
+		Male:   male,
+	})
+)
 
-	if species.String() != "Vampire" {
+func TestToString(t *testing.T) {
+	if s.String() != "Northman" {
 		t.Fail()
 	}
 }
 
 func TestGenders(t *testing.T) {
-	female := NewSpeciesGender(words.NorseFemaleNamer, Matronymic, 12, 48)
-	male := NewSpeciesGender(words.NorseMaleNamer, Patronymic, 12, 65)
-	s := NewSpecies("Northman", map[Gender]*SpeciesGender{
-		Female: female,
-		Male:   male,
-	})
 	if s.Name != "Northman" {
 		t.Fail()
 	}

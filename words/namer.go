@@ -28,7 +28,7 @@ func lowercaseJoiners(s string) string {
 func (n *Namer) Execute(with interface{}) (string, error) {
 	tmpl := n.Template()
 	buf := bytes.NewBuffer([]byte(""))
-	err := tmpl.Execute(buf, n.Words)
+	err := tmpl.Execute(buf, with)
 	return lowercaseJoiners(strings.Title(buf.String())), err
 }
 
