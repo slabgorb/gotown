@@ -34,7 +34,7 @@ func TestGenders(t *testing.T) {
 	b := &Being{Gender: Male, Species: s}
 	name := male.NameStrategy(b)
 	nameDisplay := name.Display
-	expected := "Eimund Borrison"
+	expected := "Einar Berulfson"
 	if nameDisplay != expected {
 		t.Errorf("expected %s got %s", expected, nameDisplay)
 	}
@@ -42,16 +42,20 @@ func TestGenders(t *testing.T) {
 
 func TestRandomBeing(t *testing.T) {
 	b := s.RandomBeing()
-	if b.String() != "Bjornar Leidulfson" {
-		t.Fail()
+	expected := "Borri Fridleivson"
+	if b.String() != expected {
+		t.Errorf("expected %s got %s", expected, b.String())
 	}
 	if b.Gender != Male {
-		t.Fail()
+		t.Errorf("Wrong gender, got %s", b.Gender)
 	}
 	b = s.RandomBeing()
-	if b.String() != "Gjartrud Odveigdottir" {
-		t.Fail()
+	expected = "Signhild Ulvhilddottir"
+	if b.String() != expected {
+
+		t.Errorf("expected %s got %s", expected, b.String())
 	}
+
 	if b.Gender != Female {
 		t.Fail()
 	}

@@ -43,7 +43,7 @@ func TestInheritedName(t *testing.T) {
 	species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: male, Female: female})
 	m := &Being{Species: species, Gender: Female}
 	m.Name = female.NameStrategy(m)
-	f := &Being{Species: species, Gender: Male}
+	//f := &Being{Species: species, Gender: Male}
 	m.Name = male.NameStrategy(m)
 	// children, err := f.Reproduce(m)
 	// if err != nil {
