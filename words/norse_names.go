@@ -5,12 +5,12 @@ var (
 	NorseMaleNameWords   *Words = NewWords()
 	NorseMaleNamer       *Namer = NewNamer(
 		[]string{
-			"{{.GivenName}} {{.GivenName}}{{.Patronymic}}",
+			"{{.GivenName}} {{.FamilyName}}{{.Patronymic}}",
 		}, NorseMaleNameWords,
 	)
 	NorseFemaleNamer *Namer = NewNamer(
 		[]string{
-			"{{.GivenName}} {{.GivenName}}{{.Matronymic}}",
+			"{{.GivenName}} {{.FamilyName}}{{.Matronymic}}",
 		}, NorseFemaleNameWords,
 	)
 )

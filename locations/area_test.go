@@ -1,14 +1,12 @@
-package gotown_test
+package locations_test
 
 import (
 	"testing"
 
-	. "github.com/slabgorb/gotown"
+	. "github.com/slabgorb/gotown/locations"
 )
 
 var (
-	// nameTemplate, _ = template.New("test").Parse("{{.GivenName}} {{.FamilyName}}")
-	// human           = &Species{NameTemplate: nameTemplate}
 	areaTest = []struct {
 		area     *Area
 		expected string

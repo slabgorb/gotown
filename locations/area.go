@@ -1,21 +1,22 @@
-package gotown
+package locations
 
 import (
 	"fmt"
 
+	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/words"
 )
 
 type Area struct {
 	Habitation
 	Size  AreaSize
-	Ruler *Being
+	Ruler *inhabitants.Being
 	Graveyard
 	Location   *Area
 	Enclosures map[string]*Area
 }
 
-func NewArea(size AreaSize, ruler *Being, location *Area) *Area {
+func NewArea(size AreaSize, ruler *inhabitants.Being, location *Area) *Area {
 	var n *words.Namer
 	if location != nil {
 		n = location.Namer

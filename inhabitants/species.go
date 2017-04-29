@@ -1,6 +1,7 @@
-package gotown
+package inhabitants
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/slabgorb/gotown/words"
@@ -61,6 +62,8 @@ var (
 		namer := b.Species.Genders[b.Gender].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Father() != nil {
+			fmt.Println(b.Father())
+			fmt.Println(namer.Patronymic())
 			name.FamilyName = b.Father().GivenName + namer.Patronymic()
 			return name
 		}
@@ -127,4 +130,10 @@ func NewSpecies(name string, genders map[Gender]*SpeciesGender) *Species {
 
 func (s *Species) String() string {
 	return s.Name
+}
+
+func (s *Species) RandomBeing() *Being {
+	b := &Being{Species: s}
+	b.Randomize()
+	return b
 }

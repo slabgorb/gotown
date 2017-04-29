@@ -1,4 +1,4 @@
-package gotown
+package locations
 
 type Graveyard struct {
 	*Area

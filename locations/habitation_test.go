@@ -1,9 +1,10 @@
-package gotown_test
+package locations_test
 
 import (
 	"testing"
 
-	. "github.com/slabgorb/gotown"
+	"github.com/slabgorb/gotown/inhabitants"
+	. "github.com/slabgorb/gotown/locations"
 )
 
 func TestPopulation(t *testing.T) {
@@ -11,7 +12,7 @@ func TestPopulation(t *testing.T) {
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
 	}
-	b := &Being{Name: NewName("Adam")}
+	b := &inhabitants.Being{Name: inhabitants.NewName("Adam")}
 	h.Add(b)
 	if h.Population() != 1 {
 		t.Errorf("Expected 1 got %d", h.Population())

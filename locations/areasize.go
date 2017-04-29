@@ -1,8 +1,7 @@
-package gotown
+package locations
 
 import "strings"
 
-//go:generate stringer -type=AreaSize
 type AreaSize int
 
 const (

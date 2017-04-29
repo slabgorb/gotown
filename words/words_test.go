@@ -64,3 +64,11 @@ func TestTemplating(t *testing.T) {
 		}
 	}
 }
+
+func TestNameWords(t *testing.T) {
+	w := NorseMaleNameWords
+	pt := w.Patronymic()
+	if pt != "son" {
+		t.Errorf("Expected 'son' for patronymic, got %s", pt)
+	}
+}

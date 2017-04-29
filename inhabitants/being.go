@@ -1,4 +1,4 @@
-package gotown
+package inhabitants
 
 import (
 	"fmt"
