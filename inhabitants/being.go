@@ -78,15 +78,13 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	if with == nil && b.Gender != Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	//children := []*Being{}
+	child := &Being{Species: b.Species, Age: 0}
 
-	child := &Being{Species: b.Species}
 	child.Parents = map[Gender]*Being{
 		b.Gender:    b,
 		with.Gender: with,
 	}
 	child.Randomize()
-
 	b.Children = append(b.Children, child)
 
 	return b.Children, nil

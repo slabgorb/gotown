@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 	"math/rand"
+	"regexp"
 	"strings"
 	"text/template"
 )
@@ -25,11 +26,16 @@ func lowercaseJoiners(s string) string {
 	return s
 }
 
+func edgeCases(s string) string {
+	re := regexp.MustCompile(`yey$`)
+	return re.ReplaceAllString(s, "y")
+}
+
 func (n *Namer) Execute(with interface{}) (string, error) {
 	tmpl := n.Template()
 	buf := bytes.NewBuffer([]byte(""))
 	err := tmpl.Execute(buf, with)
-	return lowercaseJoiners(strings.Title(buf.String())), err
+	return edgeCases(lowercaseJoiners(strings.Title(buf.String()))), err
 }
 
 func (n *Namer) Name() string {

@@ -1,2 +1,6 @@
 .#*
 *.test
+web/styles/**/*.css
+web/scripts/**/*.js
+node_modules
+bower_components

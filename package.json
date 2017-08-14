@@ -1,0 +1,27 @@
+{
+  "name": "gotown",
+  "email": "slabgorb@monaeo.com",
+  "version": "1.0.0",
+  "description": "Gotown app",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Keith Avery",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "bower-main": "^0.2.14",
+    "gulp": "^3.9.1",
+    "gulp-angular-templatecache": "^2.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-concat-css": "^2.3.0",
+    "gulp-go": "^1.1.0",
+    "gulp-google-webfonts": "0.0.14",
+    "gulp-load-plugins": "^1.5.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-uglify": "^3.0.0",
+    "merge2": "^1.1.0"
+  }
+}

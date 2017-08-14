@@ -1,0 +1,51 @@
+@import 'variables';
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(MaterialIcons-Regular.eot); /* For IE6-8 */
+  src: local('Material Icons'),
+       local('MaterialIcons-Regular'),
+       url(fonts/MaterialIcons/MaterialIcons-Regular.woff2) format('woff2'),
+       url(fonts/MaterialIcons/MaterialIcons-Regular.woff) format('woff'),
+       url(fonts/MaterialIcons/MaterialIcons-Regular.ttf) format('truetype');
+}
+
+$weights: (
+  Thin: 100,
+  Light: 300,
+  Book: normal,
+  Medium: 500,
+  Semibold: 600,
+  Bold: bold,
+  ExtraBold: 800,
+  Black: 900
+);
+
+$families: "Montserrat", "Manuale";
+
+
+@each $name, $weight in $weights {
+  @each $family in $families {
+    @font-face {
+        font-family: $family;
+        src: url("fonts/#{$family}/#{$family}-#{$name}.eot");
+        src: url("fonts/#{$family}/#{$family}-#{$name}.eot") format('embedded-opentype'),
+             url("fonts/#{$family}/#{$family}-#{$name}.woff") format('woff'),
+             url("fonts/#{$family}/#{$family}-#{$name}.svg") format('svg');
+        font-weight: $weight;
+        font-style: normal;
+    };
+
+    @font-face {
+        font-family: $family;
+        src: url("fonts/#{$family}/#{$family}-#{$name}Italic.eot");
+        src: url("fonts/#{$family}/#{$family}-#{$name}Italic.eot") format('embedded-opentype'),
+             url("fonts/#{$family}/#{$family}-#{$name}Italic.woff") format('woff'),
+             url("fonts/#{$family}/#{$family}-#{$name}Italic.svg") format('svg');
+        font-weight: $weight;
+        font-style: italic;
+    };
+  }
+
+}
