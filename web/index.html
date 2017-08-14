@@ -1,4 +1,4 @@
-<html>
+<html ng-app="gotown">
 <head>
   <script type="text/javascript" src="scripts/vendor.min.js" charset="utf-8"></script>
   <!-- <script type="text/javascript" src="scripts/templates.js"></script> -->
@@ -7,6 +7,15 @@
 </head>
 <body>
   <h1>Gotown</h1>
-
+  <div id="main" ng-controller="TownController">
+    <p ng-click="TownController.refresh()">
+      refresh
+    </p>
+    <ul>
+      <li ng-repeat="name in townNames">
+        {{name}}
+      </li>
+    </ul>
+  </div>
 </body>
 </html>

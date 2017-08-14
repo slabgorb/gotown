@@ -1,5 +1,25 @@
 @import 'variables';
+@import 'mixins';
+
+body {
+  font-family: Montserrat;
+}
 
 h1, h2, h3, h4, h5, h6 {
-  font-family:Manuale;
+  font-family:Lato;
+}
+
+ul, li {
+  list-style-type: none;
+  font-weight: 100;
+}
+
+li {
+  border-bottom: 1px solid $silver;
+  @include transition(font-size 0.3s ease, background-color 0.3s ease);
+}
+
+li:hover {
+  font-size: 2rem;
+  background-color: $dove-gray;
 }
