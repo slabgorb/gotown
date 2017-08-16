@@ -1,7 +1,7 @@
 module.exports = function(gulp, plugins) {
   return function() {
-    return gulp.src(['app/templates/**/*.html'])
+    return gulp.src(['web/templates/**/*.html'])
       .pipe(plugins.templatecache('templates.js', {root:'app'}))
-      .pipe(gulp.dest('app/scripts'))
+      .pipe(gulp.dest('web/scripts'))
   }
 }
