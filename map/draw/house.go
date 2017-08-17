@@ -8,6 +8,7 @@ func HouseWithGarden(dc *gg.Context, s *shape) {
 	roofShape := s.shrink(amount).offset(amount)
 
 	Roof(dc, roofShape)
+
 	dc.DrawRectangle(roofShape.x, roofShape.y, roofShape.width, roofShape.height)
 	dc.Clip()
 	Garden(dc, s)
