@@ -30,6 +30,11 @@ func (s *shape) inBounds(x, y float64) bool {
 func (s *shape) shrink(amount float64) *shape {
 	return NewShape(s.x+amount, s.y+amount, s.height-(amount*2), s.width-(amount*2), s.angle)
 }
+
+func (s *shape) grow(amount float64) *shape {
+	return NewShape(s.x-amount, s.y-amount, s.height+(amount*2), s.width+(amount*2), s.angle)
+}
+
 func (s *shape) offset(amount float64) *shape {
 	return NewShape(s.x+amount, s.y+amount, s.height, s.width, s.angle)
 }
