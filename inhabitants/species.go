@@ -20,7 +20,7 @@ type NameStrategy func(b *Being) *Name
 
 var (
 	Matrilineal NameStrategy = func(b *Being) *Name {
-		namer := b.Species.Genders[b.Gender].Namer
+		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Mother() != nil {
 			name.FamilyName = b.Mother().FamilyName
@@ -33,7 +33,7 @@ var (
 	}
 
 	Patrilineal NameStrategy = func(b *Being) *Name {
-		namer := b.Species.Genders[b.Gender].Namer
+		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Father() != nil {
 			name.FamilyName = b.Father().FamilyName
@@ -46,7 +46,7 @@ var (
 	}
 
 	Matronymic NameStrategy = func(b *Being) *Name {
-		namer := b.Species.Genders[b.Gender].Namer
+		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Mother() != nil {
 			name.FamilyName = b.Mother().GivenName + namer.Matronymic()
@@ -59,7 +59,7 @@ var (
 	}
 
 	Patronymic NameStrategy = func(b *Being) *Name {
-		namer := b.Species.Genders[b.Gender].Namer
+		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Father() != nil {
 			fmt.Println(b.Father())
@@ -74,7 +74,7 @@ var (
 	}
 
 	OneName NameStrategy = func(b *Being) *Name {
-		namer := b.Species.Genders[b.Gender].Namer
+		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		display, _ := namer.Execute(name)
 		name.Display = display
@@ -94,6 +94,10 @@ func NewSpeciesGender(namer *words.Namer, ns NameStrategy, start, end int) *Spec
 
 func (s *SpeciesGender) RandomName() {
 	s.Name()
+}
+
+func (s *SpeciesGender) RandomAge() int {
+	return rand.Intn(s.Fertility.End * 3)
 }
 
 type Fertility struct {
@@ -130,6 +134,10 @@ func NewSpecies(name string, genders map[Gender]*SpeciesGender) *Species {
 
 func (s *Species) String() string {
 	return s.Name
+}
+
+func (s *Species) GetGenders() map[Gender]*SpeciesGender {
+	return s.Genders
 }
 
 func (s *Species) RandomBeing() *Being {

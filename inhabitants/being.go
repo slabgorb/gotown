@@ -2,7 +2,6 @@ package inhabitants
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"strings"
 )
@@ -39,8 +38,8 @@ type Being struct {
 	Parents  map[Gender]*Being
 	Children []*Being
 	Age      int
-	Gender
-	Dead bool
+	Sex      Gender
+	Dead     bool
 }
 
 func (b *Being) genderedParent(gender Gender) *Being {
@@ -63,26 +62,27 @@ func (b *Being) Randomize() error {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
 	possibleGenders := []Gender{}
-	for g, _ := range b.Species.Genders {
+	genders := b.GetGenders()
+	for g, _ := range b.GetGenders() {
 		possibleGenders = append(possibleGenders, g)
 	}
-
-	b.Gender = possibleGenders[rand.Intn(len(possibleGenders))]
-	b.Name = b.Species.Genders[b.Gender].NameStrategy(b)
-	b.Age = rand.Intn(int(math.Floor(float64(b.Species.Genders[b.Gender].Fertility.End) * 1.3)))
+	//runtime.Breakpoint()
+	b.Sex = possibleGenders[rand.Intn(len(possibleGenders))]
+	b.Name = genders[b.Sex].NameStrategy(b)
+	b.Age = genders[b.Sex].RandomAge()
 	return nil
 }
 
 // Reproduce creates new Being objects from the 'parent' beings
 func (b *Being) Reproduce(with *Being) ([]*Being, error) {
-	if with == nil && b.Gender != Asexual {
+	if with == nil && b.Sex != Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
 	child := &Being{Species: b.Species, Age: 0}
 
 	child.Parents = map[Gender]*Being{
-		b.Gender:    b,
-		with.Gender: with,
+		b.Sex:    b,
+		with.Sex: with,
 	}
 	child.Randomize()
 	b.Children = append(b.Children, child)
