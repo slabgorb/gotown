@@ -1,6 +1,17 @@
 package draw
 
-import "github.com/fogleman/gg"
+import (
+	"math/rand"
+	"time"
+
+	"github.com/fogleman/gg"
+)
+
+var random *rand.Rand
+
+func init() {
+	random = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
 
 func HouseWithGarden(dc *gg.Context, s *shape) {
 	amount := s.height / 4
@@ -18,6 +29,10 @@ func Roof(dc *gg.Context, s *shape) {
 		dc.DrawLine(s.midWidth(), s.y, s.midWidth(), s.y+s.height)
 		dc.Stroke()
 	})
+}
+
+func Road(dc *gg.Context, s *shape) {
+	withRotation(dc, s, Cobblestone)
 }
 
 func Farm(dc *gg.Context, s *shape) {

@@ -24,13 +24,22 @@ func LooseHatch(dc *gg.Context, s *shape) {
 
 func Hatch(dc *gg.Context, s *shape, spacing float64) {
 	clipPattern(dc, s, func(dc *gg.Context, s *shape) {
-		dc.SetLineWidth(1.0)
+		dc.SetLineWidth(0.5)
 		for i := 0.0; i < s.width; i += spacing {
 			dc.DrawLine(s.x+i, s.y, s.x+i, s.y+s.height)
-			dc.Stroke()
 		}
+		dc.Stroke()
+		dc.SetLineWidth(0.5)
 	})
 
+}
+
+func Thatch(dc *gg.Context, s *shape) {
+	var spacing = 2.0
+	dc.SetLineWidth(0.5)
+	for y := 0.0; y < s.height; y += spacing {
+		dc.DrawLine(s.x, s.y+y, s.width+s.x, s.y+y+(0.5-random.Float64()))
+	}
 }
 
 func CrossHatch(dc *gg.Context, s *shape) {
@@ -46,16 +55,42 @@ func CrossHatch(dc *gg.Context, s *shape) {
 
 }
 
+func Cobblestone(dc *gg.Context, s *shape) {
+	clipPattern(dc, s, func(dc *gg.Context, s *shape) {
+		const density = 7.0
+		const radius = 1.0
+		dc.SetLineWidth(0.25)
+		for column := 0.0; column < s.width+density; column += density {
+			for row := 0.0; row < s.height+density/2; row += (density / 2) {
+				r := radius
+				if random.Float64() > 0.75 {
+					r += 0.5
+				}
+				y := row + s.y
+				x := column + s.x + float64(((int(y)&1)-1))*(density/2)
+				dc.DrawRoundedRectangle(x, y, density, density/2, r)
+			}
+		}
+		dc.Stroke()
+		dc.SetLineWidth(1.0)
+	})
+}
+
 func Stipple(dc *gg.Context, s *shape) {
 	clipPattern(dc, s, func(dc *gg.Context, s *shape) {
 		const density = 7
-		const radius = 1
+		const radius = 1.0
+
 		for j := 0.0; j < s.height; j += density {
 			for i := 0.0; i < s.width; i += density {
+				r := radius
+				if random.Float64() > 0.75 {
+					r += 0.25
+				}
 				x := i + s.x
 				d := i * 2 * math.Pi / s.height * 8
 				y := s.y + j + (math.Sin(d)+1)/2*density
-				dc.DrawCircle(x, y, radius)
+				dc.DrawCircle(x, y, r)
 			}
 		}
 		dc.Fill()

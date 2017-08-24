@@ -20,6 +20,18 @@ var testCases = []struct {
 		Roof,
 	},
 	{
+		"road",
+		NewShape(50, 50, 25, 125, 0),
+		gg.NewContext(200, 200),
+		Road,
+	},
+	{
+		"road2",
+		NewShape(50, 50, 125, 125, 0),
+		gg.NewContext(200, 200),
+		Road,
+	},
+	{
 		"garden",
 		NewShape(50, 50, 125, 125, 30),
 		gg.NewContext(200, 200),

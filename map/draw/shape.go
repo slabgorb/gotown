@@ -51,3 +51,4 @@ func NewShape(x, y, height, width, angle float64) *shape {
 }
 
 type shaper func(dc *gg.Context, s *shape)
+type option func(*shaper)
