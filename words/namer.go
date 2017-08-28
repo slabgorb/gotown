@@ -7,16 +7,31 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+	"time"
+
+	"github.com/slabgorb/gotown/random"
 )
 
 type Namer struct {
 	Patterns []Pattern
 	*Words
+	randomizer random.Generator
 }
 
 func (n *Namer) Template() *template.Template {
-	randomChoice := n.Patterns[rand.Intn(len(n.Patterns))]
+	n.SetDefaultRandomizer()
+	randomChoice := n.Patterns[n.randomizer.Intn(len(n.Patterns))]
 	return randomChoice.Template()
+}
+
+func (n *Namer) SetRandomizer(g random.Generator) {
+	n.randomizer = g
+}
+
+func (n *Namer) SetDefaultRandomizer() {
+	if n.randomizer == nil {
+		n.SetRandomizer(rand.New(rand.NewSource(time.Now().UTC().UnixNano())))
+	}
 }
 
 func lowercaseJoiners(s string) string {
@@ -51,5 +66,5 @@ func NewNamer(patterns []string, words *Words) *Namer {
 	for _, p := range patterns {
 		ps = append(ps, Pattern(p))
 	}
-	return &Namer{ps, words}
+	return &Namer{Patterns: ps, Words: words}
 }

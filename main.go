@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/locations"
 )
 
@@ -20,6 +21,7 @@ func init() {
 func main() {
 	e := echo.New()
 	e.GET("/town_names", townNamesHandler)
+	e.GET("/being", beingHandler)
 	e.File("/", "web")
 	e.Static("/fonts", "web/fonts")
 	e.Static("/styles", "web/styles")
@@ -27,6 +29,14 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Logger.SetLevel(log.DEBUG)
 	e.Logger.Fatal(e.Start(":8003"))
+}
+
+func beingHandler(c echo.Context) error {
+	species := &inhabitants.Species{Name: "human"}
+	being := &inhabitants.Being{
+		Species: species,
+	}
+	return c.JSON(http.StatusOK, being)
 }
 
 func townNamesHandler(c echo.Context) error {

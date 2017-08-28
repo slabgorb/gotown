@@ -3,8 +3,10 @@ package inhabitants
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -87,18 +89,30 @@ type SpeciesGender struct {
 	Fertility
 	*words.Namer
 	NameStrategy
+	randomizer random.Generator
 }
 
 func NewSpeciesGender(namer *words.Namer, ns NameStrategy, start, end int) *SpeciesGender {
-	return &SpeciesGender{Fertility{start, end}, namer, ns}
+	return &SpeciesGender{Fertility: Fertility{start, end}, Namer: namer, NameStrategy: ns}
 }
 
 func (s *SpeciesGender) RandomName() {
 	s.Name()
 }
 
+func (s *SpeciesGender) SetRandomizer(g random.Generator) {
+	s.randomizer = g
+}
+
+func (s *SpeciesGender) SetDefaultRandomizer() {
+	if s.randomizer == nil {
+		s.SetRandomizer(rand.New(rand.NewSource(time.Now().UTC().UnixNano())))
+	}
+}
+
 func (s *SpeciesGender) RandomAge() int {
-	return rand.Intn(s.Fertility.End * 3)
+	s.SetDefaultRandomizer()
+	return s.randomizer.Intn(s.Fertility.End * 3)
 }
 
 type Fertility struct {
@@ -108,10 +122,11 @@ type Fertility struct {
 
 // Species represents a species or a race.
 type Species struct {
-	Name          string
-	Genders       map[Gender]*SpeciesGender
-	MultipleBirth func() int
-	Expression    genetics.Expression
+	Name          string                       `json:"name"`
+	Genders       map[Gender]*SpeciesGender    `json:"genders"`
+	MultipleBirth func(g random.Generator) int `json:"-"`
+	Expression    genetics.Expression          `json:"-"`
+	randomizer    random.Generator
 }
 
 // NewSpecies creates and initializes a *Species
@@ -119,14 +134,14 @@ func NewSpecies(name string, genders map[Gender]*SpeciesGender) *Species {
 	return &Species{
 		Name:    name,
 		Genders: genders,
-		MultipleBirth: func() int {
-			if rand.Float64() < 0.05 {
+		MultipleBirth: func(g random.Generator) int {
+			if g.Float64() < 0.05 {
 				return 4
 			}
-			if rand.Float64() < 0.1 {
+			if g.Float64() < 0.1 {
 				return 3
 			}
-			if rand.Float64() < 0.3 {
+			if g.Float64() < 0.3 {
 				return 2
 			}
 			return 1
@@ -142,8 +157,19 @@ func (s *Species) GetGenders() map[Gender]*SpeciesGender {
 	return s.Genders
 }
 
+func (s *Species) SetRandomizer(g random.Generator) {
+	s.randomizer = g
+}
+
+func (s *Species) SetDefaultRandomizer() {
+	if s.randomizer == nil {
+		s.SetRandomizer(rand.New(rand.NewSource(time.Now().UTC().UnixNano())))
+	}
+}
+
 func (s *Species) RandomBeing() *Being {
 	b := &Being{Species: s}
+	b.SetRandomizer(s.randomizer)
 	b.Randomize()
 	return b
 }
