@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -110,6 +111,7 @@ type Species struct {
 	Name          string
 	Genders       map[Gender]*SpeciesGender
 	MultipleBirth func() int
+	Expression    genetics.Expression
 }
 
 // NewSpecies creates and initializes a *Species
