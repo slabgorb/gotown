@@ -13,8 +13,12 @@ var nameTests = []struct {
 	expected string
 }{
 	{"{{.GivenName}} {{.FamilyName}}", "Leidolv Thorbjornson"},
-	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Oddleif Borgulvson"},
-	{"{{.FamilyName}}", "Bendikson"},
+	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Thorsten Oddleifson"},
+	{"{{.FamilyName}}", "Yngvison"},
+}
+
+func init() {
+	SetRandomizer(random.NewMock())
 }
 
 func TestName(t *testing.T) {
@@ -22,9 +26,7 @@ func TestName(t *testing.T) {
 		namer := words.NewNamer([]string{nt.pattern}, words.NorseMaleNameWords)
 		speciesGender := NewSpeciesGender(namer, Patronymic, 12, 65)
 		species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: speciesGender})
-		species.SetRandomizer(random.NewMock())
 		being := &Being{Species: species}
-		being.SetRandomizer(random.NewMock())
 		being.Randomize()
 		if being.Sex != Male {
 			t.Errorf("Expected Male got %s", being.Sex)
@@ -39,12 +41,9 @@ func TestInheritedName(t *testing.T) {
 	male := NewSpeciesGender(words.NorseMaleNamer, Patronymic, 12, 65)
 	female := NewSpeciesGender(words.NorseFemaleNamer, Matronymic, 12, 50)
 	species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: male, Female: female})
-	species.SetRandomizer(random.NewMock())
 	m := &Being{Species: species, Sex: Female}
-	m.SetRandomizer(random.NewMock())
 	m.Name = female.NameStrategy(m)
 	f := &Being{Species: species, Sex: Male}
-	f.SetRandomizer(random.NewMock())
 	f.Name = male.NameStrategy(m)
 	//runtime.Breakpoint()
 	children, err := f.Reproduce(m)
@@ -54,8 +53,8 @@ func TestInheritedName(t *testing.T) {
 
 	child := children[0]
 
-	if child.Name.FamilyName != f.Name.GivenName+"son" {
-		t.Errorf("expected %s got %s", f.Name.GivenName+"son", child.Name.FamilyName)
+	if child.Name.FamilyName != m.Name.GivenName+"dottir" {
+		t.Errorf("expected %s got %s", m.Name.GivenName+"dottir", child.Name.FamilyName)
 	}
 	//t.Errorf("%v", children)
 

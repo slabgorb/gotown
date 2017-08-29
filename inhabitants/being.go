@@ -2,12 +2,9 @@ package inhabitants
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
-	"github.com/slabgorb/gotown/random"
 )
 
 type Name struct {
@@ -45,17 +42,6 @@ type Being struct {
 	Sex        Gender            `json:"gender"`
 	Dead       bool              `json:"dead"`
 	Chromosome genetics.Chromosome
-	randomizer random.Generator
-}
-
-func (b *Being) SetRandomizer(g random.Generator) {
-	b.randomizer = g
-}
-
-func (b *Being) SetDefaultRandomizer() {
-	if b.randomizer == nil {
-		b.SetRandomizer(rand.New(rand.NewSource(time.Now().UTC().UnixNano())))
-	}
 }
 
 func (b *Being) genderedParent(gender Gender) *Being {
@@ -74,7 +60,6 @@ func (b *Being) Mother() *Being {
 }
 
 func (b *Being) Randomize() error {
-	b.SetDefaultRandomizer()
 	if b.Species == nil {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
@@ -84,7 +69,7 @@ func (b *Being) Randomize() error {
 		possibleGenders = append(possibleGenders, g)
 	}
 	//runtime.Breakpoint()
-	b.Sex = possibleGenders[b.randomizer.Intn(len(possibleGenders))]
+	b.Sex = possibleGenders[randomizer.Intn(len(possibleGenders))]
 	b.Name = genders[b.Sex].NameStrategy(b)
 	b.Age = genders[b.Sex].RandomAge()
 	return nil

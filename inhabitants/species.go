@@ -2,8 +2,6 @@ package inhabitants
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
@@ -89,7 +87,6 @@ type SpeciesGender struct {
 	Fertility
 	*words.Namer
 	NameStrategy
-	randomizer random.Generator
 }
 
 func NewSpeciesGender(namer *words.Namer, ns NameStrategy, start, end int) *SpeciesGender {
@@ -100,19 +97,8 @@ func (s *SpeciesGender) RandomName() {
 	s.Name()
 }
 
-func (s *SpeciesGender) SetRandomizer(g random.Generator) {
-	s.randomizer = g
-}
-
-func (s *SpeciesGender) SetDefaultRandomizer() {
-	if s.randomizer == nil {
-		s.SetRandomizer(rand.New(rand.NewSource(time.Now().UTC().UnixNano())))
-	}
-}
-
 func (s *SpeciesGender) RandomAge() int {
-	s.SetDefaultRandomizer()
-	return s.randomizer.Intn(s.Fertility.End * 3)
+	return randomizer.Intn(s.Fertility.End * 3)
 }
 
 type Fertility struct {
@@ -157,19 +143,8 @@ func (s *Species) GetGenders() map[Gender]*SpeciesGender {
 	return s.Genders
 }
 
-func (s *Species) SetRandomizer(g random.Generator) {
-	s.randomizer = g
-}
-
-func (s *Species) SetDefaultRandomizer() {
-	if s.randomizer == nil {
-		s.SetRandomizer(rand.New(rand.NewSource(time.Now().UTC().UnixNano())))
-	}
-}
-
 func (s *Species) RandomBeing() *Being {
 	b := &Being{Species: s}
-	b.SetRandomizer(s.randomizer)
 	b.Randomize()
 	return b
 }

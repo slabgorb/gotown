@@ -1,19 +1,22 @@
 package genetics_test
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/random"
 )
 
+func init() {
+	genetics.SetRandomizer(random.NewMock())
+
+}
 func TestGene(t *testing.T) {
-	rand.Seed(0)
 	g := genetics.RandomGene()
 	if len(g) != 6 {
 		t.Errorf("Expected a length of 6, got %d", len(g))
 	}
-	var expected = int64(16527474)
+	var expected = int64(8388607)
 	if g.Int64() != expected {
 		t.Errorf("Expected %d, got %d", expected, g.Int64())
 	}
@@ -21,12 +24,11 @@ func TestGene(t *testing.T) {
 }
 
 func TestRandomize(t *testing.T) {
-	rand.Seed(0)
 	c := genetics.RandomChromosome(10)
 	if c.Len() != 10 {
 		t.Errorf("Expected a length of 10, got %d", c.Len())
 	}
-	expected := "fc3072"
+	expected := "7fffff"
 	if string(c.Index(0)) != expected {
 		t.Errorf("Got %s expected %s", c.Index(0), expected)
 	}

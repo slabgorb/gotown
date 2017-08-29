@@ -19,8 +19,8 @@ func (g gene) String() string {
 }
 
 func RandomGene() gene {
-	r := rand.Intn(16777215)
-	return gene(fmt.Sprintf("%x", r))
+	r := randomizer.Intn(16777215)
+	return gene(fmt.Sprintf("%06x", r))
 }
 
 // Chhromosome represents a collection of genes

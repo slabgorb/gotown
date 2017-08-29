@@ -6,10 +6,6 @@ type Generator interface {
 	Float64() float64
 }
 
-type Randomizable interface {
-	SetRandomizer(g Generator)
-}
-
 type MockRandom struct{}
 
 func NewMock() MockRandom {
@@ -21,7 +17,7 @@ func (m MockRandom) Int() int {
 }
 
 func (m MockRandom) Intn(max int) int {
-	return 0
+	return max / 2
 }
 
 func (m MockRandom) Float64() float64 {

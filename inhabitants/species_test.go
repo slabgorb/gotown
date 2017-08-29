@@ -1,12 +1,16 @@
 package inhabitants_test
 
 import (
-	"math/rand"
 	"testing"
 
 	. "github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/random"
 	words "github.com/slabgorb/gotown/words"
 )
+
+func init() {
+	SetRandomizer(random.NewMock())
+}
 
 var (
 	female = NewSpeciesGender(words.NorseFemaleNamer, Matronymic, 12, 48)
@@ -24,37 +28,26 @@ func TestToString(t *testing.T) {
 }
 
 func TestGenders(t *testing.T) {
-	rand.Seed(0)
 	if s.Name != "Northman" {
 		t.Fail()
 	}
 	b := &Being{Sex: Male, Species: s}
 	name := male.NameStrategy(b)
 	nameDisplay := name.Display
-	expected := "Finnbjorn Finnbjornson"
+	expected := "Herleiv Alvgautson"
 	if nameDisplay != expected {
 		t.Errorf("expected %s got %s", expected, nameDisplay)
 	}
 }
 
 func TestRandomBeing(t *testing.T) {
-	rand.Seed(0)
 	b := s.RandomBeing()
-	expected := "Annfrid Solunndottir"
+	expected := "Sjaundi Kolfinnson"
 	if b.String() != expected {
 		t.Errorf("expected %s got %s", expected, b.String())
 	}
-	if b.Sex != Female {
-		t.Errorf("Wrong gender, got %s", b.Sex)
-	}
-	b = s.RandomBeing()
-	expected = "Gunnbjorn Kolfinnson"
-	if b.String() != expected {
-
-		t.Errorf("expected %s got %s", expected, b.String())
-	}
-
 	if b.Sex != Male {
 		t.Errorf("Wrong gender, got %s", b.Sex)
 	}
+
 }
