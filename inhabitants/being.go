@@ -8,10 +8,10 @@ import (
 )
 
 type Name struct {
-	GivenName  string
-	FamilyName string
-	Other      []string
-	Display    string
+	GivenName  string   `json:"given_name"`
+	FamilyName string   `json:"family_name"`
+	Other      []string `json:"other_name"`
+	Display    string   `json:"display_name"`
 }
 
 func (n *Name) OtherNames() string {

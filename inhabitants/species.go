@@ -109,7 +109,7 @@ type Fertility struct {
 // Species represents a species or a race.
 type Species struct {
 	Name          string                       `json:"name"`
-	Genders       map[Gender]*SpeciesGender    `json:"genders"`
+	Genders       map[Gender]*SpeciesGender    `json:"-"`
 	MultipleBirth func(g random.Generator) int `json:"-"`
 	Expression    genetics.Expression          `json:"-"`
 	randomizer    random.Generator

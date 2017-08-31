@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/locations"
+	"github.com/slabgorb/gotown/words"
 )
 
 func init() {
@@ -41,14 +42,24 @@ func beingHandler(c echo.Context) error {
 }
 
 func townHandler(c echo.Context) error {
-	type townRequest struct {
-		size int64 `json:"size" form:"size" query:"size"`
-	}
+	// type townRequest struct {
+	// 	size int `form:"size" query:"size"`
+	// }
+	// tr := townRequest{}
+	// if err := c.Bind(tr); err != nil {
+	// 	return err
+	// }
+	female := inhabitants.NewSpeciesGender(words.NorseFemaleNamer, inhabitants.Matronymic, 12, 48)
+	male := inhabitants.NewSpeciesGender(words.NorseMaleNamer, inhabitants.Patronymic, 12, 65)
+	s := inhabitants.NewSpecies("Northman", map[inhabitants.Gender]*inhabitants.SpeciesGender{
+		inhabitants.Female: female,
+		inhabitants.Male:   male,
+	})
 	area := locations.NewArea(locations.Town, nil, nil)
-
 	for i := 0; i < 1000; i++ {
-		being := inhabitants.Being{}
-		_ = being.Randomize()
+		being := inhabitants.Being{Species: s}
+		being.Randomize()
+		area.Add(&being)
 	}
 
 	return c.JSON(http.StatusOK, area)
