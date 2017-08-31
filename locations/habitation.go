@@ -6,8 +6,8 @@ import (
 )
 
 type Habitation struct {
-	Residents []*inhabitants.Being
-	Name      string
+	Residents []*inhabitants.Being `json:"residents"`
+	Name      string               `json:"name"`
 	*words.Namer
 }
 

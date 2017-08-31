@@ -1,20 +1,43 @@
 package genetics
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"regexp"
 	"sort"
 )
 
 // Expression is a set of traits to be applied to a genotype (i.e. Chromosome)
-type Expression []Trait
+type Expression struct {
+	Traits []Trait `json:"traits"`
+}
 
 func (e *Expression) Add(trait Trait) {
-	*e = append(*e, trait)
+	e.Traits = append(e.Traits, trait)
+}
+
+func LoadExpression(r io.Reader) (Expression, error) {
+	exp := Expression{}
+	err := json.NewDecoder(r).Decode(&exp)
+	return exp, err
+}
+
+func (e *Expression) UnmarshalJSON(data []byte) error {
+	tmp := make(map[string][]Trait)
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	for _, t := range tmp["traits"] {
+		fmt.Println(t.Variants[0])
+		e.Add(t)
+	}
+	return nil
 }
 
 type Variant struct {
-	Name  string
-	Match *regexp.Regexp
+	Name  string         `json:"name"`
+	Match *regexp.Regexp `json:"match"`
 }
 
 // NewVariant creates a new Variant struct
@@ -34,8 +57,32 @@ func (v *Variant) Matches(s string) int {
 
 // Trait models an individual genetic trait, such as eye color.
 type Trait struct {
-	Name     string
-	Variants []*Variant
+	Name     string     `json:"name"`
+	Variants []*Variant `json:"variants"`
+}
+
+func (t *Trait) UnmarshalJSON(data []byte) error {
+	tmp := make(map[string]interface{})
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	name := fmt.Sprintf("%v", tmp["name"])
+	vmaps, ok := tmp["variants"].([]interface{})
+	if !ok {
+		return fmt.Errorf("Could not parse variants for trait %s", name)
+	}
+	variants := []*Variant{}
+	for _, vraw := range vmaps {
+		v := vraw.(map[string]interface{})
+		variant, err := NewVariant(fmt.Sprintf("%v", v["name"]), fmt.Sprintf("%v", v["match"]))
+		if err != nil {
+			return err
+		}
+		variants = append(variants, variant)
+	}
+	t.Name = name
+	t.Variants = variants
+	return nil
 }
 
 func NewTrait(name string, variants []*Variant) Trait {

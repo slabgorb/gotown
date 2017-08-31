@@ -81,7 +81,7 @@ func (c *Chromosome) Combine(other *Chromosome) (*Chromosome, error) {
 func (c *Chromosome) Express(e Expression) map[string]string {
 	set := c.String()
 	express := make(map[string]string)
-	for _, trait := range e {
+	for _, trait := range e.Traits {
 		k, _ := trait.Expression(set)
 		express[trait.Name] = k
 	}

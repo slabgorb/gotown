@@ -21,6 +21,7 @@ func init() {
 func main() {
 	e := echo.New()
 	e.GET("/town_names", townNamesHandler)
+	e.GET("/town", townHandler)
 	e.GET("/being", beingHandler)
 	e.File("/", "web")
 	e.Static("/fonts", "web/fonts")
@@ -37,6 +38,21 @@ func beingHandler(c echo.Context) error {
 		Species: species,
 	}
 	return c.JSON(http.StatusOK, being)
+}
+
+func townHandler(c echo.Context) error {
+	type townRequest struct {
+		size int64 `json:"size" form:"size" query:"size"`
+	}
+	area := locations.NewArea(locations.Town, nil, nil)
+
+	for i := 0; i < 1000; i++ {
+		being := inhabitants.Being{}
+		_ = being.Randomize()
+	}
+
+	return c.JSON(http.StatusOK, area)
+
 }
 
 func townNamesHandler(c echo.Context) error {

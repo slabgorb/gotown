@@ -2,14 +2,22 @@ package words
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/jinzhu/inflection"
+	"github.com/slabgorb/gotown/random"
 )
+
+var randomizer random.Generator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
+
+func SetRandomizer(g random.Generator) {
+	randomizer = g
+}
 
 const shortWord = 10
 
 func chooseRandomString(s []string) string {
-	return s[rand.Intn(len(s))]
+	return s[randomizer.Intn(len(s))]
 }
 
 type Words struct {

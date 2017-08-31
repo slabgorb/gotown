@@ -1,7 +1,6 @@
 package words_test
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/slabgorb/gotown/random"
@@ -9,7 +8,7 @@ import (
 )
 
 func init() {
-	rand.Seed(0)
+	SetRandomizer(random.NewMock())
 }
 
 type testRandomStringFunc func() string
@@ -18,11 +17,10 @@ var testRandomStringTable = []struct {
 	expected string
 	f        testRandomStringFunc
 }{
-	// Note: order is important here to match the rand.Seed of 0
-	{"trough", func() string { return BaseNamer.Noun() }},
-	{"colorless", func() string { return BaseNamer.Adjective() }},
-	{"reputations", func() string { return BaseNamer.PluralNoun() }},
-	{"stick", func() string { return BaseNamer.StartNoun() }},
+	{"lard", func() string { return BaseNamer.Noun() }},
+	{"living", func() string { return BaseNamer.Adjective() }},
+	{"lards", func() string { return BaseNamer.PluralNoun() }},
+	{"lard", func() string { return BaseNamer.StartNoun() }},
 }
 
 func TestStrings(t *testing.T) {
@@ -38,13 +36,12 @@ func TestBackup(t *testing.T) {
 	newWords := NewWords()
 	newWords.Backup = BaseWords
 	newNamer := NewNamer([]string{"{{.Adjective}}{{.Noun}}"}, newWords)
-	newNamer.SetRandomizer(random.NewMock())
 	name := newNamer.Name()
 	if name == "" {
 		t.Errorf("Got empty string from newNamer.Name(), got nothing from backup")
 	}
-	if name != "Rusticurge" {
-		t.Errorf("Got wrong string, got %s expected %s", name, "Rusticurge")
+	if name != "Livinglard" {
+		t.Errorf("Got wrong string, got %s expected %s", name, "Livinglard")
 	}
 }
 
@@ -52,10 +49,7 @@ var testTemplateTable = []struct {
 	expected string
 	f        testRandomStringFunc
 }{
-	{"Fuchsiaodor", func() string { return BaseNamer.Name() }},
-	{"Worries of the Blot", func() string { return BaseNamer.Name() }},
-	{"Spawn of the Bait", func() string { return BaseNamer.Name() }},
-	{"Bewilderingleader", func() string { return BaseNamer.Name() }},
+	{"Never-Lard of the Lards", func() string { return BaseNamer.Name() }},
 }
 
 func TestTemplating(t *testing.T) {

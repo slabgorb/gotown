@@ -3,35 +3,19 @@ package words
 import (
 	"bytes"
 	"log"
-	"math/rand"
 	"regexp"
 	"strings"
 	"text/template"
-	"time"
-
-	"github.com/slabgorb/gotown/random"
 )
 
 type Namer struct {
 	Patterns []Pattern
 	*Words
-	randomizer random.Generator
 }
 
 func (n *Namer) Template() *template.Template {
-	n.SetDefaultRandomizer()
-	randomChoice := n.Patterns[n.randomizer.Intn(len(n.Patterns))]
+	randomChoice := n.Patterns[randomizer.Intn(len(n.Patterns))]
 	return randomChoice.Template()
-}
-
-func (n *Namer) SetRandomizer(g random.Generator) {
-	n.randomizer = g
-}
-
-func (n *Namer) SetDefaultRandomizer() {
-	if n.randomizer == nil {
-		n.SetRandomizer(rand.New(rand.NewSource(time.Now().UTC().UnixNano())))
-	}
 }
 
 func lowercaseJoiners(s string) string {

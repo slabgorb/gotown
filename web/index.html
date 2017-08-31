@@ -8,6 +8,27 @@
 <body>
   <h1>Gotown</h1>
   <div id="main" ng-controller="TownController">
+    <form novalidate class="simple-form">
+      <label>
+        Size
+        <select name="size">
+          <option value="0">Hut</option>
+          <option value="1">Cottage</option>
+          <option value="2">House</option>
+          <option value="3">Tower</option>
+          <option value="4">Castle</option>
+          <option value="5">Hamlet</option>
+          <option value="6">Palace</option>
+          <option value="7">Village</option>
+          <option selected="selected" value="8">Town</option>
+          <option value="9">City</option>
+          <option value="10">Region</option>
+          <option value="11">NationState</option>
+          <option value="12">Empire</option>
+        </select>
+      </label>
+      <input type="button" ng-click="queryArea()" value="Go" />
+    </form>
     <p ng-click="TownController.refresh()">
       refresh
     </p>
