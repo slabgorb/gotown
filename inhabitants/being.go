@@ -36,12 +36,12 @@ func NewName(fullName string) *Name {
 type Being struct {
 	*Name      `json:"name"`
 	*Species   `json:"species"`
-	Parents    map[Gender]*Being `json:"parents"`
-	Children   []*Being          `json:"children"`
-	Age        int               `json:"age"`
-	Sex        Gender            `json:"gender"`
-	Dead       bool              `json:"dead"`
-	Chromosome genetics.Chromosome
+	Parents    map[Gender]*Being    `json:"parents"`
+	Children   []*Being             `json:"children"`
+	Age        int                  `json:"age"`
+	Sex        Gender               `json:"gender"`
+	Dead       bool                 `json:"dead"`
+	Chromosome *genetics.Chromosome `json:"chromosome"`
 }
 
 func (b *Being) genderedParent(gender Gender) *Being {
@@ -63,6 +63,7 @@ func (b *Being) Randomize() error {
 	if b.Species == nil {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
+	b.Chromosome = genetics.RandomChromosome(20)
 	possibleGenders := []Gender{}
 	genders := b.GetGenders()
 	for g, _ := range b.GetGenders() {

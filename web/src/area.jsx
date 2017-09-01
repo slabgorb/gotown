@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+var Being = require('being.jsx');
 var _ = require('underscore');
 
 class Area extends React.Component {
@@ -14,7 +15,7 @@ class Area extends React.Component {
     if (this.state.area) {
       var namesList = _.map(this.state.residents, function(resident, i) {
         return (
-          <li key={i}>{resident.name.display_name} {resident.age}</li>
+          <li key={i}><Being being={resident}/></li>
         )
       })
       return (
@@ -32,7 +33,6 @@ class Area extends React.Component {
     axios.get("/town")
       .then(res => {
         const area = res.data
-        console.log(_.pluck(_.pluck(area.residents,'name'), 'display_name'))
         this.setState({area:area, residents: area.residents})
       })
   }

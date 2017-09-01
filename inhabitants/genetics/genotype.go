@@ -25,7 +25,7 @@ func RandomGene() gene {
 
 // Chhromosome represents a collection of genes
 type Chromosome struct {
-	Genes []gene
+	Genes []gene `json:"genes"`
 }
 
 // RandomChromosome returns a Chromosome with randomized genes.
