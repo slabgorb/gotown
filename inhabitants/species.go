@@ -87,18 +87,54 @@ type SpeciesGender struct {
 	Fertility
 	*words.Namer
 	NameStrategy
+	demog string
+}
+
+type demo struct {
+	max int
+	pct int
+}
+type demography []demo
+
+var demographies = map[string]demography{
+	"medieval": demography{
+		demo{14, 29},
+		demo{18, 36},
+		demo{26, 50},
+		demo{31, 58},
+		demo{41, 72},
+		demo{51, 84},
+		demo{61, 93},
+		demo{71, 98},
+		demo{100, 100},
+	},
 }
 
 func NewSpeciesGender(namer *words.Namer, ns NameStrategy, start, end int) *SpeciesGender {
-	return &SpeciesGender{Fertility: Fertility{start, end}, Namer: namer, NameStrategy: ns}
+	words.SetRandomizer(randomizer)
+	return &SpeciesGender{Fertility: Fertility{start, end}, Namer: namer, NameStrategy: ns, demog: "medieval"}
 }
 
 func (s *SpeciesGender) RandomName() {
 	s.Name()
 }
 
-func (s *SpeciesGender) RandomAge() int {
-	return randomizer.Intn(s.Fertility.End * 3)
+func (s *SpeciesGender) RandomAge(slot int) int {
+	d, ok := demographies[s.demog]
+	if !ok {
+		return 0
+	}
+	if slot == -1 {
+		slot = randomizer.Intn(101)
+	}
+	min := 0
+	for _, dmo := range d {
+		if dmo.pct >= slot {
+			return randomizer.Intn(dmo.max-min) + min
+		}
+		min = dmo.max
+	}
+	return 0
 }
 
 type Fertility struct {

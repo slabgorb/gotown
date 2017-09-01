@@ -12,9 +12,9 @@ var nameTests = []struct {
 	pattern  string
 	expected string
 }{
-	{"{{.GivenName}} {{.FamilyName}}", "Leidolv Thorbjornson"},
-	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Thorsten Oddleifson"},
-	{"{{.FamilyName}}", "Yngvison"},
+	{"{{.GivenName}} {{.FamilyName}}", "Hauk Haukson"},
+	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Hauk Haukson"},
+	{"{{.FamilyName}}", "Haukson"},
 }
 
 func init() {
@@ -52,9 +52,15 @@ func TestInheritedName(t *testing.T) {
 	}
 
 	child := children[0]
+	if child.Sex == Male {
+		if child.Name.FamilyName != f.Name.GivenName+"son" {
+			t.Errorf("expected %s got %s", f.Name.GivenName+"son", child.Name.FamilyName)
+		}
+	} else {
 
-	if child.Name.FamilyName != m.Name.GivenName+"dottir" {
-		t.Errorf("expected %s got %s", m.Name.GivenName+"dottir", child.Name.FamilyName)
+		if child.Name.FamilyName != m.Name.GivenName+"dottir" {
+			t.Errorf("expected %s got %s", m.Name.GivenName+"dottir", child.Name.FamilyName)
+		}
 	}
 	//t.Errorf("%v", children)
 

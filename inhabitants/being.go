@@ -71,7 +71,7 @@ func (b *Being) Randomize() error {
 	//runtime.Breakpoint()
 	b.Sex = possibleGenders[randomizer.Intn(len(possibleGenders))]
 	b.Name = genders[b.Sex].NameStrategy(b)
-	b.Age = genders[b.Sex].RandomAge()
+	b.Age = genders[b.Sex].RandomAge(-1)
 	return nil
 }
 

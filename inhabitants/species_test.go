@@ -34,15 +34,32 @@ func TestGenders(t *testing.T) {
 	b := &Being{Sex: Male, Species: s}
 	name := male.NameStrategy(b)
 	nameDisplay := name.Display
-	expected := "Herleiv Alvgautson"
+	expected := "Hauk Haukson"
 	if nameDisplay != expected {
 		t.Errorf("expected %s got %s", expected, nameDisplay)
 	}
 }
 
+func TestRandomAge(t *testing.T) {
+	testCases := []struct {
+		in, out int
+	}{
+		{0, 7},
+		{30, 16},
+		{40, 22},
+		{99, 85},
+	}
+	for _, tc := range testCases {
+		age := male.RandomAge(tc.in)
+		if age != tc.out {
+			t.Errorf("expected %d got %d", tc.out, age)
+		}
+	}
+}
+
 func TestRandomBeing(t *testing.T) {
 	b := s.RandomBeing()
-	expected := "Sjaundi Kolfinnson"
+	expected := "Hauk Haukson"
 	if b.String() != expected {
 		t.Errorf("expected %s got %s", expected, b.String())
 	}
