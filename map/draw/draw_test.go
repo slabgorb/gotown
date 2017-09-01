@@ -14,10 +14,16 @@ var testCases = []struct {
 	f    shaper
 }{
 	{
-		"roof",
+		"shingled-roof",
 		NewShape(50, 50, 25, 25, 30),
 		gg.NewContext(200, 200),
-		Roof,
+		ShingledRoof,
+	},
+	{
+		"thatched-roof",
+		NewShape(50, 50, 25, 25, 30),
+		gg.NewContext(200, 200),
+		ThatchedRoof,
 	},
 	{
 		"road",

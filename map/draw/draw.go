@@ -16,15 +16,23 @@ func init() {
 func HouseWithGarden(dc *gg.Context, s *shape) {
 	amount := s.height / 4
 	roofShape := s.shrink(amount).offset(amount)
-	Roof(dc, roofShape)
+	ShingledRoof(dc, roofShape)
 	Garden(dc, s)
 }
 
-func Roof(dc *gg.Context, s *shape) {
+func ShingledRoof(dc *gg.Context, s *shape) {
+	roof(dc, s, TightHatch)
+}
+
+func ThatchedRoof(dc *gg.Context, s *shape) {
+	roof(dc, s, Thatch)
+}
+
+func roof(dc *gg.Context, s *shape, pattern shaper) {
 	withRotation(dc, s, func(dc *gg.Context, s *shape) {
 		dc.DrawRectangle(s.x, s.y, s.width, s.height)
 		dc.Stroke()
-		TightHatch(dc, s)
+		pattern(dc, s)
 		dc.SetLineWidth(2.0)
 		dc.DrawLine(s.midWidth(), s.y, s.midWidth(), s.y+s.height)
 		dc.Stroke()

@@ -14,14 +14,17 @@ func clipPattern(dc *gg.Context, s *shape, f shaper) {
 
 }
 
+// TightHatch draws a tight pattern of lines
 func TightHatch(dc *gg.Context, s *shape) {
 	Hatch(dc, s, 2)
 }
 
+// LooseHatch draws a looser pattern of lines
 func LooseHatch(dc *gg.Context, s *shape) {
 	Hatch(dc, s, 4)
 }
 
+// Hatch draws a one-directional series of lines.
 func Hatch(dc *gg.Context, s *shape, spacing float64) {
 	clipPattern(dc, s, func(dc *gg.Context, s *shape) {
 		dc.SetLineWidth(0.5)
@@ -34,14 +37,16 @@ func Hatch(dc *gg.Context, s *shape, spacing float64) {
 
 }
 
+// Thatch draws a thatching pattern, suitable for huts
 func Thatch(dc *gg.Context, s *shape) {
-	var spacing = 2.0
-	dc.SetLineWidth(0.5)
+	var spacing = 2.5
+	dc.SetLineWidth(0.25)
 	for y := 0.0; y < s.height; y += spacing {
 		dc.DrawLine(s.x, s.y+y, s.width+s.x, s.y+y+(0.5-random.Float64()))
 	}
 }
 
+// CrossHatch draws a crosshatch pattern
 func CrossHatch(dc *gg.Context, s *shape) {
 	LooseHatch(dc, s)
 	rotated := s.grow(s.width * 1.5)
@@ -55,6 +60,7 @@ func CrossHatch(dc *gg.Context, s *shape) {
 
 }
 
+// Cobblestone draws a cobblestone pattern, suitable for your fancier roads
 func Cobblestone(dc *gg.Context, s *shape) {
 	clipPattern(dc, s, func(dc *gg.Context, s *shape) {
 		const density = 7.0
@@ -76,6 +82,7 @@ func Cobblestone(dc *gg.Context, s *shape) {
 	})
 }
 
+// Stipple draws a slightly-wavy pattern of dots.
 func Stipple(dc *gg.Context, s *shape) {
 	clipPattern(dc, s, func(dc *gg.Context, s *shape) {
 		const density = 7
