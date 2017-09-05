@@ -2,11 +2,11 @@
 @import 'mixins';
 
 body {
-  font-family: Montserrat;
+  font-family: 'Playfair Display';
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family:Lato;
+  font-family:'Josefin Slab';
 }
 
 ul, li {
@@ -16,10 +16,13 @@ ul, li {
 
 li {
   border-bottom: 1px solid $silver;
-  @include transition(font-size 0.3s ease, background-color 0.3s ease);
 }
 
 li:hover {
-  font-size: 2rem;
   background-color: $dove-gray;
+}
+
+.being {
+  @include flexbox;
+  
 }

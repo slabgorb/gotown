@@ -19,9 +19,9 @@ class Area extends React.Component {
         )
       })
       return (
-        <div className="area" onClick={() => alert('click')}>
-          {this.state.area.name}
-        <ul className="residents">{namesList}</ul>
+        <div className="area">
+          <h1>{this.state.area.name}</h1>
+          <ul className="residents">{namesList}</ul>
         </div>
       )
     } else {
