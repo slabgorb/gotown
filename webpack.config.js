@@ -5,7 +5,7 @@ module.exports = {
     app: './web/src/app.jsx'
   },
   output: {
-    filename: '[name].js',
+    filename: 'bundle.js',
     path: path.join(__dirname, './web/scripts'),
   },
   resolve: {
@@ -30,9 +30,15 @@ module.exports = {
           }
         ]
       },
+       {
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+         use: [
+           'file-loader'
+         ]
+       },
       {
         test: /\.js$|\.jsx$/,
-        exclude: /(node_modules|bower_components)/,
+        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
