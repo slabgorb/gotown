@@ -2,6 +2,8 @@
 *.test
 web/styles/**/*.css
 web/scripts/**/*.js
+web/scripts/**/*.woff2
+web/scripts/**/*.woff
 node_modules
 bower_components
 *.png

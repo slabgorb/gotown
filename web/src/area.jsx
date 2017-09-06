@@ -1,7 +1,43 @@
 import React from 'react';
 import axios from 'axios';
 var Being = require('being.jsx');
+import DropDownMenu from 'material-ui/DropDownMenu';
+import MenuItem from 'material-ui/MenuItem';
 var _ = require('underscore');
+
+const sizes = {
+  'Hamlet': 5,
+  'Village': 7,
+  'Town': 8,
+  'City': 9,
+}
+
+class AreaForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: 8
+    }
+  }
+
+  handleChange(event, index, value) {
+    this.setState({value});
+  }
+
+  render() {
+
+    var optionsList = _.map(sizes, function(i,s) {
+      return (<MenuItem key={i} value={i} primaryText={s}/>)
+    });
+    return (
+      <div>
+        <DropDownMenu value={this.state.value} onChange={this.handleChange}>
+          {optionsList}
+        </DropDownMenu>
+      </div>
+    )
+  }
+}
 
 class Area extends React.Component {
   constructor(props) {
@@ -38,4 +74,7 @@ class Area extends React.Component {
   }
 }
 
-module.exports = Area
+module.exports = {
+  Area: Area,
+  AreaForm: AreaForm
+}

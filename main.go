@@ -19,6 +19,13 @@ func init() {
 
 }
 
+type namerKey struct {
+	name   string
+	gender inhabitants.Gender
+}
+
+var namers = make(map[namerKey]*words.Namer)
+
 func main() {
 	e := echo.New()
 	e.GET("/town_names", townNamesHandler)
@@ -28,6 +35,7 @@ func main() {
 	e.Static("/fonts", "web/fonts")
 	e.Static("/styles", "web/styles")
 	e.Static("/scripts", "web/scripts")
+	e.Static("/data", "web/data")
 	e.Use(middleware.Logger())
 	e.Logger.SetLevel(log.DEBUG)
 	e.Logger.Fatal(e.Start(":8003"))
@@ -39,6 +47,10 @@ func beingHandler(c echo.Context) error {
 		Species: species,
 	}
 	return c.JSON(http.StatusOK, being)
+}
+
+func renameHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, struct{}{})
 }
 
 func townHandler(c echo.Context) error {

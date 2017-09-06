@@ -19,9 +19,6 @@ class Chromosome extends React.Component {
 
       var s = {
         backgroundColor: "#" + gene,
-        width: 10,
-        height: 10,
-        display: 'inline-block'
       }
       return (
         <div key={gene} className="being-chromosome-gene" style={s}></div>

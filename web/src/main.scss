@@ -24,5 +24,16 @@ li:hover {
 
 .being {
   @include flexbox;
-  
+  div {
+    @include flex;
+  }
+}
+.being-chromosome {
+  @include flexbox;
+}
+
+.being-chromosome-gene {
+  width:10px;
+  height: 10px;
+  @include flex;
 }

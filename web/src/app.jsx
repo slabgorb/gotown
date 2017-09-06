@@ -1,10 +1,17 @@
 import "main.scss"
-
+import 'typeface-roboto'
 import React from 'react';
 import ReactDOM from 'react-dom'
-import Area from 'area.jsx'
-import Being from 'being.jsx'
+var Area = require('area.jsx').Area
+var AreaForm = require('area.jsx').AreaForm
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 ReactDOM.render(
-  <Area/>,
+  <MuiThemeProvider>
+    <div>
+
+      <AreaForm/>
+      <Area/>
+    </div>
+  </MuiThemeProvider>,
   document.getElementById('root')
 )
