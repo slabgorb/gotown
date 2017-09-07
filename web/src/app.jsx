@@ -2,16 +2,24 @@ import "main.scss"
 import 'typeface-roboto'
 import React from 'react';
 import ReactDOM from 'react-dom'
-var Area = require('area.jsx').Area
-var AreaForm = require('area.jsx').AreaForm
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+//import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles/MuiThemeProvider';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import Species from 'Species.jsx'
+
+//var theme = function()  {
+  //return createMuiTheme({
+    // typography: {
+    //   fontFamily: "'Playfair Display', serif",
+    //   headline: {
+    //     fontFamily: "'Josefin Slab', serif",
+    //   }
+    // }
+  //});
+//}
+
 ReactDOM.render(
   <MuiThemeProvider>
-    <div>
-
-      <AreaForm/>
-      <Area/>
-    </div>
+      <Species name='viking'/>
   </MuiThemeProvider>,
   document.getElementById('root')
 )

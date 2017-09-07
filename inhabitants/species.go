@@ -1,8 +1,6 @@
 package inhabitants
 
 import (
-	"fmt"
-
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/words"
@@ -19,8 +17,8 @@ const (
 
 type NameStrategy func(b *Being) *Name
 
-var (
-	Matrilineal NameStrategy = func(b *Being) *Name {
+var NameStrategies = map[string]NameStrategy{
+	"matrilineal": func(b *Being) *Name {
 		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Mother() != nil {
@@ -31,9 +29,8 @@ var (
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
-	}
-
-	Patrilineal NameStrategy = func(b *Being) *Name {
+	},
+	"patrilineal": func(b *Being) *Name {
 		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Father() != nil {
@@ -44,9 +41,8 @@ var (
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
-	}
-
-	Matronymic NameStrategy = func(b *Being) *Name {
+	},
+	"matronymic": func(b *Being) *Name {
 		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Mother() != nil {
@@ -57,14 +53,11 @@ var (
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
-	}
-
-	Patronymic NameStrategy = func(b *Being) *Name {
+	},
+	"patronymic": func(b *Being) *Name {
 		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Father() != nil {
-			fmt.Println(b.Father())
-			fmt.Println(namer.Patronymic())
 			name.FamilyName = b.Father().GivenName + namer.Patronymic()
 			return name
 		}
@@ -72,16 +65,15 @@ var (
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
-	}
-
-	OneName NameStrategy = func(b *Being) *Name {
+	},
+	"onename": func(b *Being) *Name {
 		namer := b.Species.Genders[b.Sex].Namer
 		name := &Name{GivenName: namer.GivenName()}
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
-	}
-)
+	},
+}
 
 type SpeciesGender struct {
 	Fertility

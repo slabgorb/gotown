@@ -22,6 +22,25 @@ li:hover {
   background-color: $dove-gray;
 }
 
+.key-value {
+  @include flexbox;
+  div {
+    @include flex;
+  }
+  div:first-child {
+      font-weight: bold;
+  }
+  
+}
+
+.flex-container {
+  @include flexbox;
+}
+
+.flex-item {
+  @include flex;
+}
+
 .being {
   @include flexbox;
   div {

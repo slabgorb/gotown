@@ -75,9 +75,8 @@ func (w *Words) withBackup(f func(w *Words) string) string {
 func (w *Words) listFromKey(s string) []string {
 	if list, ok := w.Dictionary[s]; ok {
 		return list
-	} else {
-		return []string{""}
 	}
+	return []string{""}
 }
 
 func (w *Words) Prefix() string {
@@ -101,6 +100,11 @@ func (w *Words) EndNoun() string {
 func (w *Words) GivenName() string {
 	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("givenNames")) })
 }
+
+func (w *Words) FamilyName() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("familyNames")) })
+}
+
 func (w *Words) Matronymic() string {
 	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("matronymics")) })
 }
