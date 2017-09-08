@@ -1,8 +1,9 @@
 import React from 'react';
 var _ = require('underscore');
 import axios from 'axios';
-import Paper from 'material-ui/Paper'
-import Typography from 'material-ui/Typography'
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
+import Card, { CardContent } from 'material-ui/Card';
 
 class Species extends React.Component {
   constructor(props) {
@@ -49,8 +50,10 @@ class Trait extends React.Component {
 
     return (
       <div>
-        <h3>{this.props.name}</h3>
-        {variants}
+        <Card>
+          <h3>{this.props.name}</h3>
+          {variants}
+        </Card>
       </div>
     )
   }
