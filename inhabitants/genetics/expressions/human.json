@@ -11,7 +11,7 @@
                "name":"hazel",
                "match":"f(6|7|8)"
             },
-            {  
+            {
                "name":"blue",
                "match":"f1|f2"
             },
@@ -29,7 +29,7 @@
          "name":"eye shape",
          "variants":[
             {
-               "name":"almond",
+               "name":"almond shape",
                "match":"e(1|2|3)"
             },
             {
@@ -42,13 +42,35 @@
             },
             {
                "name":"protruding",
-               "match":"e(8,9)"
+               "match":"e(8|9)"
             },
             {
                "name":"deep set",
                "match":"e(a|b)"
             }
          ]
+      },
+      {
+        "name": "ear shape",
+        "variants": [
+          {
+            "name": "square",
+            "match": "c1"
+          },
+          {
+            "name": "pointed",
+            "match": "c2",
+          },
+          {
+            "name": "ordinary",
+            "match": "c(3|4|5|6|7)"
+          },
+          {
+            "name":"triangular",
+            "match":"c(8|9)"
+          }
+
+        ]
       },
       {
          "name":"lip shape",

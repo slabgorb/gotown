@@ -1,8 +1,8 @@
 import React from 'react';
 import axios from 'axios';
-var Being = require('being.jsx');
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
+var Being = require('components/Being.jsx');
+import Menu, {MenuItem} from 'material-ui/Menu';
+import List, { ListItem, ListItemText } from 'material-ui/List';
 var _ = require('underscore');
 
 const sizes = {
@@ -16,24 +16,26 @@ class AreaForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: 8
+      anchorEl: null,
+      open: false,
+      selectedIndex: 1,
     }
   }
 
-  handleChange(event, index, value) {
-    this.setState({value});
+  handleChange(event) {
+    this.setState({ open: true, anchorEl: event.currentTarget });
   }
 
   render() {
 
     var optionsList = _.map(sizes, function(i,s) {
-      return (<MenuItem key={i} value={i} primaryText={s}/>)
+      return (<MenuItem key={i} onClick={this.handle}>{s}</MenuItem>)
     });
     return (
       <div>
-        <DropDownMenu value={this.state.value} onChange={this.handleChange}>
+        <Menu value={this.state.value} onChange={this.handleChange}>
           {optionsList}
-        </DropDownMenu>
+        </Menu>
       </div>
     )
   }
