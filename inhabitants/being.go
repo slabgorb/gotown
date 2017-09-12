@@ -1,6 +1,7 @@
 package inhabitants
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -51,6 +52,19 @@ func (b *Being) genderedParent(gender Gender) *Being {
 	return nil
 }
 
+func (b *Being) MarshalJSON() ([]byte, error) {
+	type Alias Being
+	return json.Marshal(&struct {
+		Expression map[string]string `json:"expression"`
+		*Alias
+		Living bool `json:"alive"`
+	}{
+		Expression: b.Expression(),
+		Alias:      (*Alias)(b),
+		Living:     !b.Dead,
+	})
+}
+
 func (b *Being) Father() *Being {
 	return b.genderedParent(Male)
 }
@@ -66,7 +80,7 @@ func (b *Being) Randomize() error {
 	b.Chromosome = genetics.RandomChromosome(20)
 	possibleGenders := []Gender{}
 	genders := b.GetGenders()
-	for g, _ := range b.GetGenders() {
+	for g := range b.GetGenders() {
 		possibleGenders = append(possibleGenders, g)
 	}
 	//runtime.Breakpoint()
@@ -74,6 +88,14 @@ func (b *Being) Randomize() error {
 	b.Name = genders[b.Sex].NameStrategy(b)
 	b.Age = genders[b.Sex].RandomAge(-1)
 	return nil
+}
+
+func (b *Being) Express(e genetics.Expression) map[string]string {
+	return b.Chromosome.Express(e)
+}
+
+func (b *Being) Expression() map[string]string {
+	return b.Express(*b.Species.Expression)
 }
 
 // Reproduce creates new Being objects from the 'parent' beings

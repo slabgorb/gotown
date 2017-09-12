@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/locations"
 	"github.com/slabgorb/gotown/words"
 )
@@ -61,12 +63,21 @@ func townHandler(c echo.Context) error {
 	// if err := c.Bind(tr); err != nil {
 	// 	return err
 	// }
-	female := inhabitants.NewSpeciesGender(words.NorseFemaleNamer, inhabitants.Matronymic, 12, 48)
-	male := inhabitants.NewSpeciesGender(words.NorseMaleNamer, inhabitants.Patronymic, 12, 65)
+	r, err := os.Open("./web/data/human.json")
+	if err != nil {
+		panic(err)
+	}
+	expression, err := genetics.LoadExpression(r)
+	if err != nil {
+		panic(err)
+	}
+
+	female := inhabitants.NewSpeciesGender(words.NorseFemaleNamer, inhabitants.NameStrategies["matronymic"], 12, 48)
+	male := inhabitants.NewSpeciesGender(words.NorseMaleNamer, inhabitants.NameStrategies["patronymic"], 12, 65)
 	s := inhabitants.NewSpecies("Northman", map[inhabitants.Gender]*inhabitants.SpeciesGender{
 		inhabitants.Female: female,
 		inhabitants.Male:   male,
-	})
+	}, &expression)
 	area := locations.NewArea(locations.Town, nil, nil)
 	for i := 0; i < 1000; i++ {
 		being := inhabitants.Being{Species: s}

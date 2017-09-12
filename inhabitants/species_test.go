@@ -13,12 +13,12 @@ func init() {
 }
 
 var (
-	female = NewSpeciesGender(words.NorseFemaleNamer, Matronymic, 12, 48)
-	male   = NewSpeciesGender(words.NorseMaleNamer, Patronymic, 12, 65)
+	female = NewSpeciesGender(words.NorseFemaleNamer, NameStrategies["matronymic"], 12, 48)
+	male   = NewSpeciesGender(words.NorseMaleNamer, NameStrategies["patronymic"], 12, 65)
 	s      = NewSpecies("Northman", map[Gender]*SpeciesGender{
 		Female: female,
 		Male:   male,
-	})
+	}, nil)
 )
 
 func TestToString(t *testing.T) {

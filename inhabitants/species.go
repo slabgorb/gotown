@@ -1,6 +1,8 @@
 package inhabitants
 
 import (
+	"encoding/json"
+
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/words"
@@ -14,6 +16,10 @@ const (
 	Male
 	Female
 )
+
+func (g Gender) MarshalJSON() ([]byte, error) {
+	return json.Marshal(g.String())
+}
 
 type NameStrategy func(b *Being) *Name
 
@@ -139,15 +145,16 @@ type Species struct {
 	Name          string                       `json:"name"`
 	Genders       map[Gender]*SpeciesGender    `json:"-"`
 	MultipleBirth func(g random.Generator) int `json:"-"`
-	Expression    genetics.Expression          `json:"-"`
+	Expression    *genetics.Expression         `json:"-"`
 	randomizer    random.Generator
 }
 
 // NewSpecies creates and initializes a *Species
-func NewSpecies(name string, genders map[Gender]*SpeciesGender) *Species {
+func NewSpecies(name string, genders map[Gender]*SpeciesGender, e *genetics.Expression) *Species {
 	return &Species{
-		Name:    name,
-		Genders: genders,
+		Name:       name,
+		Genders:    genders,
+		Expression: e,
 		MultipleBirth: func(g random.Generator) int {
 			if g.Float64() < 0.05 {
 				return 4

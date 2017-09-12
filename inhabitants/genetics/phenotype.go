@@ -61,6 +61,7 @@ type Trait struct {
 	Variants []*Variant `json:"variants"`
 }
 
+// UnmarshalJSON unmarshals the JSON. Yep.
 func (t *Trait) UnmarshalJSON(data []byte) error {
 	tmp := make(map[string]interface{})
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -85,6 +86,7 @@ func (t *Trait) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// NewTrait instantiates a Trait
 func NewTrait(name string, variants []*Variant) Trait {
 	return Trait{Name: name, Variants: variants}
 }
