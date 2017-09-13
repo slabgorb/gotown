@@ -41,7 +41,13 @@ class AreaForm extends React.Component {
   }
 }
 
-class Area extends React.Component {
+const Area = (props) => {
+  (
+    <AreaDisplay/>
+  )
+}
+
+class AreaDisplay extends React.Component {
   constructor(props) {
     super(props)
     this.state = {

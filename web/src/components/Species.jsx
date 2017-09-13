@@ -5,7 +5,11 @@ import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import Card, { CardContent } from 'material-ui/Card';
 
-class Species extends React.Component {
+const Species = (props) => {
+  (<SpeciesDisplay/>)
+}
+
+class SpeciesDisplay extends React.Component {
   constructor(props) {
     super(props);
     this.state = {

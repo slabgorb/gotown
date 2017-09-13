@@ -73,6 +73,43 @@
         ]
       },
       {
+         "name":"hair color",
+         "variants": [
+           {
+           "name": "blond",
+           "match": "a(1|2)"
+         },
+         {
+           "name":"brown",
+           "match":"a(3|4|5)"
+         },
+         {
+           "name":"black",
+           "match":"a(6|7)"
+         },
+         {
+           "name":"red",
+           "match":"a8"
+         },
+         {
+           "name":"auburn",
+           "match":"a(9|a)"
+         },
+         {
+           "name":"chestnut",
+           "match":"a(b|c)"
+         },
+         {
+           "name":"sandy blond",
+            "match":"a(d|e)"
+         },
+         {
+           "name":"jet black",
+           "match":"af"
+         }
+         ]
+      },
+      {
          "name":"lip shape",
          "variants":[
             {

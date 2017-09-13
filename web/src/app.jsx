@@ -1,13 +1,24 @@
 import "main.scss"
 import React from 'react';
-import ReactDOM from 'react-dom'
+import { render } from 'react-dom'
 import { BrowserRouter } from 'react-router-dom'
 //import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles/MuiThemeProvider';
 import App from 'components/App.jsx'
+import { dispatch } from 'redux';
 
-ReactDOM.render(
-  (<BrowserRouter>
-    <App/>
-  </BrowserRouter>),
+const defaultSpecies = {
+  name: "",
+  genetics: {},
+  genderNames: {},
+}
+
+let store = createStore()
+
+render(
+  <Provider store={store}>
+    <BrowserRouter>
+      <App/>
+    </BrowserRouter>
+  </Provider>,
   document.getElementById('root')
 )
