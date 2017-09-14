@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -33,6 +34,7 @@ func main() {
 	e.GET("/town_names", townNamesHandler)
 	e.GET("/town", townHandler)
 	e.GET("/being", beingHandler)
+	e.GET("/random/chromosome", randomChromosomeHandler)
 	e.File("/", "web")
 	e.Static("/fonts", "web/fonts")
 	e.Static("/styles", "web/styles")
@@ -49,6 +51,16 @@ func beingHandler(c echo.Context) error {
 		Species: species,
 	}
 	return c.JSON(http.StatusOK, being)
+}
+
+func randomChromosomeHandler(c echo.Context) error {
+	count, err := strconv.Atoi(c.QueryParam("count"))
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	chromosome := genetics.RandomChromosome(count)
+	return c.JSON(http.StatusOK, chromosome)
 }
 
 func renameHandler(c echo.Context) error {
