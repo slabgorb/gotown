@@ -1,5 +1,60 @@
 {
    "traits":[
+     {
+       "name":"honesty/humility",
+       "variants": [
+         {
+           "name":"sincere",
+           "match":"10"
+
+         },
+         {
+           "name": "honest",
+           "match": "11"
+         },
+         {
+           "name":"faithful",
+           "match":"12"
+         },
+         {
+           "name":"loyal",
+           "match":"13"
+         },
+         {
+           "name":"sly",
+           "match":"14"
+
+         },
+         {
+           "name": "deceitful",
+           "match": "15"
+         },
+         {
+           "name":"greedy",
+           "match":"16"
+         },
+         {
+           "name":"pretentious",
+           "match":"17"
+         },
+         {
+           "name":"pompous",
+           "match":"18"
+         },
+         {
+           "name":"modest",
+           "match":"19"
+         },
+         {
+           "name":"hypocritical",
+           "match":"1A"
+         },
+         {
+           "name":"pompous",
+           "match":"1B"
+         },
+       ]
+     },
       {
          "name":"eye color",
          "variants":[

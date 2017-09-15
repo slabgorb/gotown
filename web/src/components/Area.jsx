@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-var Being = require('components/Being.jsx');
+var Being = require('./Being.jsx');
 import Menu, {MenuItem} from 'material-ui/Menu';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 var _ = require('underscore');
@@ -41,13 +41,8 @@ class AreaForm extends React.Component {
   }
 }
 
-const Area = (props) => {
-  (
-    <AreaDisplay/>
-  )
-}
 
-class AreaDisplay extends React.Component {
+class Area extends React.Component {
   constructor(props) {
     super(props)
     this.state = {

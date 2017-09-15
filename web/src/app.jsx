@@ -2,23 +2,18 @@ import "main.scss"
 import React from 'react';
 import { render } from 'react-dom'
 import { BrowserRouter } from 'react-router-dom'
-//import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles/MuiThemeProvider';
 import App from 'components/App.jsx'
-import { dispatch } from 'redux';
+import { dispatch, createStore } from 'redux';
+import {Provider} from 'react-redux';
+import { rootReducer } from './reducers.js'
 
-const defaultSpecies = {
-  name: "",
-  genetics: {},
-  genderNames: {},
-}
 
-let store = createStore()
-
+let store = createStore(rootReducer)
 render(
-  <Provider store={store}>
+  (<Provider store={store}>
     <BrowserRouter>
       <App/>
     </BrowserRouter>
-  </Provider>,
+  </Provider>),
   document.getElementById('root')
 )

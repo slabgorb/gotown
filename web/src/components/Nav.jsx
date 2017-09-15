@@ -5,8 +5,8 @@ class Nav extends React.Component {
   render() {
     return (
       <nav>
-        <Link to="Area">Area</Link>
-        <Link to="Species">Species</Link>
+        <Link to="area">Area</Link>
+        <Link to="species">Species</Link>
       </nav>
 
     )

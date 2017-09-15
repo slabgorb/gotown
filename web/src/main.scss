@@ -2,11 +2,13 @@
 @import 'mixins';
 
 body {
-  font-family: 'Playfair Display';
+  font-family: 'Bilbo';
+  font-size: 1.2rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family:'Josefin Slab';
+  font-family:'Princess Sofia';
+  font-weight: normal;
 }
 
 ul, li {
@@ -30,7 +32,7 @@ li:hover {
   div:first-child {
       font-weight: bold;
   }
-  
+
 }
 
 .flex-container {
@@ -42,10 +44,6 @@ li:hover {
 }
 
 .being {
-  @include flexbox;
-  div {
-    @include flex;
-  }
 }
 .being-chromosome {
   @include flexbox;

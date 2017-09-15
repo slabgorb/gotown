@@ -1,33 +1,45 @@
 import React from 'react';
 var _ = require('underscore');
+import Card, { CardContent } from "material-ui/Card"
 
-const Being = (props) => {
+const Being = (props) =>
   (
-    <div className="being">
-      <div className="being-name">{this.props.being.name.display_name}</div>
-      <div className="being-age">{this.props.being.age}</div>
-      <Chromosome chromosome={this.props.being.chromosome}/>
+    <div>
+
+    <Card className="being">
+      <CardContent>
+
+        <div className="being-name">{props.being.name.display_name}</div>
+        <div className="being-age">{props.being.age}</div>
+        <div className="being-gender">{props.being.gender}</div>
+        <Expression expression={props.being.expression}/>
+        <Chromosome chromosome={props.being.chromosome}/>
+      </CardContent>
+    </Card>
+    <br/>
     </div>
   )
-}
+const expressionMap = (v,k) =>
+  (
+    <div key={k} className="key-value">
+      <div>{k}</div>
+      <div>{v}</div>
+    </div>
+  )
+const Expression = (props) =>
+  (
+      <div className="being-expression">
+        {_.map(props.expression, expressionMap)}
+      </div>
+  )
 
-const Chromosome = (props) => {
-  var cDisplay = _.map(this.props.chromosome.genes, function(gene) {
-
-    var s = {
-      backgroundColor: "#" + gene,
-    }
-    return (
-      <div key={gene} className="being-chromosome-gene" style={s}></div>
-    )
-  })
-
+const geneMap = (gene) => <div key={gene} className="being-chromosome-gene" style={{backgroundColor:`#${gene}`}}></div>
+const Chromosome = (props) =>
   (
     <div className="being-chromosome">
-      {cDisplay}
+      {props.chromosome.genes.map(geneMap)}
     </div>
 
   )
-}
 
 module.exports = Being
