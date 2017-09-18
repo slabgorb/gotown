@@ -77,11 +77,11 @@ func townHandler(c echo.Context) error {
 	// }
 	r, err := os.Open("./web/data/human.json")
 	if err != nil {
-		panic(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not load internal data file")
 	}
 	expression, err := genetics.LoadExpression(r)
 	if err != nil {
-		panic(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
 	}
 
 	female := inhabitants.NewSpeciesGender(words.NorseFemaleNamer, inhabitants.NameStrategies["matronymic"], 12, 48)
