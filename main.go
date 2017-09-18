@@ -121,7 +121,7 @@ func householdHandler(c echo.Context) error {
 	dad.RandomizeName()
 	dad.RandomizeChromosome()
 	mom.Name.FamilyName = dad.Name.FamilyName
-	//mom.Reproduce(dad)
+	mom.Reproduce(dad)
 	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
 }
 

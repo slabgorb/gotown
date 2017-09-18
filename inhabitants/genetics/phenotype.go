@@ -29,7 +29,6 @@ func (e *Expression) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	for _, t := range tmp["traits"] {
-		fmt.Println(t.Variants[0])
 		e.Add(t)
 	}
 	return nil

@@ -37,7 +37,7 @@ func NewName(fullName string) *Name {
 type Being struct {
 	*Name      `json:"name"`
 	*Species   `json:"species"`
-	Parents    map[Gender]*Being    `json:"parents"`
+	Parents    map[Gender]*Being    `json:"-"`
 	Children   []*Being             `json:"children"`
 	Age        int                  `json:"age"`
 	Sex        Gender               `json:"gender"`
@@ -78,16 +78,23 @@ func (b *Being) Randomize() error {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
 	b.RandomizeChromosome()
-	possibleGenders := []Gender{}
+	b.RandomizeGender()
+	b.RandomizeName()
+	b.RandomizeAge(-1)
+	return nil
+}
+
+func (b *Being) RandomizeAge(slot int) {
 	genders := b.GetGenders()
+	b.Age = genders[b.Sex].RandomAge(slot)
+}
+
+func (b *Being) RandomizeGender() {
+	possibleGenders := []Gender{}
 	for g := range b.GetGenders() {
 		possibleGenders = append(possibleGenders, g)
 	}
-	//runtime.Breakpoint()
 	b.Sex = possibleGenders[randomizer.Intn(len(possibleGenders))]
-	b.RandomizeName()
-	b.Age = genders[b.Sex].RandomAge(-1)
-	return nil
 }
 
 func (b *Being) RandomizeName() {
@@ -120,6 +127,7 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	}
 	child.Randomize()
 	b.Children = append(b.Children, child)
+	with.Children = append(with.Children, child)
 
 	return b.Children, nil
 }
