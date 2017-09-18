@@ -1864,6 +1864,7 @@
    "gender_names":[
       {
          "gender":"male",
+         "name_strategy":"patrilineal",
          "patterns":[
             "{{.GivenName}} {{.FamilyName}}"
          ],
@@ -2299,6 +2300,7 @@
       },
       {
          "gender":"female",
+        "name_strategy":"patrilineal",
          "patterns":[
             "{{.GivenName}} {{.FamilyName}}"
          ],

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -22,6 +24,20 @@ func init() {
 
 }
 
+type namerLoad struct {
+	Name        string   `json:"name"`
+	Species     string   `json:"species"`
+	Patronymics []string `json:"patronymics"`
+	Matronymics []string `json:"matronymics"`
+	FamilyNames []string `json:"family_names"`
+	GenderNames []struct {
+		Gender       string   `json:"gender"`
+		Patterns     []string `json:"patterns"`
+		GivenNames   []string `json:"given_names"`
+		NameStrategy string   `json:"name_strategy"`
+	} `json:"gender_names"`
+}
+
 type namerKey struct {
 	name   string
 	gender inhabitants.Gender
@@ -34,6 +50,7 @@ func main() {
 	e.GET("/town_names", townNamesHandler)
 	e.GET("/town", townHandler)
 	e.GET("/being", beingHandler)
+	e.GET("/household", householdHandler)
 	e.GET("/random/chromosome", randomChromosomeHandler)
 	e.File("/", "web")
 	e.Static("/fonts", "web/fonts")
@@ -67,6 +84,59 @@ func renameHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, struct{}{})
 }
 
+func householdHandler(c echo.Context) error {
+	filename := c.QueryParam("namer")
+	nl := namerLoad{}
+	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", filename))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not load internal data file")
+	}
+	err = json.NewDecoder(r).Decode(&nl)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+	}
+
+	var namers = make(map[string]*words.Namer)
+
+	for _, gn := range nl.GenderNames {
+		w := words.NewWords()
+		w.AddList("givenNames", gn.GivenNames)
+		w.AddList("familyNames", nl.FamilyNames)
+		namers[gn.Gender] = words.NewNamer(gn.Patterns, w, gn.NameStrategy)
+	}
+	female := inhabitants.NewSpeciesGender(namers["female"], inhabitants.NameStrategies[namers["female"].NameStrategy], 12, 48)
+	male := inhabitants.NewSpeciesGender(namers["male"], inhabitants.NameStrategies[namers["male"].NameStrategy], 12, 48)
+	expression, err := loadHuman()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+	}
+	s := inhabitants.NewSpecies("human", map[inhabitants.Gender]*inhabitants.SpeciesGender{
+		inhabitants.Female: female,
+		inhabitants.Male:   male,
+	}, expression)
+	mom := &inhabitants.Being{Species: s, Sex: inhabitants.Female}
+	mom.RandomizeName()
+	mom.RandomizeChromosome()
+	dad := &inhabitants.Being{Species: s, Sex: inhabitants.Male}
+	dad.RandomizeName()
+	dad.RandomizeChromosome()
+	mom.Name.FamilyName = dad.Name.FamilyName
+	//mom.Reproduce(dad)
+	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
+}
+
+func loadHuman() (*genetics.Expression, error) {
+	r, err := os.Open("./web/data/human.json")
+	if err != nil {
+		return nil, err
+	}
+	expression, err := genetics.LoadExpression(r)
+	if err != nil {
+		return nil, err
+	}
+	return &expression, nil
+}
+
 func townHandler(c echo.Context) error {
 	// type townRequest struct {
 	// 	size int `form:"size" query:"size"`
@@ -75,11 +145,7 @@ func townHandler(c echo.Context) error {
 	// if err := c.Bind(tr); err != nil {
 	// 	return err
 	// }
-	r, err := os.Open("./web/data/human.json")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not load internal data file")
-	}
-	expression, err := genetics.LoadExpression(r)
+	expression, err := loadHuman()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
 	}
@@ -89,7 +155,7 @@ func townHandler(c echo.Context) error {
 	s := inhabitants.NewSpecies("Northman", map[inhabitants.Gender]*inhabitants.SpeciesGender{
 		inhabitants.Female: female,
 		inhabitants.Male:   male,
-	}, &expression)
+	}, expression)
 	area := locations.NewArea(locations.Town, nil, nil)
 	for i := 0; i < 1000; i++ {
 		being := inhabitants.Being{Species: s}

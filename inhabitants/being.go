@@ -77,7 +77,7 @@ func (b *Being) Randomize() error {
 	if b.Species == nil {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
-	b.Chromosome = genetics.RandomChromosome(20)
+	b.RandomizeChromosome()
 	possibleGenders := []Gender{}
 	genders := b.GetGenders()
 	for g := range b.GetGenders() {
@@ -85,9 +85,18 @@ func (b *Being) Randomize() error {
 	}
 	//runtime.Breakpoint()
 	b.Sex = possibleGenders[randomizer.Intn(len(possibleGenders))]
-	b.Name = genders[b.Sex].NameStrategy(b)
+	b.RandomizeName()
 	b.Age = genders[b.Sex].RandomAge(-1)
 	return nil
+}
+
+func (b *Being) RandomizeName() {
+	genders := b.GetGenders()
+	b.Name = genders[b.Sex].NameStrategy(b)
+}
+
+func (b *Being) RandomizeChromosome() {
+	b.Chromosome = genetics.RandomChromosome(20)
 }
 
 func (b *Being) Express(e genetics.Expression) map[string]string {

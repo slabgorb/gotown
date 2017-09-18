@@ -11,6 +11,7 @@ import (
 type Namer struct {
 	Patterns []Pattern
 	*Words
+	NameStrategy string
 }
 
 func (n *Namer) Template() *template.Template {
@@ -45,10 +46,10 @@ func (n *Namer) Name() string {
 	return s
 }
 
-func NewNamer(patterns []string, words *Words) *Namer {
+func NewNamer(patterns []string, words *Words, nameStrategy string) *Namer {
 	ps := []Pattern{}
 	for _, p := range patterns {
 		ps = append(ps, Pattern(p))
 	}
-	return &Namer{Patterns: ps, Words: words}
+	return &Namer{Patterns: ps, Words: words, NameStrategy: nameStrategy}
 }

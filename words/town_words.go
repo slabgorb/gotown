@@ -20,7 +20,7 @@ var (
 			"{{.Adjective}} {{.EndNoun}}",
 			"{{.Noun}} {{.EndNoun}}",
 			"{{.Adjective}} {{.EndNoun}}"},
-		TownWords,
+		TownWords, "",
 	)
 )
 

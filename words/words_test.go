@@ -35,7 +35,7 @@ func TestStrings(t *testing.T) {
 func TestBackup(t *testing.T) {
 	newWords := NewWords()
 	newWords.Backup = BaseWords
-	newNamer := NewNamer([]string{"{{.Adjective}}{{.Noun}}"}, newWords)
+	newNamer := NewNamer([]string{"{{.Adjective}}{{.Noun}}"}, newWords, "")
 	name := newNamer.Name()
 	if name == "" {
 		t.Errorf("Got empty string from newNamer.Name(), got nothing from backup")

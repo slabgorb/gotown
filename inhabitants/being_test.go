@@ -23,8 +23,8 @@ func init() {
 
 func TestName(t *testing.T) {
 	for _, nt := range nameTests {
-		namer := words.NewNamer([]string{nt.pattern}, words.NorseMaleNameWords)
-		speciesGender := NewSpeciesGender(namer, NameStrategies["patronymic"], 12, 65)
+		namer := words.NewNamer([]string{nt.pattern}, words.NorseMaleNameWords, "patronymic")
+		speciesGender := NewSpeciesGender(namer, NameStrategies[namer.NameStrategy], 12, 65)
 		species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: speciesGender}, nil)
 		being := &Being{Species: species}
 		being.Randomize()

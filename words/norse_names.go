@@ -6,12 +6,12 @@ var (
 	NorseMaleNamer       *Namer = NewNamer(
 		[]string{
 			"{{.GivenName}} {{.FamilyName}}{{.Patronymic}}",
-		}, NorseMaleNameWords,
+		}, NorseMaleNameWords, "patronymic",
 	)
 	NorseFemaleNamer *Namer = NewNamer(
 		[]string{
 			"{{.GivenName}} {{.FamilyName}}{{.Matronymic}}",
-		}, NorseFemaleNameWords,
+		}, NorseFemaleNameWords, "matronymic",
 	)
 )
 

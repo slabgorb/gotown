@@ -13,7 +13,7 @@ var (
 		"{{.PluralNoun}} of the {{.Noun}}",
 		"{{.Adjective}}{{.StartNoun}}",
 	},
-		BaseWords,
+		BaseWords, "",
 	)
 )
 
