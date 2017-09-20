@@ -117,6 +117,7 @@ func householdHandler(c echo.Context) error {
 	mom := &inhabitants.Being{Species: s, Sex: inhabitants.Female}
 	mom.RandomizeName()
 	mom.RandomizeChromosome()
+	mom.RandomizeAge(2)
 	dad := &inhabitants.Being{Species: s, Sex: inhabitants.Male}
 	dad.RandomizeName()
 	dad.RandomizeChromosome()

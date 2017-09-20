@@ -21,66 +21,6 @@ func (g Gender) MarshalJSON() ([]byte, error) {
 	return json.Marshal(g.String())
 }
 
-type NameStrategy func(b *Being) *Name
-
-var NameStrategies = map[string]NameStrategy{
-	"matrilineal": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
-		name := &Name{GivenName: namer.GivenName()}
-		if b.Mother() != nil {
-			name.FamilyName = b.Mother().FamilyName
-			return name
-		}
-		name.FamilyName = namer.GivenName()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"patrilineal": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
-		name := &Name{GivenName: namer.GivenName()}
-		if b.Father() != nil {
-			name.FamilyName = b.Father().FamilyName
-			return name
-		}
-		name.FamilyName = namer.GivenName()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"matronymic": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
-		name := &Name{GivenName: namer.GivenName()}
-		if b.Mother() != nil {
-			name.FamilyName = b.Mother().GivenName + namer.Matronymic()
-			return name
-		}
-		name.FamilyName = namer.GivenName() + namer.Matronymic()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"patronymic": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
-		name := &Name{GivenName: namer.GivenName()}
-		if b.Father() != nil {
-			name.FamilyName = b.Father().GivenName + namer.Patronymic()
-			return name
-		}
-		name.FamilyName = namer.GivenName() + namer.Patronymic()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"onename": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
-		name := &Name{GivenName: namer.GivenName()}
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-}
-
 type SpeciesGender struct {
 	Fertility
 	*words.Namer

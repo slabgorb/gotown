@@ -8,7 +8,7 @@ import (
 )
 
 type Area struct {
-	Habitation
+	*Habitation
 	Size  AreaSize
 	Ruler *inhabitants.Being
 	Graveyard
@@ -24,6 +24,7 @@ func NewArea(size AreaSize, ruler *inhabitants.Being, location *Area) *Area {
 		n = words.TownNamer
 	}
 	a := &Area{Size: size, Ruler: ruler, Location: location}
+	a.Habitation = NewHabitation()
 	a.Enclosures = make(map[string]*Area)
 	a.SetNamer(n)
 	a.Name = a.Namer.Name()

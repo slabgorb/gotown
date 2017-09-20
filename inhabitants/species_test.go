@@ -5,33 +5,23 @@ import (
 
 	. "github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/random"
-	words "github.com/slabgorb/gotown/words"
 )
 
 func init() {
 	SetRandomizer(random.NewMock())
 }
 
-var (
-	female = NewSpeciesGender(words.NorseFemaleNamer, NameStrategies["matronymic"], 12, 48)
-	male   = NewSpeciesGender(words.NorseMaleNamer, NameStrategies["patronymic"], 12, 65)
-	s      = NewSpecies("Northman", map[Gender]*SpeciesGender{
-		Female: female,
-		Male:   male,
-	}, nil)
-)
-
 func TestToString(t *testing.T) {
-	if s.String() != "Northman" {
+	if mockSpecies.String() != "Northman" {
 		t.Fail()
 	}
 }
 
 func TestGenders(t *testing.T) {
-	if s.Name != "Northman" {
+	if mockSpecies.Name != "Northman" {
 		t.Fail()
 	}
-	b := &Being{Sex: Male, Species: s}
+	b := &Being{Sex: Male, Species: mockSpecies}
 	name := male.NameStrategy(b)
 	nameDisplay := name.Display
 	expected := "Hauk Haukson"
@@ -58,7 +48,7 @@ func TestRandomAge(t *testing.T) {
 }
 
 func TestRandomBeing(t *testing.T) {
-	b := s.RandomBeing()
+	b := mockSpecies.RandomBeing()
 	expected := "Hauk Haukson"
 	if b.String() != expected {
 		t.Errorf("expected %s got %s", expected, b.String())

@@ -8,7 +8,7 @@ import (
 )
 
 func TestPopulation(t *testing.T) {
-	h := Area{}
+	h := NewArea(Village, nil, nil)
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
 	}
@@ -17,7 +17,7 @@ func TestPopulation(t *testing.T) {
 	if h.Population() != 1 {
 		t.Errorf("Expected 1 got %d", h.Population())
 	}
-	_, found := h.Resident(b)
+	found := h.Resident(b)
 	if !found {
 		t.Errorf("Being not resident")
 	}

@@ -34,11 +34,26 @@ func NewName(fullName string) *Name {
 	return name
 }
 
+type members []*Being
+
+func (m members) Strings() []string {
+	var out []string
+	for _, b := range m {
+		out = append(out, b.String())
+	}
+	return out
+}
+
+func (m members) String() string {
+	return strings.Join(m.Strings(), ", ")
+}
+
 type Being struct {
 	*Name      `json:"name"`
 	*Species   `json:"species"`
-	Parents    map[Gender]*Being    `json:"-"`
-	Children   []*Being             `json:"children"`
+	Parents    members              `json:"parents"`
+	Children   members              `json:"children"`
+	Spouses    members              `json:"spouses"`
 	Age        int                  `json:"age"`
 	Sex        Gender               `json:"gender"`
 	Dead       bool                 `json:"dead"`
@@ -46,21 +61,32 @@ type Being struct {
 }
 
 func (b *Being) genderedParent(gender Gender) *Being {
-	if parent, ok := b.Parents[gender]; ok {
-		return parent
+	for _, b := range b.Parents {
+		if b.Sex == gender {
+			return b
+		}
 	}
 	return nil
 }
 
 func (b *Being) MarshalJSON() ([]byte, error) {
-	type Alias Being
 	return json.Marshal(&struct {
 		Expression map[string]string `json:"expression"`
-		*Alias
-		Living bool `json:"alive"`
+		Age        int               `json"age"`
+		Sex        string            `json:"sex"`
+		Species    string            `json:"species"`
+		Parents    []string          `json:"parents"`
+		Children   []string          `json:"children"`
+		Spouses    []string          `json:"spouses"`
+		Living     bool              `json:"alive"`
 	}{
 		Expression: b.Expression(),
-		Alias:      (*Alias)(b),
+		Age:        b.Age,
+		Sex:        b.Sex.String(),
+		Species:    b.Species.String(),
+		Parents:    b.Parents.Strings(),
+		Children:   b.Children.Strings(),
+		Spouses:    b.Spouses.Strings(),
 		Living:     !b.Dead,
 	})
 }
@@ -121,10 +147,7 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	}
 	child := &Being{Species: b.Species, Age: 0}
 
-	child.Parents = map[Gender]*Being{
-		b.Sex:    b,
-		with.Sex: with,
-	}
+	child.Parents = members{b, with}
 	child.Randomize()
 	b.Children = append(b.Children, child)
 	with.Children = append(with.Children, child)

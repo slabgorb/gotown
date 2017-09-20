@@ -6,9 +6,13 @@ import (
 )
 
 type Habitation struct {
-	Residents []*inhabitants.Being `json:"residents"`
-	Name      string               `json:"name"`
+	Residents *inhabitants.Population `json:"residents"`
+	Name      string                  `json:"name"`
 	*words.Namer
+}
+
+func NewHabitation() *Habitation {
+	return &Habitation{Residents: inhabitants.NewPopulation([]*inhabitants.Being{})}
 }
 
 func (h *Habitation) SetNamer(namer *words.Namer) {
@@ -16,34 +20,17 @@ func (h *Habitation) SetNamer(namer *words.Namer) {
 }
 
 func (h *Habitation) Add(b *inhabitants.Being) (ok bool) {
-	_, found := h.Resident(b)
-	if found {
-		return false
-	}
-	h.Residents = append(h.Residents, b)
-	return true
+	return h.Residents.Add(b)
 }
 
 func (h *Habitation) Remove(b *inhabitants.Being) (ok bool) {
-	index, found := h.Resident(b)
-	if !found {
-		return false
-	}
-	h.Residents = append(h.Residents[:index], h.Residents[index+1:]...)
-	return true
+	return h.Residents.Remove(b)
 }
 
 func (h *Habitation) Population() int {
-	return len(h.Residents)
+	return h.Residents.Len()
 }
 
-func (h *Habitation) Resident(b *inhabitants.Being) (index int, found bool) {
-	for i, r := range h.Residents {
-		if r == b {
-			found = true
-			index = i
-			break
-		}
-	}
-	return index, found
+func (h *Habitation) Resident(b *inhabitants.Being) (found bool) {
+	return h.Residents.Get(b)
 }
