@@ -112,8 +112,7 @@ func (b *Being) Randomize() error {
 }
 
 func (b *Being) RandomizeAge(slot int) {
-	genders := b.GetGenders()
-	b.Age = genders[b.Sex].RandomAge(slot)
+	b.Age = b.Species.RandomAge(slot)
 }
 
 func (b *Being) RandomizeGender() {

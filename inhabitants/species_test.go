@@ -40,7 +40,7 @@ func TestRandomAge(t *testing.T) {
 		{99, 85},
 	}
 	for _, tc := range testCases {
-		age := male.RandomAge(tc.in)
+		age := mockSpecies.RandomAge(tc.in)
 		if age != tc.out {
 			t.Errorf("expected %d got %d", tc.out, age)
 		}

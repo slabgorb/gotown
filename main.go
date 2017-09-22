@@ -85,27 +85,17 @@ func renameHandler(c echo.Context) error {
 }
 
 func householdHandler(c echo.Context) error {
-	filename := c.QueryParam("namer")
-	nl := namerLoad{}
+	filename := c.QueryParam("culture")
 	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", filename))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not load internal data file")
 	}
-	err = json.NewDecoder(r).Decode(&nl)
+	culture := &inhabitants.Culture{}
+	err = json.NewDecoder(r).Decode(&culture)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
 	}
 
-	var namers = make(map[string]*words.Namer)
-
-	for _, gn := range nl.GenderNames {
-		w := words.NewWords()
-		w.AddList("givenNames", gn.GivenNames)
-		w.AddList("familyNames", nl.FamilyNames)
-		namers[gn.Gender] = words.NewNamer(gn.Patterns, w, gn.NameStrategy)
-	}
-	female := inhabitants.NewSpeciesGender(namers["female"], inhabitants.NameStrategies[namers["female"].NameStrategy], 12, 48)
-	male := inhabitants.NewSpeciesGender(namers["male"], inhabitants.NameStrategies[namers["male"].NameStrategy], 12, 48)
 	expression, err := loadHuman()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")

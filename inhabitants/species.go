@@ -61,24 +61,6 @@ func (s *SpeciesGender) RandomName() {
 	s.Name()
 }
 
-func (s *SpeciesGender) RandomAge(slot int) int {
-	d, ok := Demographies[s.demog]
-	if !ok {
-		return 0
-	}
-	if slot == -1 {
-		slot = randomizer.Intn(101)
-	}
-	min := 0
-	for _, dmo := range d {
-		if dmo.pct >= slot {
-			return randomizer.Intn(dmo.max-min) + min
-		}
-		min = dmo.max
-	}
-	return 0
-}
-
 type Fertility struct {
 	Start int
 	End   int
@@ -91,6 +73,7 @@ type Species struct {
 	MultipleBirth func(g random.Generator) int `json:"-"`
 	Expression    *genetics.Expression         `json:"-"`
 	randomizer    random.Generator
+	demog         demography
 }
 
 // NewSpecies creates and initializes a *Species
@@ -99,6 +82,7 @@ func NewSpecies(name string, genders map[Gender]*SpeciesGender, e *genetics.Expr
 		Name:       name,
 		Genders:    genders,
 		Expression: e,
+		demog:      Demographies["medieval"],
 		MultipleBirth: func(g random.Generator) int {
 			if g.Float64() < 0.05 {
 				return 4
@@ -126,4 +110,18 @@ func (s *Species) RandomBeing() *Being {
 	b := &Being{Species: s}
 	b.Randomize()
 	return b
+}
+
+func (s *Species) RandomAge(slot int) int {
+	if slot == -1 {
+		slot = randomizer.Intn(101)
+	}
+	min := 0
+	for _, dmo := range s.demog {
+		if dmo.pct >= slot {
+			return randomizer.Intn(dmo.max-min) + min
+		}
+		min = dmo.max
+	}
+	return 0
 }
