@@ -9,13 +9,17 @@ import (
 )
 
 // go:generate stringer -type=Gender
-type Gender int
+type Gender string
 
 const (
-	Asexual Gender = iota
-	Male
-	Female
+	Asexual Gender = "neuter"
+	Male    Gender = "male"
+	Female  Gender = "female"
 )
+
+func (g Gender) String() string {
+	return string(g)
+}
 
 func (g Gender) MarshalJSON() ([]byte, error) {
 	return json.Marshal(g.String())
@@ -34,7 +38,7 @@ type demo struct {
 }
 type demography []demo
 
-var demographies = map[string]demography{
+var Demographies = map[string]demography{
 	"medieval": demography{
 		demo{14, 29},
 		demo{18, 36},
@@ -58,7 +62,7 @@ func (s *SpeciesGender) RandomName() {
 }
 
 func (s *SpeciesGender) RandomAge(slot int) int {
-	d, ok := demographies[s.demog]
+	d, ok := Demographies[s.demog]
 	if !ok {
 		return 0
 	}

@@ -1,11 +1,16 @@
 package inhabitants
 
-import "github.com/slabgorb/gotown/timeline"
+import (
+	"fmt"
+
+	"github.com/slabgorb/gotown/timeline"
+)
 
 // Population is a set of Being
 type Population struct {
-	beings     map[*Being]bool
-	chronology timeline.Chronology
+	beings map[*Being]bool
+	*timeline.Chronology
+	*Culture
 }
 
 type MaritalCandidate struct {
@@ -13,10 +18,10 @@ type MaritalCandidate struct {
 }
 
 // NewPopulation initializes a Population
-func NewPopulation(beings []*Being, chronology *timeline.Chronology) *Population {
-	p := &Population{}
+func NewPopulation(beings []*Being, chronology *timeline.Chronology, culture *Culture) *Population {
+	p := &Population{Chronology: chronology, Culture: culture}
 	if chronology == nil {
-
+		p.Chronology = timeline.NewChronology()
 	}
 	p.beings = make(map[*Being]bool)
 	for _, b := range beings {
@@ -80,15 +85,19 @@ func (p Population) ByGender(g Gender) []*Being {
 	return out
 }
 
-func (p *Population) MaritalCandidates(strategy MaritalStrategy) []*MaritalCandidate {
+func (p *Population) MaritalCandidates() ([]*MaritalCandidate, error) {
 	mc := []*MaritalCandidate{}
+	if p.Culture == nil {
+		return nil, fmt.Errorf("no culture for population, cannot assess marital candidates")
+	}
 	// loop through the population, taking each member and looking for candidates
 	for _, m := range p.ByGender(Male) {
 		for _, f := range p.ByGender(Female) {
-			if strategy(m, f) {
+
+			if p.Culture.MaritalCandidate(m, f) {
 				mc = append(mc, &MaritalCandidate{male: m, female: f})
 			}
 		}
 	}
-	return mc
+	return mc, nil
 }

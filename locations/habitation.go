@@ -12,7 +12,7 @@ type Habitation struct {
 }
 
 func NewHabitation() *Habitation {
-	return &Habitation{Residents: inhabitants.NewPopulation([]*inhabitants.Being{})}
+	return &Habitation{Residents: inhabitants.NewPopulation([]*inhabitants.Being{}, nil, nil)}
 }
 
 func (h *Habitation) SetNamer(namer *words.Namer) {

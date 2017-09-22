@@ -51,6 +51,7 @@ func (m members) String() string {
 type Being struct {
 	*Name      `json:"name"`
 	*Species   `json:"species"`
+	*Culture   `json:"culture"`
 	Parents    members              `json:"parents"`
 	Children   members              `json:"children"`
 	Spouses    members              `json:"spouses"`

@@ -8,7 +8,7 @@ import (
 )
 
 func TestAging(t *testing.T) {
-	p := NewPopulation([]*Being{}, nil)
+	p := NewPopulation([]*Being{}, nil, nil)
 	count := 10
 	beings := make([]*Being, count)
 	for i := 0; i < count; i++ {
@@ -30,9 +30,13 @@ func TestAging(t *testing.T) {
 	}
 }
 
+func TestGender(t *testing.T) {
+
+}
+
 func TestAddAndRemove(t *testing.T) {
 	b := &Being{Species: mockSpecies}
-	p := NewPopulation([]*Being{b}, nil)
+	p := NewPopulation([]*Being{b}, nil, nil)
 	p.Remove(b)
 	if p.Get(b) {
 		t.Fail()
