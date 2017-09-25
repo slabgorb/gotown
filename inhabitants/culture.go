@@ -79,9 +79,14 @@ func (c *Culture) MaritalCandidate(a, b *Being) bool {
 	return out
 }
 
+func (c *Culture) GetName(b *Being) *Name {
+	f := c.nameStrategies[b.Sex]
+	return f(b)
+}
+
 var NameStrategies = map[string]NameStrategy{
 	"matrilineal": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
+		namer := b.Culture.Namers[b.Sex]
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Mother() != nil {
 			name.FamilyName = b.Mother().FamilyName
@@ -93,7 +98,7 @@ var NameStrategies = map[string]NameStrategy{
 		return name
 	},
 	"patrilineal": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
+		namer := b.Culture.Namers[b.Sex]
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Father() != nil {
 			name.FamilyName = b.Father().FamilyName
@@ -105,7 +110,7 @@ var NameStrategies = map[string]NameStrategy{
 		return name
 	},
 	"matronymic": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
+		namer := b.Culture.Namers[b.Sex]
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Mother() != nil {
 			name.FamilyName = b.Mother().GivenName + namer.Matronymic()
@@ -117,7 +122,7 @@ var NameStrategies = map[string]NameStrategy{
 		return name
 	},
 	"patronymic": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
+		namer := b.Culture.Namers[b.Sex]
 		name := &Name{GivenName: namer.GivenName()}
 		if b.Father() != nil {
 			name.FamilyName = b.Father().GivenName + namer.Patronymic()
@@ -129,7 +134,7 @@ var NameStrategies = map[string]NameStrategy{
 		return name
 	},
 	"onename": func(b *Being) *Name {
-		namer := b.Species.Genders[b.Sex].Namer
+		namer := b.Culture.Namers[b.Sex]
 		name := &Name{GivenName: namer.GivenName()}
 		display, _ := namer.Execute(name)
 		name.Display = display

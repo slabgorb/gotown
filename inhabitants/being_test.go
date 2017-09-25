@@ -5,7 +5,6 @@ import (
 
 	. "github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/random"
-	words "github.com/slabgorb/gotown/words"
 )
 
 var nameTests = []struct {
@@ -22,12 +21,14 @@ func init() {
 }
 
 func TestName(t *testing.T) {
+	species := NewSpecies("Northman", []Gender{Male, Female}, nil)
+	culture := helperMockCulture(t, "viking")
+	if culture == nil {
+		t.Error("culture not loaded")
+	}
 	for _, nt := range nameTests {
-		namer := words.NewNamer([]string{nt.pattern}, words.NorseMaleNameWords, "patronymic")
-		speciesGender := NewSpeciesGender(namer, NameStrategies[namer.NameStrategy], 12, 65)
-		species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: speciesGender}, nil)
-		being := &Being{Species: species}
-		being.Randomize()
+		being := &Being{Species: species, Culture: culture, Sex: Male}
+		being.RandomizeName()
 		if being.Sex != Male {
 			t.Errorf("Expected Male got %s", being.Sex)
 		}
@@ -38,13 +39,12 @@ func TestName(t *testing.T) {
 }
 
 func TestInheritedName(t *testing.T) {
-	male := NewSpeciesGender(words.NorseMaleNamer, NameStrategies["patronymic"], 12, 65)
-	female := NewSpeciesGender(words.NorseFemaleNamer, NameStrategies["matronymic"], 12, 50)
-	species := NewSpecies("Northman", map[Gender]*SpeciesGender{Male: male, Female: female}, nil)
-	m := &Being{Species: species, Sex: Female}
-	m.Name = female.NameStrategy(m)
-	f := &Being{Species: species, Sex: Male}
-	f.Name = male.NameStrategy(m)
+	species := NewSpecies("Northman", []Gender{Male, Female}, nil)
+	culture := helperMockCulture(t, "viking")
+	m := &Being{Species: species, Sex: Female, Culture: culture}
+	m.Name = m.Culture.GetName(m)
+	f := &Being{Species: species, Sex: Male, Culture: culture}
+	f.Name = f.Culture.GetName(f)
 	//runtime.Breakpoint()
 	children, err := f.Reproduce(m)
 	if err != nil {

@@ -116,16 +116,11 @@ func (b *Being) RandomizeAge(slot int) {
 }
 
 func (b *Being) RandomizeGender() {
-	possibleGenders := []Gender{}
-	for g := range b.GetGenders() {
-		possibleGenders = append(possibleGenders, g)
-	}
-	b.Sex = possibleGenders[randomizer.Intn(len(possibleGenders))]
+	b.Sex = b.Species.Genders[randomizer.Intn(len(b.Species.Genders))]
 }
 
 func (b *Being) RandomizeName() {
-	genders := b.GetGenders()
-	b.Name = genders[b.Sex].NameStrategy(b)
+	b.Name = b.Culture.nameStrategies[b.Sex](b)
 }
 
 func (b *Being) RandomizeChromosome() {

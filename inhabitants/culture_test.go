@@ -2,13 +2,14 @@ package inhabitants_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	. "github.com/slabgorb/gotown/inhabitants"
 )
 
-func helperMockCulture(t *testing.T) *Culture {
-	data := helperLoadBytes(t, "mock_culture.json")
+func helperMockCulture(t *testing.T, name string) *Culture {
+	data := helperLoadBytes(t, fmt.Sprintf("mock_culture_%s.json", name))
 	c := &Culture{}
 	err := json.Unmarshal(data, c)
 	if err != nil {
@@ -18,14 +19,14 @@ func helperMockCulture(t *testing.T) *Culture {
 }
 
 func TestUnmarshal(t *testing.T) {
-	c := helperMockCulture(t)
+	c := helperMockCulture(t, "italian")
 	if c.Name != "Italianate" {
 		t.Error("did not get name")
 	}
 }
 
 func TestMaritalStrategy(t *testing.T) {
-	c := helperMockCulture(t)
+	c := helperMockCulture(t, "italian")
 	testCases := []struct {
 		name     string
 		a        *Being

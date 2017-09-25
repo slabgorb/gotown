@@ -5,7 +5,6 @@ import (
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
-	"github.com/slabgorb/gotown/words"
 )
 
 // go:generate stringer -type=Gender
@@ -23,13 +22,6 @@ func (g Gender) String() string {
 
 func (g Gender) MarshalJSON() ([]byte, error) {
 	return json.Marshal(g.String())
-}
-
-type SpeciesGender struct {
-	Fertility
-	*words.Namer
-	NameStrategy
-	demog string
 }
 
 type demo struct {
@@ -52,15 +44,6 @@ var Demographies = map[string]demography{
 	},
 }
 
-func NewSpeciesGender(namer *words.Namer, ns NameStrategy, start, end int) *SpeciesGender {
-	words.SetRandomizer(randomizer)
-	return &SpeciesGender{Fertility: Fertility{start, end}, Namer: namer, NameStrategy: ns, demog: "medieval"}
-}
-
-func (s *SpeciesGender) RandomName() {
-	s.Name()
-}
-
 type Fertility struct {
 	Start int
 	End   int
@@ -69,7 +52,7 @@ type Fertility struct {
 // Species represents a species or a race.
 type Species struct {
 	Name          string                       `json:"name"`
-	Genders       map[Gender]*SpeciesGender    `json:"-"`
+	Genders       []Gender                     `json:"-"`
 	MultipleBirth func(g random.Generator) int `json:"-"`
 	Expression    *genetics.Expression         `json:"-"`
 	randomizer    random.Generator
@@ -77,7 +60,7 @@ type Species struct {
 }
 
 // NewSpecies creates and initializes a *Species
-func NewSpecies(name string, genders map[Gender]*SpeciesGender, e *genetics.Expression) *Species {
+func NewSpecies(name string, genders []Gender, e *genetics.Expression) *Species {
 	return &Species{
 		Name:       name,
 		Genders:    genders,
@@ -102,14 +85,8 @@ func (s *Species) String() string {
 	return s.Name
 }
 
-func (s *Species) GetGenders() map[Gender]*SpeciesGender {
+func (s *Species) GetGenders() []Gender {
 	return s.Genders
-}
-
-func (s *Species) RandomBeing() *Being {
-	b := &Being{Species: s}
-	b.Randomize()
-	return b
 }
 
 func (s *Species) RandomAge(slot int) int {
