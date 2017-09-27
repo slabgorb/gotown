@@ -5,16 +5,8 @@ import (
 
 	. "github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/random"
+	"github.com/slabgorb/gotown/words"
 )
-
-var nameTests = []struct {
-	pattern  string
-	expected string
-}{
-	{"{{.GivenName}} {{.FamilyName}}", "Hauk Haukson"},
-	{"{{.GivenName}} {{.FamilyName}} {{.OtherNames}}", "Hauk Haukson"},
-	{"{{.FamilyName}}", "Haukson"},
-}
 
 func init() {
 	SetRandomizer(random.NewMock())
@@ -26,15 +18,15 @@ func TestName(t *testing.T) {
 	if culture == nil {
 		t.Error("culture not loaded")
 	}
-	for _, nt := range nameTests {
-		being := &Being{Species: species, Culture: culture, Sex: Male}
-		being.RandomizeName()
-		if being.Sex != Male {
-			t.Errorf("Expected Male got %s", being.Sex)
-		}
-		if being.String() != nt.expected {
-			t.Errorf("Expected %s got %s", nt.expected, being.String())
-		}
+	expected := "Hauk Haukson"
+	being := &Being{Species: species, Culture: culture, Sex: Male}
+	words.SetRandomizer(random.NewMock())
+	being.RandomizeName()
+	if being.Sex != Male {
+		t.Errorf("Expected Male got %s", being.Sex)
+	}
+	if being.String() != expected {
+		t.Errorf("Expected %s got %s", expected, being.String())
 	}
 }
 

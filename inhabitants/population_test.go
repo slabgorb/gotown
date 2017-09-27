@@ -30,9 +30,7 @@ func TestAging(t *testing.T) {
 	}
 }
 
-func TestGender(t *testing.T) {
-
-}
+func TestMaritalCandidates(t *testing.T) {}
 
 func TestAddAndRemove(t *testing.T) {
 	b := &Being{Species: mockSpecies}

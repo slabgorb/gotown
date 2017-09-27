@@ -40,7 +40,7 @@ func beingFixtures(t *testing.T) map[string]*Being {
 	}
 	for _, f := range v {
 		name := NewName(f.Name)
-		beings[f.Label] = &Being{Name: name, Age: f.Age}
+		beings[f.Label] = &Being{Name: name, Age: f.Age, Sex: Gender(f.Sex)}
 	}
 	return beings
 }

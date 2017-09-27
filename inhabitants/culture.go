@@ -66,6 +66,7 @@ func (c *Culture) UnmarshalJSON(data []byte) error {
 		w.AddList("givenNames", gn.GivenNames)
 		w.AddList("familyNames", cl.FamilyNames)
 		c.Namers[gn.Gender] = words.NewNamer(gn.Patterns, w, gn.NameStrategy)
+		c.nameStrategies[gn.Gender] = NameStrategies[gn.NameStrategy]
 	}
 
 	return nil

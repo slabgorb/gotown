@@ -140,7 +140,7 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	if with == nil && b.Sex != Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	child := &Being{Species: b.Species, Age: 0}
+	child := &Being{Species: b.Species, Age: 0, Culture: b.Culture}
 
 	child.Parents = members{b, with}
 	child.Randomize()
