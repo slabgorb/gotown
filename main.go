@@ -84,31 +84,35 @@ func renameHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, struct{}{})
 }
 
-func householdHandler(c echo.Context) error {
-	filename := c.QueryParam("culture")
-	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", filename))
+func loadCulture(name string) (*inhabitants.Culture, error) {
+	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", name))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not load internal data file")
+		return nil, fmt.Errorf("could not load internal data file")
 	}
 	culture := &inhabitants.Culture{}
 	err = json.NewDecoder(r).Decode(&culture)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+		return nil, fmt.Errorf("could not parse json file")
 	}
+	return culture, nil
+}
 
+func householdHandler(c echo.Context) error {
+	filename := c.QueryParam("culture")
+	culture, err := loadCulture(filename)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 	expression, err := loadHuman()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
 	}
-	s := inhabitants.NewSpecies("human", map[inhabitants.Gender]*inhabitants.SpeciesGender{
-		inhabitants.Female: female,
-		inhabitants.Male:   male,
-	}, expression)
-	mom := &inhabitants.Being{Species: s, Sex: inhabitants.Female}
+	s := inhabitants.NewSpecies("human", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, expression)
+	mom := &inhabitants.Being{Species: s, Sex: inhabitants.Female, Culture: culture}
 	mom.RandomizeName()
 	mom.RandomizeChromosome()
 	mom.RandomizeAge(2)
-	dad := &inhabitants.Being{Species: s, Sex: inhabitants.Male}
+	dad := &inhabitants.Being{Species: s, Sex: inhabitants.Male, Culture: culture}
 	dad.RandomizeName()
 	dad.RandomizeChromosome()
 	mom.Name.FamilyName = dad.Name.FamilyName
@@ -140,16 +144,14 @@ func townHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
 	}
-
-	female := inhabitants.NewSpeciesGender(words.NorseFemaleNamer, inhabitants.NameStrategies["matronymic"], 12, 48)
-	male := inhabitants.NewSpeciesGender(words.NorseMaleNamer, inhabitants.NameStrategies["patronymic"], 12, 65)
-	s := inhabitants.NewSpecies("Northman", map[inhabitants.Gender]*inhabitants.SpeciesGender{
-		inhabitants.Female: female,
-		inhabitants.Male:   male,
-	}, expression)
+	culture, err := loadCulture(c.QueryParam("culture"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	s := inhabitants.NewSpecies("Northman", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, expression)
 	area := locations.NewArea(locations.Town, nil, nil)
 	for i := 0; i < 1000; i++ {
-		being := inhabitants.Being{Species: s}
+		being := inhabitants.Being{Species: s, Culture: culture}
 		being.Randomize()
 		area.Add(&being)
 	}
