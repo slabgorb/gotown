@@ -4,7 +4,6 @@ import axios from 'axios';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import Card, { CardContent } from 'material-ui/Card';
-
 // const Species = (props) => {
 //   <SpeciesDisplay { ...props }/>
 // }
@@ -13,17 +12,11 @@ class Species extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: "Loading...",
-      genetics: {},
-      matronymics: [],
-      patronymics: [],
-      genderNames: [],
+      name: props.name,
+      genetics: {traits:[]},
     }
   }
   render() {
-    var genderNames =_.map(this.state.genderNames, function(gn) {
-      return (<GenderName key={gn.gender} gender={gn.gender} patterns={gn.patterns} givenNames={gn.given_names}/>)
-    })
     return (
       <div>
         <Paper elevation={4}>
@@ -31,7 +24,7 @@ class Species extends React.Component {
             {this.state.name}
           </Typography>
           <Genetics traits={this.state.genetics.traits}/>
-          {genderNames}
+          <GeneticsMap/>
         </Paper>
       </div>
     )
@@ -41,63 +34,66 @@ class Species extends React.Component {
     axios.get(`data/${this.props.name}.json`)
       .then(res => {
         const s = res.data;
-        this.setState({name: s.name, genetics: s.genetics, genderNames: s.gender_names})
+        console.log(this.state)
+        this.setState({genetics:s})
       })
   }
 }
 
-class Trait extends React.Component {
-  render() {
-    var variants = _.map(this.props.variants, function(variant) {
-      return(<Variant name={variant.name} match={variant.match} key={variant.name}/>)
-    });
+const hexes = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+const blankLines = (h) => {
+  (
+    <div key={h}>
+      <span>{h}</span>
+      { hexes.map((h) =>  (<span key={h}>&nbsp;</span>))}
+    </div>
+  )
+}
 
-    return (
-      <div>
-        <Card>
-          <h3>{this.props.name}</h3>
-          {variants}
-        </Card>
+var line = _.map(hexes, function(h) {
+  (<span>{h}</span>)
+})
+
+
+const GeneticsMap = () =>
+ (
+    <div>
+      <span>&nbsp;</span>{line}
+        { hexes.map((h) => blankLines(h) )}
+    </div>
+  )
+
+const Trait = (props) =>
+  (
+    <div>
+      <Card>
+        <h3>{this.props.name}</h3>
+        {props.variants.map((variant) => (<Variant name={variant.name} match={variant.match} key={variant.name}/>))}
+      </Card>
+    </div>
+  )
+
+const Variant = ({name, match}) =>
+  (
+      <div className="key-value">
+        <div>{name}</div>
+        <div>{match}</div>
       </div>
-    )
-  }
-}
+  )
 
-class Variant extends React.Component {
-  render() {
-    return (
-        <div className="key-value">
-          <div>{this.props.name}</div>
-          <div>{this.props.match}</div>
-        </div>
-    )
-  }
-}
-
-class GenderName extends React.Component {
-  render() {
-    return (
+const GenderName = ({gender, patterns, givenNames}) =>
+    (
       <div className="gender-name">
-        <h3>{this.props.gender}</h3>
-        <p>{this.props.patterns.join(', ')}</p>
-        <p>{this.props.givenNames.join(', ')}</p>
+        <h3>{gender}</h3>
+        <p>{patterns.join(', ')}</p>
+        <p>{givenNames.join(', ')}</p>
       </div>
     )
-  }
-}
 
-class Genetics extends React.Component {
-  render() {
-    return (
+const Genetics = ({traits}) =>
+    (
       <div>
-        {
-          _.map(this.props.traits, function(trait) {
-            return(<Trait name={trait.name} key={trait.name} variants={trait.variants}/>)
-          })
-        }
+        { traits.map((trait) => (<Trait name={trait.name} key={trait.name} variants={trait.variants}/>)) }
       </div>
     )
-  }
-}
-
 module.exports = Species

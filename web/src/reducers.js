@@ -7,14 +7,16 @@ import { combineReducers } from 'redux'
 const defaultSpecies = {
   name: "",
   genetics: {},
-  genderNames: {},
 }
 
 const defaultArea = {
   name: "",
   residents: [],
 }
-function speciesReducer(state = {isFetching: false, species: defaultSpecies, area: defaultArea}, action) {
+
+const initialState = {isFetching: false, species: defaultSpecies, area: defaultArea}
+
+export default function (state = initialState, action) {
   switch (action.type) {
     case SELECT_SPECIES:
       return Object.assign({}, state, {isFetching: true})
@@ -27,8 +29,3 @@ function speciesReducer(state = {isFetching: false, species: defaultSpecies, are
       return state
   }
 }
-
-
-export const rootReducer = combineReducers( {
-  speciesReducer
-})

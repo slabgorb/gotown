@@ -8,7 +8,7 @@ import { Route } from 'react-router-dom'
 const App = (props) => {
   return   (
       <div>
-        <Area/>
+        <Species name="human"/>
       </div>
     )
 }
