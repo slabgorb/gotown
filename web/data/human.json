@@ -422,6 +422,58 @@
          ]
       },
       {
+        "name": "eyebrows",
+        "variants": [
+          {
+            "name": "straight",
+            "match":"09",
+          },
+          {
+            "name": "rounded",
+            "match":"0A",
+          },
+          {
+            "name": "arched",
+            "match":"0B",
+          },
+          {
+            "name": "steeply arched",
+            "match":"0C",
+          }
+        ]
+      },
+      {
+        "name": "face shape",
+        "variants": [
+          {
+            "name": "oval",
+            "match": "0(1|2)"
+          },
+          {
+            "name": "round",
+            "match": "0(3|4)"
+          },
+          {
+            "name": "long",
+            "match": "05"
+          },
+          {
+            "name": "square",
+            "match": "06"
+          },
+          {
+            "name": "heart",
+            "match": "07"
+          },
+          {
+            "name": "diamond",
+            "match": "08"
+          },
+
+        ]
+
+      },
+      {
          "name":"lip shape",
          "variants":[
             {
