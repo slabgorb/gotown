@@ -14,7 +14,11 @@ type Population struct {
 }
 
 type MaritalCandidate struct {
-	female, male *Being
+	a, b *Being
+}
+
+func (mc *MaritalCandidate) Pair() (*Being, *Being) {
+	return mc.a, mc.b
 }
 
 // NewPopulation initializes a Population
@@ -90,12 +94,15 @@ func (p *Population) MaritalCandidates() ([]*MaritalCandidate, error) {
 	if p.Culture == nil {
 		return nil, fmt.Errorf("no culture for population, cannot assess marital candidates")
 	}
+	beings := p.Beings()
 	// loop through the population, taking each member and looking for candidates
-	for _, m := range p.ByGender(Male) {
-		for _, f := range p.ByGender(Female) {
-
-			if p.Culture.MaritalCandidate(m, f) {
-				mc = append(mc, &MaritalCandidate{male: m, female: f})
+	for _, a := range beings {
+		for _, b := range beings {
+			if a == b {
+				continue
+			}
+			if p.Culture.MaritalCandidate(a, b) {
+				mc = append(mc, &MaritalCandidate{a: a, b: b})
 			}
 		}
 	}

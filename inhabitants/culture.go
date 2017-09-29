@@ -23,6 +23,9 @@ type maritalStrategy func(a, b *Being) bool
 type NameStrategy func(b *Being) *Name
 
 var maritalStrategies = map[string]maritalStrategy{
+	"living": func(a, b *Being) bool {
+		return a.Alive() && b.Alive()
+	},
 	"monogamous": func(a, b *Being) bool {
 		return len(a.Spouses) == 0 && len(b.Spouses) == 0
 	},

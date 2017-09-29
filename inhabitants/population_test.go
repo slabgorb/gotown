@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	. "github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/timeline"
 )
 
 func TestAging(t *testing.T) {
@@ -30,7 +31,30 @@ func TestAging(t *testing.T) {
 	}
 }
 
-func TestMaritalCandidates(t *testing.T) {}
+func TestMaritalCandidates(t *testing.T) {
+	culture := helperMockCulture(t, "italian")
+	beingFixtures := beingFixtures(t, "italian")
+	chronology := timeline.NewChronology()
+	beings := []*Being{
+		beingFixtures["adam"],
+		beingFixtures["eve"],
+	}
+	p := NewPopulation(beings, chronology, culture)
+	candidates, _ := p.MaritalCandidates()
+	a, b := candidates[0].Pair()
+	if !(a == beings[0] || b == beings[0]) || !(a == beings[1] || b == beings[1]) {
+		t.Errorf("expected adam and eve")
+	}
+	beings = []*Being{
+		beingFixtures["adam"],
+		beingFixtures["steve"],
+	}
+	p = NewPopulation(beings, chronology, culture)
+	candidates, _ = p.MaritalCandidates()
+	if len(candidates) > 0 {
+		t.Errorf("Did not expect adam and steve")
+	}
+}
 
 func TestAddAndRemove(t *testing.T) {
 	b := &Being{Species: mockSpecies}

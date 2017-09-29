@@ -58,6 +58,24 @@ func TestInheritedName(t *testing.T) {
 
 }
 
+func TestSiblings(t *testing.T) {
+	bf := beingFixtures(t, "italian")
+	bf["adam"].Marry(bf["eve"])
+	bf["adam"].Children = []*Being{bf["cain"], bf["abel"]}
+	bf["eve"].Children = []*Being{bf["cain"], bf["abel"]}
+	bf["cain"].Parents = []*Being{bf["adam"], bf["eve"]}
+	bf["abel"].Parents = []*Being{bf["adam"], bf["eve"]}
+	if bf["cain"].Siblings()[0] != bf["abel"] {
+		t.Errorf("expected cain to be abel's brother")
+	}
+	if bf["abel"].Siblings()[0] != bf["cain"] {
+		t.Errorf("expected cain to be abel's brother")
+	}
+	if !bf["abel"].IsSiblingOf(bf["cain"]) {
+		t.Errorf("expected cain to be abel's brother")
+	}
+}
+
 func TestDeath(t *testing.T) {
 	adam := &Being{}
 	if !adam.Alive() {

@@ -2,15 +2,17 @@ package inhabitants_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
 
 	. "github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/genetics"
 )
 
 var (
-	mockSpecies = NewSpecies("Northman", []Gender{Male, Female}, nil)
+	mockSpecies = NewSpecies("Human", []Gender{Male, Female}, nil)
 )
 
 type beingFixture struct {
@@ -30,17 +32,28 @@ func helperLoadBytes(t *testing.T, name string) []byte {
 	return bytes
 }
 
-func beingFixtures(t *testing.T) map[string]*Being {
+func helperMockCulture(t *testing.T, name string) *Culture {
+	data := helperLoadBytes(t, fmt.Sprintf("mock_culture_%s.json", name))
+	c := &Culture{}
+	err := json.Unmarshal(data, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c
+}
+
+func beingFixtures(t *testing.T, cultureName string) map[string]*Being {
 	var v []beingFixture
+	culture := helperMockCulture(t, cultureName)
 	beings := make(map[string]*Being)
 	data := helperLoadBytes(t, "being_fixtures.json")
-	err := json.Unmarshal(data, v)
+	err := json.Unmarshal(data, &v)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, f := range v {
 		name := NewName(f.Name)
-		beings[f.Label] = &Being{Name: name, Age: f.Age, Sex: Gender(f.Sex)}
+		beings[f.Label] = &Being{Name: name, Age: f.Age, Sex: Gender(f.Sex), Culture: culture, Chromosome: genetics.RandomChromosome(30)}
 	}
 	return beings
 }

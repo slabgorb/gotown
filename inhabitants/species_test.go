@@ -12,13 +12,13 @@ func init() {
 }
 
 func TestToString(t *testing.T) {
-	if mockSpecies.String() != "Northman" {
+	if mockSpecies.String() != "Human" {
 		t.Fail()
 	}
 }
 
 func TestGenders(t *testing.T) {
-	if mockSpecies.Name != "Northman" {
+	if mockSpecies.Name != "Human" {
 		t.Fail()
 	}
 	culture := helperMockCulture(t, "viking")

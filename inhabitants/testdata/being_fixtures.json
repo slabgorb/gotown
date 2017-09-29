@@ -9,6 +9,25 @@
     "label":"eve",
     "name":"Eve Woman",
     "age":35,
+    "sex":"female"
+  },
+  {
+    "label":"steve",
+    "name":"Steve Guy",
+    "age":35,
+    "sex":"male"
+  },
+  {
+    "label":"cain",
+    "name":"Cain Man",
+    "age":17,
+    "sex":"male"
+  },
+  {
+    "label":"abel",
+    "name":"Abel Man",
+    "age":18,
     "sex":"male"
   }
+
 ]

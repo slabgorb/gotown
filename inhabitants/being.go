@@ -34,9 +34,9 @@ func NewName(fullName string) *Name {
 	return name
 }
 
-type members []*Being
+type Members []*Being
 
-func (m members) Strings() []string {
+func (m Members) Strings() []string {
 	var out []string
 	for _, b := range m {
 		out = append(out, b.String())
@@ -44,7 +44,7 @@ func (m members) Strings() []string {
 	return out
 }
 
-func (m members) String() string {
+func (m Members) String() string {
 	return strings.Join(m.Strings(), ", ")
 }
 
@@ -52,9 +52,9 @@ type Being struct {
 	*Name      `json:"name"`
 	*Species   `json:"species"`
 	*Culture   `json:"culture"`
-	Parents    members              `json:"parents"`
-	Children   members              `json:"children"`
-	Spouses    members              `json:"spouses"`
+	Parents    Members              `json:"parents"`
+	Children   Members              `json:"children"`
+	Spouses    Members              `json:"spouses"`
 	Age        int                  `json:"age"`
 	Sex        Gender               `json:"gender"`
 	Dead       bool                 `json:"dead"`
@@ -135,6 +135,102 @@ func (b *Being) Expression() map[string]string {
 	return b.Express(*b.Species.Expression)
 }
 
+// Marry marries two beings together. Marry does not check whether the beings
+// are compatible marriage partners based on cultural settings, it is up to the
+// caller to make sure they should be candidates.
+func (b *Being) Marry(with *Being) {
+	b.Spouses = append(b.Spouses, with)
+	with.Spouses = append(with.Spouses, b)
+}
+
+// IsParentOf returns true of the receiver is the parent of the passed in being
+func (b *Being) IsParentOf(with *Being) bool {
+	for _, c := range b.Children {
+		if c == with {
+			return true
+		}
+	}
+	return false
+}
+
+// IsChildOf returns true if the receiver being is a child of the passed in
+// being
+func (b *Being) IsChildOf(with *Being) bool {
+	for _, c := range with.Children {
+		if c == b {
+			return true
+		}
+	}
+	return false
+}
+
+// Siblings gets all siblings (half and full) of the receiver
+func (b *Being) Siblings() Members {
+	children := make(map[string]*Being)
+	sibs := Members{}
+	for _, p := range b.Parents {
+		for _, c := range p.Children {
+			children[fmt.Sprintf("%p", c)] = c
+		}
+	}
+	for _, s := range children {
+		if s != b {
+			sibs = append(sibs, s)
+		}
+	}
+	return sibs
+}
+
+// Piblings returns aunts and uncles of the receiver
+func (b *Being) Piblings() Members {
+	parentSiblings := Members{}
+	for _, p := range b.Parents {
+		parentSiblings = append(parentSiblings, p.Siblings()...)
+	}
+	return parentSiblings
+}
+
+func (b *Being) Cousins() Members {
+	piblings := b.Piblings()
+	cousins := Members{}
+	for _, p := range piblings {
+		cousins = append(cousins, p.Children...)
+	}
+	return cousins
+
+}
+
+// Niblings returns nieces and nephews of the receiver
+func (b *Being) Niblings() Members {
+	siblings := b.Siblings()
+	niblings := Members{}
+	for _, s := range siblings {
+		niblings = append(niblings, s.Children...)
+	}
+	return niblings
+}
+
+// IsSiblingOf checks to see if the receiver is a sibling of the passed in being
+func (b *Being) IsSiblingOf(with *Being) bool {
+	siblings := b.Siblings()
+	for _, s := range siblings {
+		if s == with {
+			return true
+		}
+	}
+	return false
+}
+
+// IsCloseRelativeOf returns true if the receiver is a close relative of the
+// passed in being
+func (b *Being) IsCloseRelativeOf(with *Being) bool {
+	close := false
+	close = close || b.IsChildOf(with)
+	close = close || b.IsParentOf(with)
+	close = close || b.IsSiblingOf(with)
+	return close
+}
+
 // Reproduce creates new Being objects from the 'parent' beings
 func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	if with == nil && b.Sex != Asexual {
@@ -142,7 +238,7 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	}
 	child := &Being{Species: b.Species, Age: 0, Culture: b.Culture}
 
-	child.Parents = members{b, with}
+	child.Parents = Members{b, with}
 	child.Randomize()
 	b.Children = append(b.Children, child)
 	with.Children = append(with.Children, child)
@@ -150,14 +246,17 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	return b.Children, nil
 }
 
+// Die makes the being dead.
 func (b *Being) Die() {
 	b.Dead = true
 }
 
+// String returns the string representation of the being.
 func (b *Being) String() string {
 	return strings.Trim(b.Name.Display, " ")
 }
 
+// Alive returns whether this being is currently alive
 func (b *Being) Alive() bool {
 	return !b.Dead
 }
