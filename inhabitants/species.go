@@ -2,12 +2,12 @@ package inhabitants
 
 import (
 	"encoding/json"
+	"sort"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
 )
 
-// go:generate stringer -type=Gender
 type Gender string
 
 const (
@@ -22,26 +22,6 @@ func (g Gender) String() string {
 
 func (g Gender) MarshalJSON() ([]byte, error) {
 	return json.Marshal(g.String())
-}
-
-type demo struct {
-	max int
-	pct int
-}
-type demography []demo
-
-var Demographies = map[string]demography{
-	"medieval": demography{
-		demo{14, 29},
-		demo{18, 36},
-		demo{26, 50},
-		demo{31, 58},
-		demo{41, 72},
-		demo{51, 84},
-		demo{61, 93},
-		demo{71, 98},
-		demo{100, 100},
-	},
 }
 
 type Fertility struct {
@@ -94,7 +74,15 @@ func (s *Species) RandomAge(slot int) int {
 		slot = randomizer.Intn(101)
 	}
 	min := 0
-	for _, dmo := range s.demog {
+	keys := make([]int, len(s.demog))
+	i := 0
+	for k, _ := range s.demog {
+		keys[i] = int(k)
+		i++
+	}
+	sort.Ints(keys)
+	for _, k := range keys {
+		dmo := s.demog[DemographyBucket(k)]
 		if dmo.pct >= slot {
 			return randomizer.Intn(dmo.max-min) + min
 		}
