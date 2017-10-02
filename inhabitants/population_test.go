@@ -45,6 +45,11 @@ func TestMaritalCandidates(t *testing.T) {
 	if !(a == beings[0] || b == beings[0]) || !(a == beings[1] || b == beings[1]) {
 		t.Errorf("expected adam and eve")
 	}
+	beings[1].Die()
+	candidates, _ = p.MaritalCandidates()
+	if len(candidates) > 0 {
+		t.Errorf("Did not expect adam and dead eve")
+	}
 	beings = []*Being{
 		beingFixtures["adam"],
 		beingFixtures["steve"],

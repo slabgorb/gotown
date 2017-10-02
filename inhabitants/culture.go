@@ -35,6 +35,9 @@ var maritalStrategies = map[string]maritalStrategy{
 	"homosexual": func(a, b *Being) bool {
 		return a.Sex == b.Sex
 	},
+	"unrelated": func(a, b *Being) bool {
+		return !a.IsCloseRelativeOf(b)
+	},
 }
 
 func (c *Culture) UnmarshalJSON(data []byte) error {
