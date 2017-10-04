@@ -1,13 +1,8 @@
 package genetics
 
-import (
-	"math/rand"
-	"time"
+import "github.com/slabgorb/gotown/random"
 
-	"github.com/slabgorb/gotown/random"
-)
-
-var randomizer random.Generator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
+var randomizer random.Generator = random.Random
 
 func SetRandomizer(g random.Generator) {
 	randomizer = g

@@ -6,9 +6,9 @@ import (
 )
 
 type Habitation struct {
-	Residents *inhabitants.Population `json:"residents"`
-	Name      string                  `json:"name"`
-	*words.Namer
+	Residents    *inhabitants.Population `json:"residents"`
+	Name         string                  `json:"name"`
+	*words.Namer `json:"-"`
 }
 
 func NewHabitation() *Habitation {

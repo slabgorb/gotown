@@ -1,14 +1,11 @@
 package words
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/jinzhu/inflection"
 	"github.com/slabgorb/gotown/random"
 )
 
-var randomizer random.Generator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
+var randomizer random.Generator = random.Random
 
 func SetRandomizer(g random.Generator) {
 	randomizer = g

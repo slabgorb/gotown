@@ -133,16 +133,9 @@ func loadHuman() (*genetics.Expression, error) {
 }
 
 func townHandler(c echo.Context) error {
-	// type townRequest struct {
-	// 	size int `form:"size" query:"size"`
-	// }
-	// tr := townRequest{}
-	// if err := c.Bind(tr); err != nil {
-	// 	return err
-	// }
 	expression, err := loadHuman()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	culture, err := loadCulture(c.QueryParam("culture"))
 	if err != nil {
@@ -150,12 +143,18 @@ func townHandler(c echo.Context) error {
 	}
 	s := inhabitants.NewSpecies("Northman", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, expression)
 	area := locations.NewArea(locations.Town, nil, nil)
-	for i := 0; i < 1000; i++ {
-		being := inhabitants.Being{Species: s, Culture: culture}
-		being.Randomize()
-		area.Add(&being)
+	count := 10000
+	var wg sync.WaitGroup
+	wg.Add(count)
+	for i := 0; i < count; i++ {
+		go func(wg *sync.WaitGroup) {
+			being := inhabitants.Being{Species: s, Culture: culture}
+			being.Randomize()
+			area.Add(&being)
+			wg.Done()
+		}(&wg)
 	}
-
+	wg.Wait()
 	return c.JSON(http.StatusOK, area)
 
 }

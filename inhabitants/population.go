@@ -2,12 +2,14 @@ package inhabitants
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/slabgorb/gotown/timeline"
 )
 
 // Population is a set of Being
 type Population struct {
+	mux    sync.Mutex
 	beings map[*Being]bool
 	*timeline.Chronology
 	*Culture
@@ -59,21 +61,27 @@ func (p *Population) Len() int {
 
 // Add adds a being to the population and returns whether it was actually added.
 func (p *Population) Add(b *Being) bool {
+	p.mux.Lock()
 	_, found := p.beings[b]
 	p.beings[b] = true
+	p.mux.Unlock()
 	return !found
 }
 
 // Get returns whether this being is in the Population
 func (p *Population) Get(b *Being) bool {
+	p.mux.Lock()
 	_, found := p.beings[b]
+	p.mux.Unlock()
 	return found
 }
 
 // Remove removes a being from the population
 func (p *Population) Remove(b *Being) bool {
+	p.mux.Lock()
 	_, found := p.beings[b]
 	delete(p.beings, b)
+	p.mux.Unlock()
 	return found
 }
 

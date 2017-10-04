@@ -9,11 +9,11 @@ import (
 
 type Area struct {
 	*Habitation
-	Size  AreaSize
-	Ruler *inhabitants.Being
+	Size  AreaSize           `json:"size"`
+	Ruler *inhabitants.Being `json:"ruler"`
 	Graveyard
-	Location   *Area
-	Enclosures map[string]*Area
+	Location   *Area            `json:"location"`
+	Enclosures map[string]*Area `json:"enclosures"`
 }
 
 func NewArea(size AreaSize, ruler *inhabitants.Being, location *Area) *Area {
