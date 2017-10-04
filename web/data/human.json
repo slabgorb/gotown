@@ -426,19 +426,19 @@
         "variants": [
           {
             "name": "straight",
-            "match":"09",
+            "match":"09"
           },
           {
             "name": "rounded",
-            "match":"0A",
+            "match":"0A"
           },
           {
             "name": "arched",
-            "match":"0B",
+            "match":"0B"
           },
           {
             "name": "steeply arched",
-            "match":"0C",
+            "match":"0C"
           }
         ]
       },
@@ -468,7 +468,7 @@
           {
             "name": "diamond",
             "match": "08"
-          },
+          }
 
         ]
 
