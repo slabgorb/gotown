@@ -141,7 +141,7 @@ func townHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	s := inhabitants.NewSpecies("Northman", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, expression)
+	s := inhabitants.NewSpecies("Human", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, expression)
 	area := locations.NewArea(locations.Town, nil, nil)
 	count := 10000
 	var wg sync.WaitGroup

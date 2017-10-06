@@ -1,6 +1,7 @@
 package inhabitants
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -13,6 +14,16 @@ type Population struct {
 	beings map[*Being]bool
 	*timeline.Chronology
 	*Culture
+}
+
+func (p *Population) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Beings     []*Being             `json:"residents"`
+		Chronology *timeline.Chronology `json:"chronology"`
+	}{
+		Beings:     p.Beings(),
+		Chronology: p.Chronology,
+	})
 }
 
 type MaritalCandidate struct {
