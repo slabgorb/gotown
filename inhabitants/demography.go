@@ -18,11 +18,11 @@ type demo struct {
 	max int
 	pct int
 }
-type demography map[DemographyBucket]demo
+type Demography map[DemographyBucket]demo
 
 // Demographies models the population curve, as well as providing information into fertility, age-related changes, etc.
-var Demographies = map[string]demography{
-	"medieval": demography{
+var Demographies = map[string]Demography{
+	"human": Demography{
 		Child:      demo{14, 29},
 		YoungAdult: demo{18, 36},
 		EarlyAdult: demo{26, 50},
