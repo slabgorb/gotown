@@ -2,6 +2,8 @@ package inhabitants
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 
 	"github.com/slabgorb/gotown/words"
 )
@@ -38,6 +40,18 @@ var maritalStrategies = map[string]maritalStrategy{
 	"unrelated": func(a, b *Being) bool {
 		return !a.IsCloseRelativeOf(b)
 	},
+}
+
+func (c *Culture) Load(r io.Reader) error {
+	err := json.NewDecoder(r).Decode(&c)
+	if err != nil {
+		return fmt.Errorf("could not parse json file")
+	}
+	return nil
+}
+
+func (c *Culture) String() string {
+	return fmt.Sprintf("%s", c.Name)
 }
 
 func (c *Culture) UnmarshalJSON(data []byte) error {

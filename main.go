@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -90,9 +89,8 @@ func loadCulture(name string) (*inhabitants.Culture, error) {
 		return nil, fmt.Errorf("could not load internal data file")
 	}
 	culture := &inhabitants.Culture{}
-	err = json.NewDecoder(r).Decode(&culture)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse json file")
+	if err = culture.Load(r); err != nil {
+		return nil, err
 	}
 	return culture, nil
 }
