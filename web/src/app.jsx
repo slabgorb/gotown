@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from 'components/App.jsx'
 import { dispatch, createStore } from 'redux';
 import {Provider} from 'react-redux';
-import { rootReducer } from './reducers.js'
+import rootReducer from './reducers'
 
 
 let store = createStore(rootReducer)

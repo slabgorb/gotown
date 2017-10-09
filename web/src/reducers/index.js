@@ -2,8 +2,7 @@ import {
   SELECT_SPECIES,
   RECEIVE_SPECIES,
   setSpecies
-} from './actions'
-import { combineReducers } from 'redux'
+} from '../actions'
 const defaultSpecies = {
   name: "",
   genetics: {},
@@ -16,7 +15,7 @@ const defaultArea = {
 
 const initialState = {isFetching: false, species: defaultSpecies, area: defaultArea}
 
-export default function (state = initialState, action) {
+function appReducer(state = initialState, action) {
   switch (action.type) {
     case SELECT_SPECIES:
       return Object.assign({}, state, {isFetching: true})
@@ -29,3 +28,5 @@ export default function (state = initialState, action) {
       return state
   }
 }
+
+export default appReducer;

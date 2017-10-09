@@ -67,7 +67,7 @@ const Trait = (props) =>
   (
     <div>
       <Card>
-        <h3>{this.props.name}</h3>
+        <h3>{props.name}</h3>
         {props.variants.map((variant) => (<Variant name={variant.name} match={variant.match} key={variant.name}/>))}
       </Card>
     </div>
