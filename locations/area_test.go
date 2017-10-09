@@ -3,6 +3,7 @@ package locations_test
 import (
 	"testing"
 
+	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/locations"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/words"
@@ -36,6 +37,19 @@ func TestAddTo(t *testing.T) {
 	}
 	if ok := a1.AttachTo(a2); ok {
 		t.Error("Should not allow adding in a circular relationship")
+	}
+
+}
+
+func BenchmarkPop(b *testing.B) {
+	culture := helperMockCulture(b, "italian")
+
+	s := inhabitants.NewSpecies("Human", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, nil)
+	area := NewArea(Town, nil, nil)
+	for i := 0; i < b.N; i++ {
+		being := inhabitants.Being{Species: s, Culture: culture}
+		being.Randomize()
+		area.Add(&being)
 	}
 
 }

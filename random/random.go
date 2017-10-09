@@ -30,7 +30,7 @@ func (m MockRandom) Float64() float64 {
 	return 0.40000
 }
 
-var Random *rand.Rand // your private random
+var Random *rand.Rand
 
 func init() {
 	Random = rand.New(
