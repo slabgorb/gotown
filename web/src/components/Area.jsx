@@ -69,7 +69,7 @@ class Area extends React.Component {
 
   }
   componentDidMount() {
-    axios.get("/town")
+    axios.get("/town?culture=italian")
       .then(res => {
         const area = res.data
         this.setState({area:area, residents: area.residents})
