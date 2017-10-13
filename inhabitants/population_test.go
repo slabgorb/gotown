@@ -9,6 +9,7 @@ import (
 )
 
 func TestAging(t *testing.T) {
+	mockSpecies := helperMockSpecies(t)
 	p := NewPopulation([]*Being{}, nil, nil)
 	count := 10
 	beings := make([]*Being, count)
@@ -62,6 +63,7 @@ func TestMaritalCandidates(t *testing.T) {
 }
 
 func TestAddAndRemove(t *testing.T) {
+	mockSpecies := helperMockSpecies(t)
 	b := &Being{Species: mockSpecies}
 	p := NewPopulation([]*Being{b}, nil, nil)
 	p.Remove(b)

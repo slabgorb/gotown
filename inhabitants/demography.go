@@ -14,23 +14,23 @@ const (
 	Ancient
 )
 
-type demo struct {
-	max int
-	pct int
+type Demo struct {
+	MaxAge            int `json:"max_age"`
+	CumulativePercent int `json:"cumulative_percent"`
 }
-type Demography map[DemographyBucket]demo
 
-// Demographies models the population curve, as well as providing information into fertility, age-related changes, etc.
-var Demographies = map[string]Demography{
-	"human": Demography{
-		Child:      demo{14, 29},
-		YoungAdult: demo{18, 36},
-		EarlyAdult: demo{26, 50},
-		Adult:      demo{31, 58},
-		MiddleAge:  demo{41, 72},
-		LateAdult:  demo{51, 84},
-		Senior:     demo{61, 93},
-		Elderly:    demo{71, 98},
-		Ancient:    demo{100, 100},
-	},
-}
+//
+// // Demographies models the population curve, as well as providing information into fertility, age-related changes, etc.
+// var Demographies = map[string]Demography{
+// 	"human": Demography{
+// 		Child:      Demo{14, 29},
+// 		YoungAdult: Demo{18, 36},
+// 		EarlyAdult: Demo{26, 50},
+// 		Adult:      Demo{31, 58},
+// 		MiddleAge:  Demo{41, 72},
+// 		LateAdult:  Demo{51, 84},
+// 		Senior:     Demo{61, 93},
+// 		Elderly:    Demo{71, 98},
+// 		Ancient:    Demo{100, 100},
+// 	},
+// }

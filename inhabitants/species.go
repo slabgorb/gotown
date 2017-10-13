@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
-	"github.com/slabgorb/gotown/random"
 )
 
 type Gender string
@@ -24,6 +23,16 @@ func (g Gender) MarshalJSON() ([]byte, error) {
 	return json.Marshal(g.String())
 }
 
+func (g *Gender) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*g = Gender(s)
+	return nil
+
+}
+
 type Fertility struct {
 	Start int
 	End   int
@@ -31,33 +40,40 @@ type Fertility struct {
 
 // Species represents a species or a race.
 type Species struct {
-	Name          string                       `json:"name"`
-	Genders       []Gender                     `json:"-"`
-	MultipleBirth func(g random.Generator) int `json:"-"`
-	Expression    *genetics.Expression         `json:"-"`
-	randomizer    random.Generator
-	Demography    `json:"demography"`
+	Name       string                    `json:"name"`
+	Genders    []Gender                  `json:"genders"`
+	Expression *genetics.Expression      `json:"expression"`
+	Demography map[DemographyBucket]Demo `json:"demography"`
+}
+
+func (s *Species) UnmarshalJSON(data []byte) error {
+	aux := &struct {
+		Name       string               `json:"name"`
+		Genders    []Gender             `json:"genders"`
+		Expression *genetics.Expression `json:"expression"`
+		DemoArray  []Demo               `json:"demography"`
+	}{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	s.Name = aux.Name
+	s.Genders = aux.Genders
+	s.Expression = aux.Expression
+	d := make(map[DemographyBucket]Demo)
+	for i, a := range aux.DemoArray {
+		d[DemographyBucket(i)] = a
+	}
+	s.Demography = d
+	return nil
 }
 
 // NewSpecies creates and initializes a *Species
-func NewSpecies(name string, genders []Gender, e *genetics.Expression) *Species {
+func NewSpecies(name string, genders []Gender, e *genetics.Expression, d map[DemographyBucket]Demo) *Species {
 	return &Species{
 		Name:       name,
 		Genders:    genders,
 		Expression: e,
-		Demography: Demographies["human"],
-		MultipleBirth: func(g random.Generator) int {
-			if g.Float64() < 0.05 {
-				return 4
-			}
-			if g.Float64() < 0.1 {
-				return 3
-			}
-			if g.Float64() < 0.3 {
-				return 2
-			}
-			return 1
-		},
+		Demography: d,
 	}
 }
 
@@ -83,10 +99,10 @@ func (s *Species) RandomAge(slot int) int {
 	sort.Ints(keys)
 	for _, k := range keys {
 		dmo := s.Demography[DemographyBucket(k)]
-		if dmo.pct >= slot {
-			return randomizer.Intn(dmo.max-min) + min
+		if dmo.CumulativePercent >= slot {
+			return randomizer.Intn(dmo.MaxAge-min) + min
 		}
-		min = dmo.max
+		min = dmo.MaxAge
 	}
 	return 0
 }

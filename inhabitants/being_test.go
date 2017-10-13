@@ -13,7 +13,7 @@ func init() {
 }
 
 func TestName(t *testing.T) {
-	species := NewSpecies("Northman", []Gender{Male, Female}, nil)
+	species := helperMockSpecies(t)
 	culture := helperMockCulture(t, "viking")
 	if culture == nil {
 		t.Error("culture not loaded")
@@ -31,7 +31,7 @@ func TestName(t *testing.T) {
 }
 
 func TestInheritedName(t *testing.T) {
-	species := NewSpecies("Northman", []Gender{Male, Female}, nil)
+	species := helperMockSpecies(t)
 	culture := helperMockCulture(t, "viking")
 	m := &Being{Species: species, Sex: Female, Culture: culture}
 	m.Name = m.Culture.GetName(m)

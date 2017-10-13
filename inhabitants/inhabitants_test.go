@@ -11,10 +11,6 @@ import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 )
 
-var (
-	mockSpecies = NewSpecies("Human", []Gender{Male, Female}, nil)
-)
-
 type beingFixture struct {
 	Label   string `json:"label"`
 	Name    string `json:"name"`
@@ -40,6 +36,16 @@ func helperMockCulture(t *testing.T, name string) *Culture {
 		t.Fatal(err)
 	}
 	return c
+}
+
+func helperMockSpecies(t *testing.T) *Species {
+	data := helperLoadBytes(t, "mock_species.json")
+	s := &Species{}
+	err := json.Unmarshal(data, s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return s
 }
 
 func beingFixtures(t *testing.T, cultureName string) map[string]*Being {

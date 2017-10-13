@@ -12,12 +12,14 @@ func init() {
 }
 
 func TestToString(t *testing.T) {
+	mockSpecies := helperMockSpecies(t)
 	if mockSpecies.String() != "Human" {
-		t.Fail()
+		t.Error(mockSpecies.String())
 	}
 }
 
 func TestGenders(t *testing.T) {
+	mockSpecies := helperMockSpecies(t)
 	if mockSpecies.Name != "Human" {
 		t.Fail()
 	}
@@ -32,6 +34,7 @@ func TestGenders(t *testing.T) {
 }
 
 func TestRandomAge(t *testing.T) {
+	mockSpecies := helperMockSpecies(t)
 	testCases := []struct {
 		in, out int
 	}{

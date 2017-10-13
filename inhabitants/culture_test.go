@@ -15,6 +15,7 @@ func TestUnmarshal(t *testing.T) {
 
 func TestMaritalStrategy(t *testing.T) {
 	c := helperMockCulture(t, "italian")
+	mockSpecies := helperMockSpecies(t)
 	testCases := []struct {
 		name     string
 		a        *Being
