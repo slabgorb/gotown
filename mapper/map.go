@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/pzsz/voronoi"
+	vu "github.com/pzsz/voronoi/utils"
 	"github.com/slabgorb/gotown/random"
 )
 
@@ -14,7 +15,7 @@ func SetRandomizer(g random.Generator) {
 	randomizer = g
 }
 
-func VoronoiDiagram(x, y int, pointCount int) *voronoi.Diagram {
+func VoronoiDiagram(x, y int, pointCount int, relaxation int) *voronoi.Diagram {
 	sites := []voronoi.Vertex{}
 	for i := 0; i < pointCount; i++ {
 		vx := randomizer.Float64() * float64(x)
@@ -22,5 +23,11 @@ func VoronoiDiagram(x, y int, pointCount int) *voronoi.Diagram {
 		sites = append(sites, voronoi.Vertex{X: vx, Y: vy})
 	}
 	bbox := voronoi.NewBBox(0, float64(x), 0, float64(y))
-	return voronoi.ComputeDiagram(sites, bbox, true)
+	d := voronoi.ComputeDiagram(sites, bbox, true)
+	for i := 0; i < relaxation; i++ {
+		v := vu.LloydRelaxation(d.Cells)
+		d = voronoi.ComputeDiagram(v, bbox, true)
+	}
+	return d
+
 }

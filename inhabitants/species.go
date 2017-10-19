@@ -2,6 +2,7 @@ package inhabitants
 
 import (
 	"encoding/json"
+	"io"
 	"sort"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
@@ -65,6 +66,11 @@ func (s *Species) UnmarshalJSON(data []byte) error {
 	}
 	s.Demography = d
 	return nil
+}
+func LoadSpecies(r io.Reader) (Species, error) {
+	s := Species{}
+	err := json.NewDecoder(r).Decode(&s)
+	return s, err
 }
 
 // NewSpecies creates and initializes a *Species

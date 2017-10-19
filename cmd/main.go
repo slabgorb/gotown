@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"text/tabwriter"
 
 	"github.com/abiosoft/ishell"
 	"github.com/slabgorb/gotown/inhabitants"
-	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/locations"
 )
 
@@ -50,25 +50,24 @@ func status(c *ishell.Context) {
 }
 
 func loadSpecies(c *ishell.Context) {
-	name := c.Args[0]
-	r, err := os.Open("../web/data/human.json")
+	name := strings.ToLower(c.Args[0])
+	r, err := os.Open(fmt.Sprintf("../web/data/%s.json", name))
 	if err != nil {
 		c.Println(err)
 	}
-	expression, err := genetics.LoadExpression(r)
+	currentSpecies, err := inhabitants.LoadSpecies(r)
 	if err != nil {
 		c.Println(err)
 	}
-	currentSpecies = &inhabitants.Species{
-		Name:       name,
-		Expression: &expression,
-		Genders:    []inhabitants.Gender{inhabitants.Male, inhabitants.Female},
-		Demography: inhabitants.Demographies[name],
-	}
+
 	c.Println(currentSpecies)
 }
 
 func loadCulture(c *ishell.Context) {
+	if len(c.Args) < 1 {
+		c.Println("Please specify a name")
+		return
+	}
 	name := c.Args[0]
 	r, err := os.Open(fmt.Sprintf("../web/data/%s.json", name))
 	if err != nil {
