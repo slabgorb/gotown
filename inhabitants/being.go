@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/slabgorb/gotown/events"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/timeline"
 )
 
 type Name struct {
@@ -49,16 +51,16 @@ func (m Members) String() string {
 }
 
 type Being struct {
-	*Name      `json:"name"`
-	*Species   `json:"species"`
-	*Culture   `json:"culture"`
-	Parents    Members              `json:"parents"`
+	*Name
+	*Species
+	*Culture
+	Parents    Members
 	Children   Members              `json:"children"`
 	Spouses    Members              `json:"spouses"`
-	Age        int                  `json:"age"`
 	Sex        Gender               `json:"gender"`
 	Dead       bool                 `json:"dead"`
 	Chromosome *genetics.Chromosome `json:"chromosome"`
+	Chronology *timeline.Chronology
 }
 
 func (b *Being) genderedParent(gender Gender) *Being {
@@ -80,15 +82,17 @@ func (b *Being) MarshalJSON() ([]byte, error) {
 		Children   []string          `json:"children"`
 		Spouses    []string          `json:"spouses"`
 		Living     bool              `json:"alive"`
+		Events     []events.Event    `json:"events"`
 	}{
 		Expression: b.Expression(),
-		Age:        b.Age,
+		Age:        b.Age(),
 		Sex:        b.Sex.String(),
 		Species:    b.Species.String(),
 		Parents:    b.Parents.Strings(),
 		Children:   b.Children.Strings(),
 		Spouses:    b.Spouses.Strings(),
 		Living:     !b.Dead,
+		Events:     b.Chronology.Events,
 	})
 }
 
@@ -112,7 +116,7 @@ func (b *Being) Randomize() error {
 }
 
 func (b *Being) RandomizeAge(slot int) {
-	b.Age = b.Species.RandomAge(slot)
+	b.Chronology.CurrentYear = b.Species.RandomAge(slot)
 }
 
 func (b *Being) RandomizeGender() {
@@ -141,6 +145,9 @@ func (b *Being) Expression() map[string]string {
 func (b *Being) Marry(with *Being) {
 	b.Spouses = append(b.Spouses, with)
 	with.Spouses = append(with.Spouses, b)
+	b.Chronology.AddEvent(fmt.Sprintf("%s got married to %s", b.String(), with.String()))
+	with.Chronology.AddEvent(fmt.Sprintf("%s got married to %s", with.String(), b.String()))
+
 }
 
 // IsParentOf returns true of the receiver is the parent of the passed in being
@@ -236,7 +243,7 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	if with == nil && b.Sex != Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	child := &Being{Species: b.Species, Age: 0, Culture: b.Culture}
+	child := &Being{Species: b.Species, Chronology: timeline.NewChronology(), Culture: b.Culture}
 
 	child.Parents = Members{b, with}
 	child.Randomize()
@@ -244,6 +251,10 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	with.Children = append(with.Children, child)
 
 	return b.Children, nil
+}
+
+func (b *Being) Age() int {
+	return b.Chronology.CurrentYear
 }
 
 // Die makes the being dead.

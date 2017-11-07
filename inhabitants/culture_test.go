@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	. "github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/timeline"
 )
 
 func TestUnmarshal(t *testing.T) {
@@ -24,20 +25,20 @@ func TestMaritalStrategy(t *testing.T) {
 	}{
 		{
 			name:     "usual",
-			a:        &Being{Species: mockSpecies, Age: 20, Sex: Male},
-			b:        &Being{Species: mockSpecies, Age: 19, Sex: Female},
+			a:        &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: 20}, Sex: Male},
+			b:        &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: 19}, Sex: Female},
 			expected: true,
 		},
 		{
 			name:     "hetero only for this culture (yes, sorry)",
-			a:        &Being{Species: mockSpecies, Age: 20, Sex: Male},
-			b:        &Being{Species: mockSpecies, Age: 19, Sex: Male},
+			a:        &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: 20}, Sex: Male},
+			b:        &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: 19}, Sex: Male},
 			expected: false,
 		},
 		{
 			name:     "no bigamy",
-			a:        &Being{Species: mockSpecies, Age: 20, Sex: Male, Spouses: []*Being{&Being{}}},
-			b:        &Being{Species: mockSpecies, Age: 19, Sex: Female},
+			a:        &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: 20}, Sex: Male, Spouses: []*Being{&Being{}}},
+			b:        &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: 29}, Sex: Female},
 			expected: false,
 		},
 	}

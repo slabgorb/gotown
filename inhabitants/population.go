@@ -61,7 +61,7 @@ func (p *Population) Beings() []*Being {
 // Age ages all the beings in this population
 func (p *Population) Age() {
 	for b := range p.beings {
-		b.Age++
+		b.Chronology.Tick()
 	}
 }
 

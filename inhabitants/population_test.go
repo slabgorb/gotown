@@ -14,13 +14,13 @@ func TestAging(t *testing.T) {
 	count := 10
 	beings := make([]*Being, count)
 	for i := 0; i < count; i++ {
-		beings[i] = &Being{Species: mockSpecies, Age: i}
+		beings[i] = &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: i}}
 		p.Add(beings[i])
 	}
 	p.Age()
 	ages := []int{}
 	for _, b := range p.Beings() {
-		ages = append(ages, b.Age)
+		ages = append(ages, b.Age())
 
 	}
 	sort.Ints(ages)
