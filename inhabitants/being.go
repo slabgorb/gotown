@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/slabgorb/gotown/events"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/timeline"
 )
@@ -75,14 +74,14 @@ func (b *Being) genderedParent(gender Gender) *Being {
 func (b *Being) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		Expression map[string]string `json:"expression"`
-		Age        int               `json"age"`
+		Age        int               `json:"age"`
 		Sex        string            `json:"sex"`
 		Species    string            `json:"species"`
 		Parents    []string          `json:"parents"`
 		Children   []string          `json:"children"`
 		Spouses    []string          `json:"spouses"`
 		Living     bool              `json:"alive"`
-		Events     []events.Event    `json:"events"`
+		Events     []timeline.Event  `json:"events"`
 	}{
 		Expression: b.Expression(),
 		Age:        b.Age(),
@@ -249,7 +248,8 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	child.Randomize()
 	b.Children = append(b.Children, child)
 	with.Children = append(with.Children, child)
-
+	b.Chronology.AddEvent(fmt.Sprintf("%s had a child %s with %s", b, child, with))
+	with.Chronology.AddEvent(fmt.Sprintf("%s had a child %s with %s", with, child, b))
 	return b.Children, nil
 }
 
@@ -258,8 +258,13 @@ func (b *Being) Age() int {
 }
 
 // Die makes the being dead.
-func (b *Being) Die() {
+func (b *Being) Die(explanation ...string) {
+	if len(explanation) == 0 {
+		explanation = append(explanation, "unknown causes")
+	}
 	b.Dead = true
+	b.Chronology.AddEvent(fmt.Sprintf("Died from %s", explanation[0]))
+	b.Chronology.Freeze()
 }
 
 // String returns the string representation of the being.

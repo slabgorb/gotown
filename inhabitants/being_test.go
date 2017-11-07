@@ -5,6 +5,7 @@ import (
 
 	. "github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/random"
+	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -33,9 +34,9 @@ func TestName(t *testing.T) {
 func TestInheritedName(t *testing.T) {
 	species := helperMockSpecies(t)
 	culture := helperMockCulture(t, "viking")
-	m := &Being{Species: species, Sex: Female, Culture: culture}
+	m := &Being{Species: species, Sex: Female, Culture: culture, Chronology: timeline.NewChronology()}
 	m.Name = m.Culture.GetName(m)
-	f := &Being{Species: species, Sex: Male, Culture: culture}
+	f := &Being{Species: species, Sex: Male, Culture: culture, Chronology: timeline.NewChronology()}
 	f.Name = f.Culture.GetName(f)
 	//runtime.Breakpoint()
 	children, err := f.Reproduce(m)
@@ -77,12 +78,15 @@ func TestSiblings(t *testing.T) {
 }
 
 func TestDeath(t *testing.T) {
-	adam := &Being{}
+	adam := &Being{Chronology: timeline.NewChronology()}
 	if !adam.Alive() {
 		t.Fail()
 	}
 	adam.Die()
 	if adam.Alive() {
+		t.Fail()
+	}
+	if len(adam.Chronology.Events) > 1 {
 		t.Fail()
 	}
 
