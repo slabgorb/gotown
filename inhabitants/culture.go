@@ -37,6 +37,23 @@ var maritalStrategies = map[string]maritalStrategy{
 	"homosexual": func(a, b *Being) bool {
 		return a.Sex == b.Sex
 	},
+	"close age male older": func(a, b *Being) bool {
+		// divide by 2 add 7
+		if a.Sex == Gender("male") {
+			return (a.Age/2)+7 < b.Age && a.Age >= b.Age
+		}
+		return (b.Age/2)+7 < a.Age && b.Age >= a.Age
+	},
+	"close age female older": func(a, b *Being) bool {
+		// divide by 2 add 7
+		if a.Sex == Gender("female") {
+			return (a.Age/2)+7 < b.Age && a.Age >= b.Age
+		}
+		return (b.Age/2)+7 < a.Age && b.Age >= a.Age
+	},
+	"close age": func(a, b *Being) bool {
+		return (a.Age/2)+7 < b.Age && (b.Age/2)+7 < a.Age
+	},
 	"unrelated": func(a, b *Being) bool {
 		return !a.IsCloseRelativeOf(b)
 	},
