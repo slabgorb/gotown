@@ -32,6 +32,24 @@ func TestAging(t *testing.T) {
 	}
 }
 
+func TestReproductionCandidates(t *testing.T) {
+	culture := helperMockCulture(t, "italian")
+	beingFixtures := beingFixtures(t, "italian")
+	chronology := timeline.NewChronology()
+	beings := []*Being{
+		beingFixtures["adam"],
+		beingFixtures["eve"],
+		beingFixtures["martha"],
+	}
+	beingFixtures["eve"].Marry(beingFixtures["adam"])
+	p := NewPopulation(beings, chronology, culture)
+	candidates := p.ReproductionCandidates()
+	if len(candidates) != 2 {
+		t.Fail()
+	}
+
+}
+
 func TestMaritalCandidates(t *testing.T) {
 	culture := helperMockCulture(t, "italian")
 	beingFixtures := beingFixtures(t, "italian")

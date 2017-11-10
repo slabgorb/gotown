@@ -30,6 +30,11 @@ type MaritalCandidate struct {
 	a, b *Being
 }
 
+type ReproductionCandidate struct {
+	b     *Being
+	score float64
+}
+
 func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 	return mc.a, mc.b
 }
@@ -97,17 +102,37 @@ func (p *Population) Remove(b *Being) bool {
 }
 
 func (p Population) ByGender(g Gender) []*Being {
-	out := make([]*Being, p.Len())
-	i := 0
+	out := []*Being{}
 	for b := range p.beings {
 		if b.Sex == g {
-			out[i] = b
-			i++
+			out = append(out, b)
 		}
 	}
 	return out
 }
 
+// ReproductionCandidates scans the population for potential candidates for
+// reproduction.
+func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
+	candidates := []*ReproductionCandidate{}
+
+	for _, b := range p.ByGender(Gender("female")) {
+		maxAge := b.Species.Demography[Adult].MaxAge
+		minAge := b.Species.Demography[Child].MaxAge + 1
+		if b.Age() > maxAge || b.Age() < minAge {
+			continue
+		}
+		score := 0.05
+		if b.Spouses != nil && len(b.Spouses) > 0 {
+			score += 0.05
+		}
+		candidates = append(candidates, &ReproductionCandidate{b: b, score: score})
+	}
+	return candidates
+}
+
+// MaritalCandidates scans the population for potential candidates for marrying
+// one another.
 func (p *Population) MaritalCandidates() ([]*MaritalCandidate, error) {
 	mc := []*MaritalCandidate{}
 	if p.Culture == nil {

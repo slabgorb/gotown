@@ -54,13 +54,14 @@ func beingFixtures(t *testing.T, cultureName string) map[string]*Being {
 	culture := helperMockCulture(t, cultureName)
 	beings := make(map[string]*Being)
 	data := helperLoadBytes(t, "being_fixtures.json")
+	species := helperMockSpecies(t)
 	err := json.Unmarshal(data, &v)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, f := range v {
 		name := NewName(f.Name)
-		beings[f.Label] = &Being{Name: name, Chronology: &timeline.Chronology{CurrentYear: f.Age}, Sex: Gender(f.Sex), Culture: culture, Chromosome: genetics.RandomChromosome(30)}
+		beings[f.Label] = &Being{Name: name, Species: species, Chronology: &timeline.Chronology{CurrentYear: f.Age}, Sex: Gender(f.Sex), Culture: culture, Chromosome: genetics.RandomChromosome(30)}
 	}
 	return beings
 }

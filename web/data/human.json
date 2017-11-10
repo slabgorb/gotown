@@ -488,6 +488,35 @@
 
       },
       {
+        "name":"skin color",
+        "variants": [
+          {
+            "name":"pale",
+            "match":"d(0|f)"
+          },
+          {
+            "name":"dark",
+            "match":"d(7|8)",
+          },
+          {
+            "name":"light",
+            "match":"d(8|9)",
+          },
+          {
+            "name":"olive",
+            "match":"d(a|b)",
+          },
+          {
+            "name":"very dark",
+            "match":"d(c|d)",
+          },
+          {
+            "name":"albino",
+            "match":"d00",
+          },
+        ]
+      },
+      {
         "name":"lip shape",
         "variants":[
           {
