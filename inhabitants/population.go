@@ -11,7 +11,7 @@ import (
 // Population is a set of Being
 type Population struct {
 	mux    sync.Mutex
-	beings map[*Being]bool
+	beings map[*Being]struct{}
 	*timeline.Chronology
 	*Culture
 }
@@ -27,7 +27,7 @@ func (p *Population) MarshalJSON() ([]byte, error) {
 }
 
 type MaritalCandidate struct {
-	a, b *Being
+	male, female *Being
 }
 
 type ReproductionCandidate struct {
@@ -36,7 +36,7 @@ type ReproductionCandidate struct {
 }
 
 func (mc *MaritalCandidate) Pair() (*Being, *Being) {
-	return mc.a, mc.b
+	return mc.male, mc.female
 }
 
 // NewPopulation initializes a Population
@@ -45,7 +45,7 @@ func NewPopulation(beings []*Being, chronology *timeline.Chronology, culture *Cu
 	if chronology == nil {
 		p.Chronology = timeline.NewChronology()
 	}
-	p.beings = make(map[*Being]bool)
+	p.beings = make(map[*Being]struct{})
 	for _, b := range beings {
 		p.Add(b)
 	}
@@ -79,7 +79,7 @@ func (p *Population) Len() int {
 func (p *Population) Add(b *Being) bool {
 	p.mux.Lock()
 	_, found := p.beings[b]
-	p.beings[b] = true
+	p.beings[b] = struct{}{}
 	p.mux.Unlock()
 	return !found
 }
@@ -134,21 +134,28 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 // MaritalCandidates scans the population for potential candidates for marrying
 // one another.
 func (p *Population) MaritalCandidates() ([]*MaritalCandidate, error) {
-	mc := []*MaritalCandidate{}
+	mc := make(map[MaritalCandidate]bool)
 	if p.Culture == nil {
 		return nil, fmt.Errorf("no culture for population, cannot assess marital candidates")
 	}
-	beings := p.Beings()
+	males := p.ByGender(Male)
+	females := p.ByGender(Female)
 	// loop through the population, taking each member and looking for candidates
-	for _, a := range beings {
-		for _, b := range beings {
-			if a == b {
+	for _, a := range males {
+		for _, b := range females {
+			m := MaritalCandidate{male: a, female: b}
+			if _, ok := mc[m]; ok {
 				continue
 			}
-			if p.Culture.MaritalCandidate(a, b) {
-				mc = append(mc, &MaritalCandidate{a: a, b: b})
-			}
+			mc[m] = p.Culture.MaritalCandidate(a, b)
 		}
 	}
-	return mc, nil
+	result := []*MaritalCandidate{}
+	for k, v := range mc {
+		if v {
+			result = append(result, &k)
+
+		}
+	}
+	return result, nil
 }

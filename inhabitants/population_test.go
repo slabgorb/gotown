@@ -32,6 +32,25 @@ func TestAging(t *testing.T) {
 	}
 }
 
+func BenchmarkMaritalCandidates(b *testing.B) {
+	t := &testing.T{}
+	culture := helperMockCulture(t, "italian")
+	beings := []*Being{}
+	for i := 0; i < 100; i++ {
+		b := &Being{}
+		b.Randomize()
+		beings = append(beings, b)
+	}
+	var bc []*MaritalCandidate
+	chronology := timeline.NewChronology()
+	p := NewPopulation(beings, chronology, culture)
+	b.Run("mc benchmark", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			bc, _ = p.MaritalCandidates()
+		}
+	})
+}
+
 func TestReproductionCandidates(t *testing.T) {
 	culture := helperMockCulture(t, "italian")
 	beingFixtures := beingFixtures(t, "italian")

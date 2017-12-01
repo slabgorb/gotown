@@ -7,3 +7,6 @@ web/scripts/**/*.woff
 node_modules
 bower_components
 *.png
+bench*
+cpu.out
+mem.out
