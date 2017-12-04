@@ -1,5 +1,7 @@
 package timeline
 
+import "sync"
+
 type Callback func(year int)
 
 type Chronology struct {
@@ -24,6 +26,15 @@ func (c *Chronology) AddCurrentEvent(description string) {
 	c.AddEvent(&Event{Description: description, Year: c.CurrentYear})
 }
 
+func (c *Chronology) EventsForYear(year int) []*Event {
+	e, ok := c.Events[year]
+	if !ok {
+		return []*Event{}
+	}
+	return e
+
+}
+
 // AddEvent adds an Event to the Chronology
 func (c *Chronology) AddEvent(event *Event) {
 	if _, ok := c.Events[event.Year]; !ok {
@@ -45,7 +56,13 @@ func (c *Chronology) Tick() {
 		return
 	}
 	c.CurrentYear++
+	var wg sync.WaitGroup
+	wg.Add(len(c.Callbacks))
 	for _, ca := range c.Callbacks {
-		go ca(c.CurrentYear)
+		go func(ca Callback) {
+			ca(c.CurrentYear)
+			wg.Done()
+		}(ca)
 	}
+	wg.Wait()
 }
