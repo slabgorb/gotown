@@ -496,24 +496,24 @@
           },
           {
             "name":"dark",
-            "match":"d(7|8)",
+            "match":"d(7|8)"
           },
           {
             "name":"light",
-            "match":"d(8|9)",
+            "match":"d(8|9)"
           },
           {
             "name":"olive",
-            "match":"d(a|b)",
+            "match":"d(a|b)"
           },
           {
             "name":"very dark",
-            "match":"d(c|d)",
+            "match":"d(c|d)"
           },
           {
             "name":"albino",
-            "match":"d00",
-          },
+            "match":"d00"
+          }
         ]
       },
       {

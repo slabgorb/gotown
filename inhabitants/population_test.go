@@ -1,6 +1,7 @@
 package inhabitants_test
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 
@@ -113,14 +114,37 @@ func TestAddAndRemove(t *testing.T) {
 	}
 }
 
+func TestReproductionCandidatesScore(t *testing.T) {
+	culture := helperMockCulture(t, "italian")
+	beingFixtures := beingFixtures(t, "italian")
+	chronology := timeline.NewChronology()
+	pop := []*Being{}
+	for _, v := range beingFixtures {
+		pop = append(pop, v)
+	}
+	p := NewPopulation(pop, chronology, culture)
+	rcs := p.ReproductionCandidates()
+	for _, rc := range rcs {
+		fmt.Println(rc)
+	}
+
+}
+
 func TestAdamEve(t *testing.T) {
 	culture := helperMockCulture(t, "italian")
 	beingFixtures := beingFixtures(t, "italian")
 	chronology := timeline.NewChronology()
-	p := NewPopulation([]*Being{beingFixtures["adam"], beingFixtures["eve"]}, chronology, culture)
-	mcs, _ := p.MaritalCandidates()
-	for _, mc := range mcs {
-		m, f := mc.Pair()
-		m.Marry(f)
+	pop := []*Being{}
+	for _, v := range beingFixtures {
+		pop = append(pop, v)
 	}
+	p := NewPopulation(pop, chronology, culture)
+	for i := 0; i < 100; i++ {
+		chronology.Tick()
+		fmt.Println(p.Chronology.EventsForYear(i))
+	}
+	for _, b := range p.Beings() {
+		fmt.Println(b)
+	}
+
 }

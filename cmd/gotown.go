@@ -40,26 +40,43 @@ func main() {
 		Help: "make a town",
 		Func: createTown,
 	})
+	shell.AddCmd(&ishell.Cmd{
+		Name: "tick",
+		Help: "add a year",
+		Func: tick,
+	})
 	shell.SetHomeHistoryPath(".ishell_history")
 	shell.Run()
 }
 
 func status(c *ishell.Context) {
-	c.Println(currentArea)
-	c.Println(currentCulture)
+
+	if currentArea != nil {
+		showTown(c)
+	}
+
+}
+
+func tick(c *ishell.Context) {
+	if currentArea == nil {
+		c.Err(fmt.Errorf("please create a town first"))
+		return
+	}
+	currentArea.Residents.Chronology.Tick()
+	showTown(c)
 }
 
 func loadSpecies(c *ishell.Context) {
 	name := strings.ToLower(c.Args[0])
-	r, err := os.Open(fmt.Sprintf("../web/data/%s.json", name))
+	r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
 	if err != nil {
 		c.Println(err)
 	}
-	currentSpecies, err := inhabitants.LoadSpecies(r)
+	species, err := inhabitants.LoadSpecies(r)
 	if err != nil {
 		c.Println(err)
 	}
-
+	currentSpecies = &species
 	c.Println(currentSpecies)
 }
 
@@ -69,7 +86,7 @@ func loadCulture(c *ishell.Context) {
 		return
 	}
 	name := c.Args[0]
-	r, err := os.Open(fmt.Sprintf("../web/data/%s.json", name))
+	r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
 	if err != nil {
 		c.Println(err)
 		return
@@ -80,6 +97,18 @@ func loadCulture(c *ishell.Context) {
 	}
 	currentCulture = culture
 	c.Println(currentCulture)
+}
+
+func showTown(c *ishell.Context) {
+	output := bytes.Buffer{}
+	w := tabwriter.NewWriter(&output, 1, 1, 1, ' ', tabwriter.Debug)
+	c.Println(currentArea.Name)
+	beings := currentArea.Residents.Beings()
+	for i := 0; i < len(beings); i++ {
+		fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%d", beings[i].String(), beings[i].Sex, beings[i].Age()))
+	}
+	w.Flush()
+	c.Print(output.String())
 }
 
 func createTown(c *ishell.Context) {
@@ -101,21 +130,13 @@ func createTown(c *ishell.Context) {
 	wg.Add(pop)
 	for i := 0; i < pop; i++ {
 		go func(wg *sync.WaitGroup) {
-			being := inhabitants.Being{Species: currentSpecies, Culture: currentCulture}
+			being := inhabitants.NewBeing(currentSpecies, currentCulture)
 			being.Randomize()
-			area.Add(&being)
+			area.Add(being)
 			wg.Done()
 		}(&wg)
 	}
 	wg.Wait()
 	currentArea = area
-	output := bytes.Buffer{}
-	w := tabwriter.NewWriter(&output, 1, 1, 1, ' ', tabwriter.Debug)
-	c.Println(currentArea.Name)
-	beings := currentArea.Residents.Beings()
-	for i := 0; i < len(beings); i++ {
-		fmt.Fprintln(w, fmt.Sprintf("%s\t%d", beings[i].String(), beings[i].Age))
-	}
-	w.Flush()
-	c.Print(output.String())
+	showTown(c)
 }

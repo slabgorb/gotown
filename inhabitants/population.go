@@ -35,6 +35,10 @@ type ReproductionCandidate struct {
 	score float64
 }
 
+func (rc ReproductionCandidate) String() string {
+	return fmt.Sprintf("%s (score %f)", rc.b, rc.score)
+}
+
 func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 	return mc.male, mc.female
 }
@@ -45,11 +49,47 @@ func NewPopulation(beings []*Being, chronology *timeline.Chronology, culture *Cu
 	if chronology == nil {
 		p.Chronology = timeline.NewChronology()
 	}
+	p.Chronology.Register(reproduction(p))
+	p.Chronology.Register(marry(p))
 	p.beings = make(map[*Being]struct{})
 	for _, b := range beings {
 		p.Add(b)
 	}
 	return p
+}
+
+func marry(p *Population) timeline.Callback {
+	return func(_ int) {
+		mc, _ := p.MaritalCandidates()
+		fmt.Println(len(mc))
+		for _, m := range mc {
+			r := randomizer.Float64()
+			fmt.Println(r)
+			if r < 0.10 {
+				m.female.Marry(m.male)
+			}
+		}
+	}
+}
+
+func reproduction(p *Population) timeline.Callback {
+	return func(_ int) {
+		rc := p.ReproductionCandidates()
+		for _, r := range rc {
+			if randomizer.Float64() < r.score {
+				var with *Being
+				// if b is married, choose spouse?
+				if r.b.Spouses != nil && len(r.b.Spouses) > 0 {
+					with = r.b.Spouses[0]
+				} else {
+					// choose random guy for now, will work on the choice later
+					men := p.ByGender(Male)
+					with = men[randomizer.Intn(len(men))]
+				}
+				r.b.Reproduce(with)
+			}
+		}
+	}
 }
 
 // Beings returns the beings in the population
@@ -125,9 +165,19 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 		if b.Age() > maxAge || b.Age() < minAge {
 			continue
 		}
-		score := 0.05
-		if b.Spouses != nil && len(b.Spouses) > 0 {
-			score += 0.05
+		var score float64
+		r := float64(maxAge - minAge)
+		adjustedAge := float64(b.Age() - minAge)
+		splits := []float64{r * 0.3, r * 0.6, r}
+		switch {
+		case adjustedAge < splits[1]:
+			score = 0.2
+		case adjustedAge < splits[2]:
+			score = 0.15
+		}
+
+		if b.Spouses == nil || len(b.Spouses) == 0 {
+			score -= 0.1
 		}
 		candidates = append(candidates, &ReproductionCandidate{b: b, score: score})
 	}
