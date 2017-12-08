@@ -8,8 +8,6 @@ import (
 	"testing"
 
 	. "github.com/slabgorb/gotown/inhabitants"
-	"github.com/slabgorb/gotown/inhabitants/genetics"
-	"github.com/slabgorb/gotown/timeline"
 )
 
 type beingFixture struct {
@@ -61,7 +59,10 @@ func beingFixtures(t *testing.T, cultureName string) map[string]*Being {
 	}
 	for _, f := range v {
 		name := NewName(f.Name)
-		beings[f.Label] = &Being{Name: name, Species: species, Chronology: &timeline.Chronology{CurrentYear: f.Age}, Sex: Gender(f.Sex), Culture: culture, Chromosome: genetics.RandomChromosome(30)}
+		beings[f.Label] = NewBeing(species, culture)
+		beings[f.Label].Name = name
+		beings[f.Label].Sex = Gender(f.Sex)
+		beings[f.Label].Chronology.SetYear(f.Age)
 	}
 	return beings
 }

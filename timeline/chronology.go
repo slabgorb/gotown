@@ -21,6 +21,11 @@ func (c *Chronology) Freeze() {
 	c.frozen = true
 }
 
+// Freeze stops the ticks on a Chronology
+func (c *Chronology) SetYear(year int) {
+	c.CurrentYear = year
+}
+
 // AddCurrentEvent adds an event to the Chronology in the current year
 func (c *Chronology) AddCurrentEvent(description string) {
 	c.AddEvent(&Event{Description: description, Year: c.CurrentYear})

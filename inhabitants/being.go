@@ -62,6 +62,15 @@ type Being struct {
 	Chronology *timeline.Chronology
 }
 
+func NewBeing(s *Species, c *Culture) *Being {
+	return &Being{
+		Species:    s,
+		Culture:    c,
+		Chronology: timeline.NewChronology(),
+		Chromosome: genetics.RandomChromosome(30),
+	}
+}
+
 func (b *Being) genderedParent(gender Gender) *Being {
 	for _, b := range b.Parents {
 		if b.Sex == gender {
@@ -73,15 +82,15 @@ func (b *Being) genderedParent(gender Gender) *Being {
 
 func (b *Being) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
-		Expression map[string]string `json:"expression"`
-		Age        int               `json:"age"`
-		Sex        string            `json:"sex"`
-		Species    string            `json:"species"`
-		Parents    []string          `json:"parents"`
-		Children   []string          `json:"children"`
-		Spouses    []string          `json:"spouses"`
-		Living     bool              `json:"alive"`
-		Events     []timeline.Event  `json:"events"`
+		Expression map[string]string         `json:"expression"`
+		Age        int                       `json:"age"`
+		Sex        string                    `json:"sex"`
+		Species    string                    `json:"species"`
+		Parents    []string                  `json:"parents"`
+		Children   []string                  `json:"children"`
+		Spouses    []string                  `json:"spouses"`
+		Living     bool                      `json:"alive"`
+		Events     map[int][]*timeline.Event `json:"events"`
 	}{
 		Expression: b.Expression(),
 		Age:        b.Age(),
@@ -144,9 +153,10 @@ func (b *Being) Expression() map[string]string {
 func (b *Being) Marry(with *Being) {
 	b.Spouses = append(b.Spouses, with)
 	with.Spouses = append(with.Spouses, b)
-	b.Chronology.AddEvent(fmt.Sprintf("%s got married to %s", b.String(), with.String()))
-	with.Chronology.AddEvent(fmt.Sprintf("%s got married to %s", with.String(), b.String()))
-
+	message := fmt.Sprintf("%s got married to %s", b.String(), with.String())
+	b.Chronology.AddCurrentEvent(message)
+	message = fmt.Sprintf("%s got married to %s", with.String(), b.String())
+	with.Chronology.AddCurrentEvent(message)
 }
 
 // IsParentOf returns true of the receiver is the parent of the passed in being
@@ -248,8 +258,8 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	child.Randomize()
 	b.Children = append(b.Children, child)
 	with.Children = append(with.Children, child)
-	b.Chronology.AddEvent(fmt.Sprintf("%s had a child %s with %s", b, child, with))
-	with.Chronology.AddEvent(fmt.Sprintf("%s had a child %s with %s", with, child, b))
+	b.Chronology.AddCurrentEvent(fmt.Sprintf("%s had a child %s with %s", b, child, with))
+	with.Chronology.AddCurrentEvent(fmt.Sprintf("%s had a child %s with %s", with, child, b))
 	return b.Children, nil
 }
 
@@ -263,7 +273,7 @@ func (b *Being) Die(explanation ...string) {
 		explanation = append(explanation, "unknown causes")
 	}
 	b.Dead = true
-	b.Chronology.AddEvent(fmt.Sprintf("Died from %s", explanation[0]))
+	b.Chronology.AddCurrentEvent(fmt.Sprintf("Died from %s", explanation[0]))
 	b.Chronology.Freeze()
 }
 
