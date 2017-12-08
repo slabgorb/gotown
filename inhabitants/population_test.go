@@ -112,3 +112,15 @@ func TestAddAndRemove(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestAdamEve(t *testing.T) {
+	culture := helperMockCulture(t, "italian")
+	beingFixtures := beingFixtures(t, "italian")
+	chronology := timeline.NewChronology()
+	p := NewPopulation([]*Being{beingFixtures["adam"], beingFixtures["eve"]}, chronology, culture)
+	mcs, _ := p.MaritalCandidates()
+	for _, mc := range mcs {
+		m, f := mc.Pair()
+		m.Marry(f)
+	}
+}

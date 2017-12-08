@@ -80,6 +80,9 @@ func (p *Population) Add(b *Being) bool {
 	p.mux.Lock()
 	_, found := p.beings[b]
 	p.beings[b] = struct{}{}
+	p.Chronology.Register(func(year int) {
+		b.Chronology.Tick()
+	})
 	p.mux.Unlock()
 	return !found
 }
