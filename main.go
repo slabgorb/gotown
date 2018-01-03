@@ -17,6 +17,8 @@ import (
 	"github.com/slabgorb/gotown/locations"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func init() {
@@ -45,8 +47,44 @@ type namerKey struct {
 
 var namers = make(map[namerKey]*words.Namer)
 
+const (
+	mongoDBHosts = "localhost"
+	mongoDBName  = "gotown"
+)
+
+type ContextWithSession struct {
+	echo.Context
+	session *mgo.Session
+}
+
 func main() {
+
+	mongoDBDialInfo := &mgo.DialInfo{
+		Addrs:    []string{mongoDBHosts},
+		Timeout:  60 * time.Second,
+		Database: mongoDBName,
+	}
+
+	mongoSession, err := mgo.DialWithInfo(mongoDBDialInfo)
+	if err != nil {
+		log.Fatalf("CreateSession: %s\n", err)
+	}
+
+	mongoSession.SetMode(mgo.Monotonic, true)
+
+	addSessionMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			cws := &ContextWithSession{
+				Context: c,
+				session: mongoSession,
+			}
+			return next(cws)
+		}
+	}
+
 	e := echo.New()
+	e.GET("/cultures", listCulturesHandler)
+	e.GET("/species", listSpeciesHandler)
 	e.GET("/town_names", townNamesHandler)
 	e.GET("/town", townHandler)
 	e.GET("/being", beingHandler)
@@ -58,8 +96,37 @@ func main() {
 	e.Static("/scripts", "web/scripts")
 	e.Static("/data", "web/data")
 	e.Use(middleware.Logger())
+	e.Use(addSessionMiddleware)
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+	}))
+
 	e.Logger.SetLevel(log.DEBUG)
 	e.Logger.Fatal(e.Start(":8003"))
+}
+
+func listCulturesHandler(c echo.Context) error {
+	cc := c.(*ContextWithSession)
+	sessionCopy := cc.session.Copy()
+	collection := sessionCopy.DB(mongoDBName).C("cultures")
+	cultures := []*inhabitants.Culture{}
+	if err := collection.Find(bson.M{}).All(&cultures); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, cultures)
+}
+
+func listSpeciesHandler(c echo.Context) error {
+	cc := c.(*ContextWithSession)
+	sessionCopy := cc.session.Copy()
+	collection := sessionCopy.DB(mongoDBName).C("species")
+	species := []*inhabitants.Species{}
+	if err := collection.Find(bson.M{}).All(&species); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, species)
 }
 
 func beingHandler(c echo.Context) error {
