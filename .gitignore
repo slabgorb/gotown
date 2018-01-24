@@ -11,3 +11,4 @@ bench*
 cpu.out
 mem.out
 main
+*.db

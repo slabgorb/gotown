@@ -9,16 +9,14 @@ import (
 	"sync"
 	"time"
 
+	bolt "github.com/coreos/bbolt"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/locations"
-	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
-	mgo "gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func init() {
@@ -47,36 +45,23 @@ type namerKey struct {
 
 var namers = make(map[namerKey]*words.Namer)
 
-const (
-	mongoDBHosts = "localhost"
-	mongoDBName  = "gotown"
-)
-
 type ContextWithSession struct {
 	echo.Context
-	session *mgo.Session
+	session *bolt.DB
 }
 
 func main() {
 
-	mongoDBDialInfo := &mgo.DialInfo{
-		Addrs:    []string{mongoDBHosts},
-		Timeout:  60 * time.Second,
-		Database: mongoDBName,
-	}
-
-	mongoSession, err := mgo.DialWithInfo(mongoDBDialInfo)
+	session, err := bolt.Open("gotown.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
-		log.Fatalf("CreateSession: %s\n", err)
+		panic(err)
 	}
-
-	mongoSession.SetMode(mgo.Monotonic, true)
 
 	addSessionMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cws := &ContextWithSession{
 				Context: c,
-				session: mongoSession,
+				session: session,
 			}
 			return next(cws)
 		}
@@ -85,10 +70,11 @@ func main() {
 	e := echo.New()
 	e.GET("/cultures", listCulturesHandler)
 	e.GET("/species", listSpeciesHandler)
+	e.GET("/species/:name", showSpeciesHandler)
 	e.GET("/town_names", townNamesHandler)
-	e.GET("/town", townHandler)
+	//e.GET("/town", townHandler)
 	e.GET("/being", beingHandler)
-	e.GET("/household", householdHandler)
+	//e.GET("/household", householdHandler)
 	e.GET("/random/chromosome", randomChromosomeHandler)
 	e.File("/", "web")
 	e.Static("/fonts", "web/fonts")
@@ -107,25 +93,34 @@ func main() {
 	e.Logger.Fatal(e.Start(":8003"))
 }
 
+func listBucketKeys(bucket string, db *bolt.DB) []string {
+	names := []string{}
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucket))
+		c := b.Cursor()
+		for k, _ := c.First(); k != nil; k, _ = c.Next() {
+			names = append(names, string(k))
+		}
+		return nil
+	})
+	return names
+}
+
 func listCulturesHandler(c echo.Context) error {
 	cc := c.(*ContextWithSession)
-	sessionCopy := cc.session.Copy()
-	collection := sessionCopy.DB(mongoDBName).C("cultures")
-	cultures := []*inhabitants.Culture{}
-	if err := collection.Find(bson.M{}).All(&cultures); err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, cultures)
+	return c.JSON(http.StatusOK, listBucketKeys("cultures", cc.session))
 }
 
 func listSpeciesHandler(c echo.Context) error {
 	cc := c.(*ContextWithSession)
-	sessionCopy := cc.session.Copy()
-	collection := sessionCopy.DB(mongoDBName).C("species")
-	species := []*inhabitants.Species{}
-	if err := collection.Find(bson.M{}).All(&species); err != nil {
-		return err
-	}
+	return c.JSON(http.StatusOK, listBucketKeys("species", cc.session))
+}
+
+func showSpeciesHandler(c echo.Context) error {
+	//cc := c.(*ContextWithSession)
+	//sessionCopy := cc.session.Copy()
+	//collection := sessionCopy.DB(mongoDBName).C("species")
+	species := &inhabitants.Species{}
 	return c.JSON(http.StatusOK, species)
 }
 
@@ -163,61 +158,61 @@ func loadCulture(name string) (*inhabitants.Culture, error) {
 	return culture, nil
 }
 
-func householdHandler(c echo.Context) error {
-	filename := c.QueryParam("culture")
-	culture, err := loadCulture(filename)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", "human"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
-	}
-	s, err := inhabitants.LoadSpecies(r)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
-	}
-	mom := &inhabitants.Being{Species: &s, Sex: inhabitants.Female, Culture: culture, Chronology: timeline.NewChronology()}
-	mom.RandomizeName()
-	mom.RandomizeChromosome()
-	//mom.RandomizeAge(2)
-	dad := &inhabitants.Being{Species: &s, Sex: inhabitants.Male, Culture: culture, Chronology: timeline.NewChronology()}
-	dad.RandomizeName()
-	dad.RandomizeChromosome()
-	mom.Name.FamilyName = dad.Name.FamilyName
-	mom.Reproduce(dad)
-	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
-}
+// func householdHandler(c echo.Context) error {
+// 	filename := c.QueryParam("culture")
+// 	culture, err := loadCulture(filename)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, err)
+// 	}
+// 	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", "human"))
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+// 	}
+// 	s, err := inhabitants.LoadSpecies(r)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+// 	}
+// 	mom := &inhabitants.Being{Species: &s, Sex: inhabitants.Female, Culture: culture, Chronology: timeline.NewChronology()}
+// 	mom.RandomizeName()
+// 	mom.RandomizeChromosome()
+// 	//mom.RandomizeAge(2)
+// 	dad := &inhabitants.Being{Species: &s, Sex: inhabitants.Male, Culture: culture, Chronology: timeline.NewChronology()}
+// 	dad.RandomizeName()
+// 	dad.RandomizeChromosome()
+// 	mom.Name.FamilyName = dad.Name.FamilyName
+// 	mom.Reproduce(dad)
+// 	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
+// }
 
-func townHandler(c echo.Context) error {
-	culture, err := loadCulture(c.QueryParam("culture"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", "human"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
-	}
-	s, err := inhabitants.LoadSpecies(r)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
-	}
-	area := locations.NewArea(locations.Town, nil, nil)
-	count := 100
-	var wg sync.WaitGroup
-	wg.Add(count)
-	for i := 0; i < count; i++ {
-		go func(wg *sync.WaitGroup) {
-			being := inhabitants.Being{Species: &s, Culture: culture, Chronology: timeline.NewChronology()}
-			being.Randomize()
-			area.Add(&being)
-			wg.Done()
-		}(&wg)
-	}
-	wg.Wait()
-	return c.JSON(http.StatusOK, area)
-
-}
+// func townHandler(c echo.Context) error {
+// 	culture, err := loadCulture(c.QueryParam("culture"))
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, err)
+// 	}
+// 	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", "human"))
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+// 	}
+// 	s, err := inhabitants.LoadSpecies(r)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
+// 	}
+// 	area := locations.NewArea(locations.Town, nil, nil)
+// 	count := 100
+// 	var wg sync.WaitGroup
+// 	wg.Add(count)
+// 	for i := 0; i < count; i++ {
+// 		go func(wg *sync.WaitGroup) {
+// 			being := inhabitants.Being{Species: &s, Culture: culture, Chronology: timeline.NewChronology()}
+// 			being.Randomize()
+// 			area.Add(&being)
+// 			wg.Done()
+// 		}(&wg)
+// 	}
+// 	wg.Wait()
+// 	return c.JSON(http.StatusOK, area)
+//
+// }
 
 func townNamesHandler(c echo.Context) error {
 	count := 1000

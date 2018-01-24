@@ -3,17 +3,19 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"text/tabwriter"
+	"time"
 
 	"github.com/abiosoft/ishell"
+	bolt "github.com/coreos/bbolt"
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/locations"
-	mgo "gopkg.in/mgo.v2"
 )
 
 var currentCulture *inhabitants.Culture
@@ -22,7 +24,7 @@ var currentArea *locations.Area
 
 func main() {
 	ctx := context.Background()
-	session, err := mgo.Dial("localhost")
+	session, err := bolt.Open("gotown.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		panic(err)
 	}
@@ -35,6 +37,7 @@ func main() {
 		showTownCommand(ctx, session),
 		createTownCommand(ctx, session),
 		statusCommand(ctx, session),
+		seedCommand(ctx, session),
 	}
 	for _, c := range commandList {
 		shell.AddCmd(c)
@@ -49,7 +52,59 @@ func main() {
 	shell.Run()
 }
 
-func tickCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
+func seedCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
+	return &ishell.Cmd{
+		Name: "seed",
+		Help: "seed database with static json files",
+		Func: func(c *ishell.Context) {
+			if err := seedSpecies(session); err != nil {
+				c.Err(err)
+			}
+			if err := seedCultures(session); err != nil {
+				c.Err(err)
+			}
+		},
+	}
+}
+
+func seedSpecies(session *bolt.DB) error {
+	speciesNames := []string{"human"}
+	for _, name := range speciesNames {
+		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
+		if err != nil {
+			return err
+		}
+		species := &inhabitants.Species{}
+		if err = species.Load(r); err != nil {
+			return err
+		}
+		if err = doSaveSpecies(species, session); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func seedCultures(session *bolt.DB) error {
+	speciesNames := []string{"italianate", "viking"}
+	for _, name := range speciesNames {
+		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
+		if err != nil {
+			return err
+		}
+		culture := &inhabitants.Culture{}
+		if err = culture.Load(r); err != nil {
+			return err
+		}
+		if err = doSaveCulture(culture, session); err != nil {
+			return err
+		}
+
+	}
+	return nil
+}
+
+func tickCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 	return &ishell.Cmd{
 		Name: "tick",
 		Help: "tick history",
@@ -71,20 +126,37 @@ func tickCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
 	}
 }
 
-func doLoadCulture(name string) error {
-	r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
-	if err != nil {
-		return err
-	}
+func doSaveCulture(culture *inhabitants.Culture, db *bolt.DB) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("cultures"))
+		if err != nil {
+			return err
+		}
+		encoded, err := json.Marshal(culture)
+		if err != nil {
+			return err
+		}
+		return b.Put([]byte(culture.Name), encoded)
+	})
+}
+
+func doLoadCulture(name string, db *bolt.DB) error {
+	var v []byte
+	db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("cultures"))
+		v = bucket.Get([]byte(name))
+		return nil
+	})
 	culture := &inhabitants.Culture{}
-	if err = culture.Load(r); err != nil {
+	err := culture.Load(bytes.NewReader(v))
+	if err != nil {
 		return err
 	}
 	currentCulture = culture
 	return nil
 }
 
-func loadCultureCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
+func loadCultureCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 	return &ishell.Cmd{
 		Name: "load_culture",
 		Help: "load a culture",
@@ -94,7 +166,7 @@ func loadCultureCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
 				return
 			}
 			name := c.Args[0]
-			if err := doLoadCulture(name); err != nil {
+			if err := doLoadCulture(name, session); err != nil {
 				c.Err(err)
 			}
 			c.Println(currentCulture)
@@ -103,13 +175,13 @@ func loadCultureCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
 
 }
 
-func loadSpeciesCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
+func loadSpeciesCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 	return &ishell.Cmd{
 		Name: "load_species",
 		Help: "load a species",
 		Func: func(c *ishell.Context) {
 			name := strings.ToLower(c.Args[0])
-			if err := doLoadSpecies(name); err != nil {
+			if err := doLoadSpecies(name, session); err != nil {
 				c.Err(err)
 			}
 			c.Println(currentSpecies)
@@ -118,17 +190,34 @@ func loadSpeciesCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
 
 }
 
-func doLoadSpecies(name string) error {
-	r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
+func doLoadSpecies(name string, db *bolt.DB) error {
+	var v []byte
+	db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("species"))
+		v = bucket.Get([]byte(name))
+		return nil
+	})
+	species := &inhabitants.Species{}
+	err := species.Load(bytes.NewReader(v))
 	if err != nil {
 		return err
 	}
-	species, err := inhabitants.LoadSpecies(r)
-	if err != nil {
-		return err
-	}
-	currentSpecies = &species
+	currentSpecies = species
 	return nil
+}
+
+func doSaveSpecies(species *inhabitants.Species, db *bolt.DB) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("species"))
+		if err != nil {
+			return err
+		}
+		encoded, err := json.Marshal(species)
+		if err != nil {
+			return err
+		}
+		return b.Put([]byte(species.Name), encoded)
+	})
 }
 
 func showTown(c *ishell.Context) {
@@ -143,7 +232,7 @@ func showTown(c *ishell.Context) {
 	c.Print(output.String())
 }
 
-func showTownCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
+func showTownCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 	return &ishell.Cmd{
 		Name: "show_town",
 		Help: "display current working town",
@@ -181,7 +270,7 @@ func createTown(c *ishell.Context) {
 	showTown(c)
 }
 
-func createTownCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
+func createTownCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 	return &ishell.Cmd{
 		Name: "create_town",
 		Help: "create a new town",
@@ -201,7 +290,7 @@ func status(c *ishell.Context) {
 	}
 }
 
-func statusCommand(ctx context.Context, session *mgo.Session) *ishell.Cmd {
+func statusCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 	return &ishell.Cmd{
 		Name: "status",
 		Help: "current status",

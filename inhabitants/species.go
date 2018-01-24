@@ -2,6 +2,7 @@ package inhabitants
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"sort"
 
@@ -67,10 +68,13 @@ func (s *Species) UnmarshalJSON(data []byte) error {
 	s.Demography = d
 	return nil
 }
-func LoadSpecies(r io.Reader) (Species, error) {
-	s := Species{}
+
+func (s *Species) Load(r io.Reader) error {
 	err := json.NewDecoder(r).Decode(&s)
-	return s, err
+	if err != nil {
+		return fmt.Errorf("could not parse json file")
+	}
+	return nil
 }
 
 // NewSpecies creates and initializes a *Species
