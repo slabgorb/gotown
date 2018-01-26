@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Trait from './Trait';
+import Trait from './Trait.jsx';
 
 const Genetics = ({ traits }) =>
   (

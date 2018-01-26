@@ -2,7 +2,7 @@ import {
   SELECT_SPECIES,
   RECEIVE_SPECIES,
   setSpecies
-} from '../actions'
+} from '../components/Species/actions'
 const defaultSpecies = {
   name: "",
   genetics: {},

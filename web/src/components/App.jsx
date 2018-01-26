@@ -1,5 +1,5 @@
 import React from 'react';
-import Species from './Species';
+import Species from './Species/Species.jsx';
 import { Area } from './Area.jsx'
 // import Being from 'components/Being.jsx'
 // import Nav from 'components/Nav.jsx';
@@ -8,7 +8,6 @@ import { Area } from './Area.jsx'
 const App = () =>
   (
     <div>
-      <Area/>
       <Species name="human" />
     </div>
   );
