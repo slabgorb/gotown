@@ -1,18 +1,18 @@
 import React from 'react';
-import Species from 'components/Species.jsx';
-import { Area } from 'components/Area.jsx'
-import Being from 'components/Being.jsx'
-import Nav from 'components/Nav.jsx';
-import { Route } from 'react-router-dom'
+import Species from './Species';
+import { Area } from './Area.jsx'
+// import Being from 'components/Being.jsx'
+// import Nav from 'components/Nav.jsx';
+//import { Route } from 'react-router-dom'
 
-const App = (props) => {
-  return   (
-      <div>
-        <Area/>
-        <Species name="human"/>
-      </div>
-    )
-}
+const App = () =>
+  (
+    <div>
+      <Area/>
+      <Species name="human" />
+    </div>
+  );
+
 
 
 //

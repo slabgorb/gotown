@@ -1,21 +1,28 @@
 import React from 'react';
-var _ = require('underscore');
 import axios from 'axios';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
-import Card, { CardContent } from 'material-ui/Card';
-// const Species = (props) => {
-//   <SpeciesDisplay { ...props }/>
-// }
+import PropTypes from 'prop-types';
+import Genetics from './Genetics';
+import GeneticsMap from './GeneticsMap';
 
 class Species extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       name: props.name,
-      genetics: {traits:[]},
+      genetics: { traits:[] },
     }
   }
+
+  componentDidMount() {
+    axios.get(`data/${this.props.name}.json`)
+      .then((res) => {
+        const s = res.data;
+        this.setState({ genetics:s })
+      })
+  }
+
   render() {
     return (
       <div>
@@ -30,29 +37,14 @@ class Species extends React.Component {
     )
   }
 
-  componentDidMount() {
-    axios.get(`data/${this.props.name}.json`)
-      .then(res => {
-        const s = res.data;
-        this.setState({genetics:s})
-      })
-  }
+
 }
 
+Species.propTypes = {
+  name: PropTypes.string.isRequired,
+};
 
 
-
-
-
-
-const GenderName = ({gender, patterns, givenNames}) =>
-    (
-      <div className="gender-name">
-        <h3>{gender}</h3>
-        <p>{patterns.join(', ')}</p>
-        <p>{givenNames.join(', ')}</p>
-      </div>
-    )
 
 
 module.exports = Species

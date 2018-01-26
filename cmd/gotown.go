@@ -24,7 +24,7 @@ var currentArea *locations.Area
 
 func main() {
 	ctx := context.Background()
-	session, err := bolt.Open("gotown.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
+	session, err := bolt.Open("gotown.db", 0600, &bolt.Options{Timeout: 10 * time.Second})
 	if err != nil {
 		panic(err)
 	}

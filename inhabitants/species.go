@@ -72,7 +72,7 @@ func (s *Species) UnmarshalJSON(data []byte) error {
 func (s *Species) Load(r io.Reader) error {
 	err := json.NewDecoder(r).Decode(&s)
 	if err != nil {
-		return fmt.Errorf("could not parse json file")
+		return fmt.Errorf("could not load")
 	}
 	return nil
 }
