@@ -35,8 +35,33 @@ func (e *Expression) UnmarshalJSON(data []byte) error {
 }
 
 type Variant struct {
-	Name  string         `json:"name"`
-	Match *regexp.Regexp `json:"match"`
+	Name  string
+	Match *regexp.Regexp
+}
+
+type serializableVariant struct {
+	Name  string `json:"name"`
+	Match string `json:"match"`
+}
+
+func (v *Variant) MarshalJSON() ([]byte, error) {
+	sv := &serializableVariant{
+		Name:  v.Name,
+		Match: v.Match.String(),
+	}
+	return json.Marshal(sv)
+}
+
+func (v *Variant) UnmarshalJSON(data []byte) error {
+	sv := &serializableVariant{}
+	json.Unmarshal(data, sv)
+	v.Name = sv.Name
+	r, err := regexp.Compile(sv.Match)
+	if err != nil {
+		return err
+	}
+	v.Match = r
+	return nil
 }
 
 // NewVariant creates a new Variant struct

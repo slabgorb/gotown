@@ -1,5 +1,5 @@
 {
-  "name": "Human",
+  "name": "human",
   "genders": ["male", "female"],
   "demography": [
     {"max_age": 14, "cumulative_percent":29},
