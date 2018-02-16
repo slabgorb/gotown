@@ -12,3 +12,5 @@ cpu.out
 mem.out
 main
 *.db
+*.code-workspace
+.vscode

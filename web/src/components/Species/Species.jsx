@@ -12,15 +12,15 @@ class Species extends React.Component {
     this.state = {
       name: props.name,
       genetics: { traits:[] },
-    }
+    };
   }
 
   componentDidMount() {
-    axios.get(`data/${this.props.name}.json`)
+    axios.get(`/species/${this.props.name}`)
       .then((res) => {
         const s = res.data;
-        this.setState({ genetics:s })
-      })
+        this.setState({ genetics:s });
+      });
   }
 
   render() {
@@ -31,10 +31,10 @@ class Species extends React.Component {
             {this.state.name}
           </Typography>
           <Genetics traits={this.state.genetics.traits}/>
-          <GeneticsMap/>
+          <GeneticsMap />
         </Paper>
       </div>
-    )
+    );
   }
 
 
@@ -44,7 +44,4 @@ Species.propTypes = {
   name: PropTypes.string.isRequired,
 };
 
-
-
-
-module.exports = Species
+module.exports = Species;

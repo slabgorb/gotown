@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -56,6 +57,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	defer session.Close()
 
 	addSessionMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -117,10 +120,17 @@ func listSpeciesHandler(c echo.Context) error {
 }
 
 func showSpeciesHandler(c echo.Context) error {
-	//cc := c.(*ContextWithSession)
-	//sessionCopy := cc.session.Copy()
-	//collection := sessionCopy.DB(mongoDBName).C("species")
+	cc := c.(*ContextWithSession)
 	species := &inhabitants.Species{}
+	err := cc.session.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("species"))
+		v := b.Get([]byte(c.Param("name")))
+		c.Echo().Logger.Debug(string(v))
+		return json.Unmarshal(v, species)
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	return c.JSON(http.StatusOK, species)
 }
 

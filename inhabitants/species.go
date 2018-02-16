@@ -48,26 +48,26 @@ type Species struct {
 	Demography map[DemographyBucket]Demo `json:"demography"`
 }
 
-func (s *Species) UnmarshalJSON(data []byte) error {
-	aux := &struct {
-		Name       string               `json:"name"`
-		Genders    []Gender             `json:"genders"`
-		Expression *genetics.Expression `json:"expression"`
-		DemoArray  []Demo               `json:"demography"`
-	}{}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-	s.Name = aux.Name
-	s.Genders = aux.Genders
-	s.Expression = aux.Expression
-	d := make(map[DemographyBucket]Demo)
-	for i, a := range aux.DemoArray {
-		d[DemographyBucket(i)] = a
-	}
-	s.Demography = d
-	return nil
-}
+// func (s *Species) UnmarshalJSON(data []byte) error {
+// 	aux := &struct {
+// 		Name       string               `json:"name"`
+// 		Genders    []Gender             `json:"genders"`
+// 		Expression *genetics.Expression `json:"expression"`
+// 		DemoArray  []Demo               `json:"demography"`
+// 	}{}
+// 	if err := json.Unmarshal(data, &aux); err != nil {
+// 		return err
+// 	}
+// 	s.Name = aux.Name
+// 	s.Genders = aux.Genders
+// 	s.Expression = aux.Expression
+// 	d := make(map[DemographyBucket]Demo)
+// 	for i, a := range aux.DemoArray {
+// 		d[DemographyBucket(i)] = a
+// 	}
+// 	s.Demography = d
+// 	return nil
+// }
 
 func (s *Species) Load(r io.Reader) error {
 	err := json.NewDecoder(r).Decode(&s)
