@@ -1,9 +1,5 @@
 import React from 'react';
-import Species from './Species/Species.jsx';
-import { Area } from './Area.jsx'
-// import Being from 'components/Being.jsx'
-// import Nav from 'components/Nav.jsx';
-//import { Route } from 'react-router-dom'
+import Species from './Species/index.jsx';
 
 const App = () =>
   (
@@ -11,16 +7,4 @@ const App = () =>
       <Species name="human" />
     </div>
   );
-
-
-
-//
-// class App extends React.Component {
-//   render() {
-//     return(
-//     <Area/>
-//     )
-//   }
-// }
-
-module.exports = App
+module.exports = App;

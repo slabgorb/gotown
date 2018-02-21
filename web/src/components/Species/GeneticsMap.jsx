@@ -21,4 +21,4 @@ const GeneticsMap = () =>
     </div>
   );
 
-module.exports = GeneticsMap
+module.exports = GeneticsMap;
