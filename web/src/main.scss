@@ -43,6 +43,25 @@ li:hover {
   @include flex;
 }
 
+.tiny-box-container {
+  border-collapse: collapse;
+  display: table;
+}
+
+.tiny-box-row {
+  @include flexbox;
+  @include justify-content(center);
+  display: table-row;
+}
+
+.tiny-box {
+  display:table-cell;
+  min-width: 30px;
+  min-height: 30px;
+  border: 1px solid $dove_gray;
+  text-align:center;
+}
+
 .being {
 }
 .being-chromosome {

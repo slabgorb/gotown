@@ -13,3 +13,5 @@ Variant.propTypes = {
   name: PropTypes.string.isRequired,
   match: PropTypes.string.isRequired,
 };
+
+module.exports = Variant;
