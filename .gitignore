@@ -14,3 +14,4 @@ main
 *.db
 *.code-workspace
 .vscode
+*hot-update*

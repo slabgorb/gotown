@@ -1,7 +1,11 @@
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavigation';
 import Reboot from 'material-ui/Reboot';
 import React from 'react';
-import Species from './Species/index';
+import PropTypes from 'prop-types';
+import { Fingerprint } from 'material-ui-icons/Fingerprint';
+import { Face } from 'material-ui-icons/Face';
+import SimpleBottomNavigation from './Nav/SimpleBottomNavigation';
 
 
 const theme = createMuiTheme({
@@ -16,20 +20,28 @@ const theme = createMuiTheme({
       main: '#afbdc4',
       light: '#e1eff7',
       dark: '#808d94',
-      contrastText:'#000',
-    }
+      contrastText: '#000',
+    },
 
-  }
+  },
 });
 
-const App = () =>
+const App = ({ children }) =>
   (
     <div>
       <Reboot>
         <MuiThemeProvider theme={theme}>
-          <Species name="human" />
+          <div>
+            {children}
+            <SimpleBottomNavigation />
+          </div>
         </MuiThemeProvider>
       </Reboot>
     </div>
   );
-module.exports = App;
+
+App.propTypes = {
+  children: PropTypes.object.isRequired,
+};
+
+export default App;

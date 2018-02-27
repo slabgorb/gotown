@@ -14,7 +14,7 @@ const styles = theme => ({
     fontFamily: 'Montserrat',
   },
   title: {
-    fontSize: 14,
+    fontSize: 12,
   },
 
   expand: {
@@ -38,9 +38,11 @@ class Trait extends React.Component {
     this.state = { expanded: false };
     this.handleExpandClick = this.handleExpandClick.bind(this);
   }
+
   handleExpandClick() {
     this.setState({ expanded: !this.state.expanded });
   }
+  
   render() {
     const { name, variants, classes } = this.props;
     return (
@@ -77,4 +79,4 @@ Trait.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Trait)
+export default withStyles(styles)(Trait);

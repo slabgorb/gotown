@@ -13,16 +13,16 @@ const lines = (h, traits) => {
 };
 
 
-const line = hexes.map(h => (<div className="tiny-box">{h}</div>));
+const line = hexes.map(h => (<div key={h} className="tiny-box">{h}</div>));
 
 
 const GeneticsMap = ({ traits }) =>
   (
     <Card>
       <div className="tiny-box-container">
-       <div className="tiny-box-row"><div className="tiny-box" >&nbsp;</div>{line}</div>
-       { hexes.map(h => lines(h, traits)) }
-     </div>
+        <div className="tiny-box-row"><div className="tiny-box" >&nbsp;</div>{line}</div>
+        { hexes.map(h => lines(h, traits)) }
+      </div>
     </Card>
   );
 
