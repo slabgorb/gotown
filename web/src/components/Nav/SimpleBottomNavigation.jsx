@@ -5,9 +5,10 @@ import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavi
 import FingerprintIcon from 'material-ui-icons/Fingerprint';
 import LanguageIcon from 'material-ui-icons/Language';
 import PlaceIcon from 'material-ui-icons/Place';
+import { withRouter } from 'react-router-dom';
 
 const styles = () => {
-  
+
 };
 
 class SimpleBottomNavigation extends React.Component {
@@ -21,7 +22,20 @@ class SimpleBottomNavigation extends React.Component {
 
   handleChange(event, value) {
     this.setState({ value });
-  };
+    switch (value) {
+      case 0:
+        this.props.history.push('/species');
+        break;
+      case 1:
+        this.props.history.push('/cultures');
+        break;
+      case 2:
+        this.props.history.push('/towns');
+        break;
+      default:
+        break;
+    }
+  }
 
   render() {
     const { classes } = this.props;
@@ -44,6 +58,7 @@ class SimpleBottomNavigation extends React.Component {
 
 SimpleBottomNavigation.propTypes = {
   classes: PropTypes.object.isRequired,
+  history: PropTypes.any.isRequired,
 };
 
-export default withStyles(styles)(SimpleBottomNavigation);
+export default withRouter(withStyles(styles)(SimpleBottomNavigation));

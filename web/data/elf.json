@@ -3,39 +3,39 @@
   "genders": ["male", "female"],
   "demography": {
     "0": {
-      "max_age": 14,
+      "max_age": 100,
       "cumulative_percent": 29
     },
     "1": {
-      "max_age": 18,
+      "max_age": 180,
       "cumulative_percent": 36
     },
     "2": {
-      "max_age": 26,
+      "max_age": 260,
       "cumulative_percent": 50
     },
     "3": {
-      "max_age": 31,
+      "max_age": 310,
       "cumulative_percent": 58
     },
     "4": {
-      "max_age": 41,
+      "max_age": 410,
       "cumulative_percent": 72
     },
     "5": {
-      "max_age": 51,
+      "max_age": 510,
       "cumulative_percent": 84
     },
     "6": {
-      "max_age": 61,
+      "max_age": 610,
       "cumulative_percent": 93
     },
     "7": {
-      "max_age": 71,
+      "max_age": 710,
       "cumulative_percent": 98
     },
     "8": {
-      "max_age": 100,
+      "max_age": 1000,
       "cumulative_percent": 100
     }
   },

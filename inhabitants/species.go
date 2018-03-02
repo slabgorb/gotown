@@ -72,7 +72,7 @@ type Species struct {
 func (s *Species) Load(r io.Reader) error {
 	err := json.NewDecoder(r).Decode(&s)
 	if err != nil {
-		return fmt.Errorf("could not load")
+		return fmt.Errorf("could not load, %s", err)
 	}
 	return nil
 }

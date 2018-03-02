@@ -57,19 +57,20 @@ func seedCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 		Name: "seed",
 		Help: "seed database with static json files",
 		Func: func(c *ishell.Context) {
-			if err := seedSpecies(session); err != nil {
+			if err := seedSpecies(session, c); err != nil {
 				c.Err(err)
 			}
-			if err := seedCultures(session); err != nil {
+			if err := seedCultures(session, c); err != nil {
 				c.Err(err)
 			}
 		},
 	}
 }
 
-func seedSpecies(session *bolt.DB) error {
-	speciesNames := []string{"human"}
+func seedSpecies(session *bolt.DB, c *ishell.Context) error {
+	speciesNames := []string{"human", "elf"}
 	for _, name := range speciesNames {
+		c.Printf("\tloading %s\n", name)
 		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
 		if err != nil {
 			return err
@@ -85,9 +86,10 @@ func seedSpecies(session *bolt.DB) error {
 	return nil
 }
 
-func seedCultures(session *bolt.DB) error {
-	speciesNames := []string{"italianate", "viking"}
-	for _, name := range speciesNames {
+func seedCultures(session *bolt.DB, c *ishell.Context) error {
+	cultureNames := []string{"italianate", "viking"}
+	for _, name := range cultureNames {
+		c.Printf("\tloading %s\n", name)
 		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
 		if err != nil {
 			return err

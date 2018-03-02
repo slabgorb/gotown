@@ -51,6 +51,56 @@ type ContextWithSession struct {
 	session *bolt.DB
 }
 
+const (
+	cultureBucket = "cultures"
+	speciesBucket = "species"
+)
+
+type fetchable interface {
+	fetch(key string, db *bolt.DB) error
+}
+
+func listBucketKeys(bucket string, db *bolt.DB) []string {
+	names := []string{}
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucket))
+		c := b.Cursor()
+		for k, _ := c.First(); k != nil; k, _ = c.Next() {
+			names = append(names, string(k))
+		}
+		return nil
+	})
+	return names
+}
+
+func doFetch(j interface{}, bucket string, key string, db *bolt.DB) error {
+	return db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucket))
+		v := b.Get([]byte(key))
+		return json.Unmarshal(v, j)
+	})
+}
+
+type fetchableCulture struct{ culture *inhabitants.Culture }
+
+func newFetchableCulture() fetchableCulture {
+	return fetchableCulture{culture: &inhabitants.Culture{}}
+}
+
+func (f fetchableCulture) fetch(key string, db *bolt.DB) error {
+	return doFetch(f.culture, cultureBucket, key, db)
+}
+
+type fetchableSpecies struct{ species *inhabitants.Species }
+
+func newFetchableSpecies() fetchableSpecies {
+	return fetchableSpecies{species: &inhabitants.Species{}}
+}
+
+func (f fetchableSpecies) fetch(key string, db *bolt.DB) error {
+	return doFetch(f.species, speciesBucket, key, db)
+}
+
 func main() {
 
 	session, err := bolt.Open("gotown.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
@@ -71,19 +121,20 @@ func main() {
 	}
 
 	e := echo.New()
-	e.GET("/cultures", listCulturesHandler)
-	e.GET("/species", listSpeciesHandler)
-	e.GET("/species/:name", showSpeciesHandler)
-	e.GET("/town_names", townNamesHandler)
+	e.GET("/api/cultures", listCulturesHandler)
+	e.GET("/api/cultures/:name", showCulturesHandler)
+	e.GET("/api/species", listSpeciesHandler)
+	e.GET("/api/species/:name", showSpeciesHandler)
+	e.GET("/api/town_names", townNamesHandler)
 	//e.GET("/town", townHandler)
-	e.GET("/being", beingHandler)
+	e.GET("/api/being", beingHandler)
 	//e.GET("/household", householdHandler)
-	e.GET("/random/chromosome", randomChromosomeHandler)
-	e.File("/", "web")
+	e.GET("/api/random/chromosome", randomChromosomeHandler)
 	e.Static("/fonts", "web/fonts")
 	e.Static("/styles", "web/styles")
 	e.Static("/scripts", "web/scripts")
 	e.Static("/data", "web/data")
+	e.File("/*", "web") // redirect all other requests to the front end so we can use normal looking urls
 	e.Use(middleware.Logger())
 	e.Use(addSessionMiddleware)
 	e.Use(middleware.Recover())
@@ -96,22 +147,24 @@ func main() {
 	e.Logger.Fatal(e.Start(":8003"))
 }
 
-func listBucketKeys(bucket string, db *bolt.DB) []string {
-	names := []string{}
-	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		c := b.Cursor()
-		for k, _ := c.First(); k != nil; k, _ = c.Next() {
-			names = append(names, string(k))
-		}
-		return nil
-	})
-	return names
-}
-
 func listCulturesHandler(c echo.Context) error {
 	cc := c.(*ContextWithSession)
 	return c.JSON(http.StatusOK, listBucketKeys("cultures", cc.session))
+}
+
+func showCulturesHandler(c echo.Context) error {
+	cc := c.(*ContextWithSession)
+	culture := &inhabitants.Culture{}
+	err := cc.session.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("cultures"))
+		v := b.Get([]byte(c.Param("name")))
+		c.Echo().Logger.Debug(string(v))
+		return json.Unmarshal(v, culture)
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, culture)
 }
 
 func listSpeciesHandler(c echo.Context) error {
@@ -121,17 +174,13 @@ func listSpeciesHandler(c echo.Context) error {
 
 func showSpeciesHandler(c echo.Context) error {
 	cc := c.(*ContextWithSession)
-	species := &inhabitants.Species{}
-	err := cc.session.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("species"))
-		v := b.Get([]byte(c.Param("name")))
-		c.Echo().Logger.Debug(string(v))
-		return json.Unmarshal(v, species)
-	})
+	fs := newFetchableSpecies()
+	err := fs.fetch(c.Param("name"), cc.session)
 	if err != nil {
+		panic(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, species)
+	return c.JSON(http.StatusOK, fs.species)
 }
 
 func beingHandler(c echo.Context) error {
@@ -221,7 +270,7 @@ func loadCulture(name string) (*inhabitants.Culture, error) {
 // 	}
 // 	wg.Wait()
 // 	return c.JSON(http.StatusOK, area)
-//
+
 // }
 
 func townNamesHandler(c echo.Context) error {

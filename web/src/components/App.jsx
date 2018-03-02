@@ -1,12 +1,8 @@
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
-import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavigation';
 import Reboot from 'material-ui/Reboot';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Fingerprint } from 'material-ui-icons/Fingerprint';
-import { Face } from 'material-ui-icons/Face';
 import SimpleBottomNavigation from './Nav/SimpleBottomNavigation';
-
 
 const theme = createMuiTheme({
   palette: {
@@ -41,7 +37,7 @@ const App = ({ children }) =>
   );
 
 App.propTypes = {
-  children: PropTypes.object.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default App;

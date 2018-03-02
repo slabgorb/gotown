@@ -11,13 +11,13 @@ class Species extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: props.name,
+      name: props.match.params.name,
       genetics: { traits: [] },
     };
   }
 
   componentDidMount() {
-    axios.get(`/species/${this.props.name}`)
+    axios.get(`/api/species/${this.props.match.params.name}`)
       .then((res) => {
         const s = res.data;
         this.setState({ genetics: s.expression });
@@ -43,7 +43,7 @@ class Species extends React.Component {
 }
 
 Species.propTypes = {
-  name: PropTypes.string.isRequired,
+  match: PropTypes.object.isRequired,
 };
 
 module.exports = Species;

@@ -42,7 +42,7 @@ class Trait extends React.Component {
   handleExpandClick() {
     this.setState({ expanded: !this.state.expanded });
   }
-  
+
   render() {
     const { name, variants, classes } = this.props;
     return (
