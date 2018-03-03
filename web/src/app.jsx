@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { SpeciesShow, SpeciesList } from './components/Species';
 import App from './components/App';
 import rootReducer from './reducers';
+import './main.scss';
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
 render(

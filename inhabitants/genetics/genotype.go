@@ -23,7 +23,7 @@ func RandomGene() gene {
 	return gene(fmt.Sprintf("%06x", r))
 }
 
-// Chhromosome represents a collection of genes
+// Chromosome represents a collection of genes
 type Chromosome struct {
 	Genes []gene `json:"genes"`
 }
@@ -85,7 +85,6 @@ func (c *Chromosome) Express(e Expression) map[string]string {
 		k, _ := trait.Expression(set)
 		express[trait.Name] = k
 	}
-	//runtime.Breakpoint()
 	return express
 }
 

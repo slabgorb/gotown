@@ -1,8 +1,4 @@
-import 'typeface-raleway';
 import React from 'react';
-import axios from 'axios';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
@@ -25,7 +21,6 @@ class SpeciesList extends React.Component {
   componentWillMount() { speciesApi.getAll().then(data => this.setState({ list: data })); }
 
   handleClick(value) {
-    console.log(value)
     this.props.history.push(`/species/${value}`);
   }
 
@@ -37,7 +32,7 @@ class SpeciesList extends React.Component {
     return (
       <List component="nav">
         {this.state.list.map(item => (
-          <ListItem button divider key={item}  onClick={() => this.handleClick(item)}>
+          <ListItem button divider key={item} onClick={() => this.handleClick(item)}>
             <ListItemText primary={item} />
           </ListItem>
           ))}
@@ -49,6 +44,6 @@ class SpeciesList extends React.Component {
 SpeciesList.propTypes = {
   history: PropTypes.object.isRequired,
 
-}
+};
 
 export default withRouter(withStyles(styles)(SpeciesList));

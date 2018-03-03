@@ -46,7 +46,7 @@ type namerKey struct {
 
 var namers = make(map[namerKey]*words.Namer)
 
-type ContextWithSession struct {
+type contextWithSession struct {
 	echo.Context
 	session *bolt.DB
 }
@@ -112,7 +112,7 @@ func main() {
 
 	addSessionMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cws := &ContextWithSession{
+			cws := &contextWithSession{
 				Context: c,
 				session: session,
 			}
@@ -134,7 +134,8 @@ func main() {
 	e.Static("/styles", "web/styles")
 	e.Static("/scripts", "web/scripts")
 	e.Static("/data", "web/data")
-	e.File("/*", "web") // redirect all other requests to the front end so we can use normal looking urls
+	e.File("/manifest.json", "web/manifest.json")
+	e.File("/", "web")
 	e.Use(middleware.Logger())
 	e.Use(addSessionMiddleware)
 	e.Use(middleware.Recover())
@@ -148,12 +149,12 @@ func main() {
 }
 
 func listCulturesHandler(c echo.Context) error {
-	cc := c.(*ContextWithSession)
+	cc := c.(*contextWithSession)
 	return c.JSON(http.StatusOK, listBucketKeys("cultures", cc.session))
 }
 
 func showCulturesHandler(c echo.Context) error {
-	cc := c.(*ContextWithSession)
+	cc := c.(*contextWithSession)
 	culture := &inhabitants.Culture{}
 	err := cc.session.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("cultures"))
@@ -168,12 +169,12 @@ func showCulturesHandler(c echo.Context) error {
 }
 
 func listSpeciesHandler(c echo.Context) error {
-	cc := c.(*ContextWithSession)
+	cc := c.(*contextWithSession)
 	return c.JSON(http.StatusOK, listBucketKeys("species", cc.session))
 }
 
 func showSpeciesHandler(c echo.Context) error {
-	cc := c.(*ContextWithSession)
+	cc := c.(*contextWithSession)
 	fs := newFetchableSpecies()
 	err := fs.fetch(c.Param("name"), cc.session)
 	if err != nil {

@@ -42,12 +42,11 @@ func BenchmarkMaritalCandidates(b *testing.B) {
 		b.Randomize()
 		beings = append(beings, b)
 	}
-	var bc []*MaritalCandidate
 	chronology := timeline.NewChronology()
 	p := NewPopulation(beings, chronology, culture)
 	b.Run("mc benchmark", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			bc, _ = p.MaritalCandidates()
+			_, _ = p.MaritalCandidates()
 		}
 	})
 }

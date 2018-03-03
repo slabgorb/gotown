@@ -9,6 +9,7 @@ import (
 	"github.com/slabgorb/gotown/timeline"
 )
 
+// Name is the name of a being.
 type Name struct {
 	GivenName  string   `json:"given_name"`
 	FamilyName string   `json:"family_name"`
@@ -16,10 +17,12 @@ type Name struct {
 	Display    string   `json:"display_name"`
 }
 
+// OtherNames returns any other names a being may have as a space-separated list
 func (n *Name) OtherNames() string {
 	return strings.Join(n.Other, " ")
 }
 
+// NewName tries valiantly to create a formal name from a string
 func NewName(fullName string) *Name {
 	name := &Name{Display: fullName}
 	names := strings.Split(fullName, " ")
@@ -35,8 +38,11 @@ func NewName(fullName string) *Name {
 	return name
 }
 
+// Members is a set of Being
 type Members []*Being
 
+// Strings gets all the beings in the Members slice and maps them to their
+// string representation.
 func (m Members) Strings() []string {
 	var out []string
 	for _, b := range m {
@@ -45,10 +51,13 @@ func (m Members) Strings() []string {
 	return out
 }
 
+// String returns the strings of all the Beings in the slice and joins them with
+// commas.
 func (m Members) String() string {
 	return strings.Join(m.Strings(), ", ")
 }
 
+// Being represents any being, like a human, a vampire, whatever.
 type Being struct {
 	*Name
 	*Species
@@ -62,6 +71,7 @@ type Being struct {
 	Chronology *timeline.Chronology
 }
 
+// NewBeing initializes a being
 func NewBeing(s *Species, c *Culture) *Being {
 	return &Being{
 		Species:    s,
@@ -80,6 +90,7 @@ func (b *Being) genderedParent(gender Gender) *Being {
 	return nil
 }
 
+// MarshalJSON implements json.marshaler
 func (b *Being) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		Expression map[string]string         `json:"expression"`
@@ -104,14 +115,17 @@ func (b *Being) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// Father returns a male parent of the Being
 func (b *Being) Father() *Being {
 	return b.genderedParent(Male)
 }
 
+// Mother returns a female parent of the Being
 func (b *Being) Mother() *Being {
 	return b.genderedParent(Female)
 }
 
+// Randomize scrambles a Being randomly
 func (b *Being) Randomize() error {
 	if b.Species == nil {
 		return fmt.Errorf("Cannot randomize a being without a species")
@@ -123,22 +137,29 @@ func (b *Being) Randomize() error {
 	return nil
 }
 
+// RandomizeAge sets the being age to a random number, based on the passed-in
+// demographic slot.
 func (b *Being) RandomizeAge(slot int) {
 	b.Chronology.CurrentYear = b.Species.RandomAge(slot)
 }
 
+// RandomizeGender randomizes the Being's gender based on the possible genders
+// the species exposes.
 func (b *Being) RandomizeGender() {
 	b.Sex = b.Species.Genders[randomizer.Intn(len(b.Species.Genders))]
 }
 
+// RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName() {
 	b.Name = b.Culture.nameStrategies[b.Sex](b)
 }
 
+// RandomizeChromosome randomizes the being's chromosome.
 func (b *Being) RandomizeChromosome() {
 	b.Chromosome = genetics.RandomChromosome(20)
 }
 
+//
 func (b *Being) Express(e genetics.Expression) map[string]string {
 	return b.Chromosome.Express(e)
 }
