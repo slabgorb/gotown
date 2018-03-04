@@ -5,6 +5,7 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { SpeciesShow, SpeciesList } from './components/Species';
+import { CulturesShow, CulturesList } from './components/Culture';
 import App from './components/App';
 import rootReducer from './reducers';
 import './main.scss';
@@ -17,6 +18,8 @@ render(
         <App>
           <Route path="/species" component={SpeciesList} />
           <Route path="/species/:name" component={SpeciesShow} />
+          <Route path="/cultures" component={CulturesList} />
+          <Route path="/cultures/:name" component={CulturesShow} />
         </App>
       </BrowserRouter>
     </Provider>

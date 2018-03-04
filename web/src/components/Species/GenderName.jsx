@@ -18,4 +18,4 @@ GenderName.propTypes = {
 };
 
 
-module.exports = GenderName
+module.exports = GenderName;

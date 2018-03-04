@@ -1,9 +1,9 @@
 import axios from 'axios';
-import * as SpeciesTypes from './types';
+import * as types from '../../types';
 
-export const setSpecies = name => ({ type: SpeciesTypes.SELECT_SPECIES, name });
-export const requestSpecies = name => ({ type: SpeciesTypes.REQUEST_SPECIES, name });
-export const receiveSpecies = (name, data) => ({ type: SpeciesTypes.RECEIVE_SPECIES, name, data });
+export const setSpecies = name => ({ type: types.SELECT_SPECIES, name });
+export const requestSpecies = name => ({ type: types.REQUEST_SPECIES, name });
+export const receiveSpecies = (name, data) => ({ type: types.RECEIVE_SPECIES, name, data });
 
 export const fetchSpecies = name => (dispatch) => {
   dispatch(requestSpecies(name));

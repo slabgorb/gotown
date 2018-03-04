@@ -1,31 +1,17 @@
-import {
-  SELECT_SPECIES,
-  RECEIVE_SPECIES,
-  setSpecies
-} from '../components/Species/actions'
-const defaultSpecies = {
-  name: "",
-  genetics: {},
-}
+import * as types from '../types';
 
-const defaultArea = {
-  name: "",
-  residents: [],
-}
-
-const initialState = {isFetching: false, species: defaultSpecies, area: defaultArea}
+const initialState = { isFetching: false };
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
-    case SELECT_SPECIES:
-      return Object.assign({}, state, {isFetching: true})
-    case RECEIVE_SPECIES:
+    case types.SELECT_SPECIES:
+      return Object.assign({}, state, { isFetching: true });
+    case types.RECEIVE_SPECIES:
       return Object.assign({}, state, {
-        species: action.data
-      })
-
+        species: action.data,
+      });
     default:
-      return state
+      return state;
   }
 }
 

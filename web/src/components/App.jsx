@@ -1,8 +1,12 @@
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import { MuiThemeProvider, createMuiTheme, withStyles } from 'material-ui/styles';
 import Reboot from 'material-ui/Reboot';
 import React from 'react';
 import PropTypes from 'prop-types';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
+import Typography from 'material-ui/Typography';
 import SimpleBottomNavigation from './Nav/SimpleBottomNavigation';
+
 
 const theme = createMuiTheme({
   palette: {
@@ -22,12 +26,19 @@ const theme = createMuiTheme({
   },
 });
 
-const App = ({ children }) =>
+const App = ({ children, classes }) =>
   (
     <div>
       <Reboot>
         <MuiThemeProvider theme={theme}>
           <div>
+            <AppBar position="static">
+              <Toolbar>
+                <Typography variant="title" color="inherit" className={classes.flex}>
+                  Gotown
+                </Typography>
+              </Toolbar>
+            </AppBar>
             {children}
             <SimpleBottomNavigation />
           </div>
@@ -38,6 +49,7 @@ const App = ({ children }) =>
 
 App.propTypes = {
   children: PropTypes.node.isRequired,
+  classes: PropTypes.object.isRequired,
 };
 
-export default App;
+export default withStyles(theme)(App);

@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
 import List, { ListItem, ListItemText } from 'material-ui/List';
-import speciesApi from './api';
+import cultureApi from './api';
 
 const styles = () => {
 
 };
 
-class SpeciesList extends React.Component {
+class CultureList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -18,10 +18,10 @@ class SpeciesList extends React.Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
-  componentWillMount() { speciesApi.getAll().then(data => this.setState({ list: data })); }
+  componentWillMount() { cultureApi.getAll().then(data => this.setState({ list: data })); }
 
   handleClick(value) {
-    this.props.history.push(`/species/${value}`);
+    this.props.history.push(`/culture/${value}`);
   }
 
 
@@ -41,9 +41,9 @@ class SpeciesList extends React.Component {
   }
 }
 
-SpeciesList.propTypes = {
+CultureList.propTypes = {
   history: PropTypes.object.isRequired,
 
 };
 
-export default withRouter(withStyles(styles)(SpeciesList));
+export default withRouter(withStyles(styles)(CultureList));

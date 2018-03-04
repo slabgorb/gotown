@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-class culturesApi {
+class cultureApi {
   static getAll() {
     axios.get('/api/cultures').then(response => response.data).catch(error => error);
   }
@@ -9,4 +9,4 @@ class culturesApi {
   }
 }
 
-export default culturesApi;
+export default cultureApi;

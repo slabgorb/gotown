@@ -1,17 +1,16 @@
 import React from 'react';
 import Paper from 'material-ui/Paper';
+import Card, { CardHeader, CardContent, CardActions } from 'material-ui/Card';
 import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
-import Genetics from './Genetics';
-import GeneticsMap from './GeneticsMap';
-import speciesApi from './api';
+import cultureApi from './api';
 
-class Species extends React.Component {
+class Culture extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       name: props.match.params.name,
-      genetics: { traits: [] },
+      names: { family: [], genderNames: {} } ,
     };
     this.get = this.get.bind(this);
   }
@@ -27,32 +26,36 @@ class Species extends React.Component {
   }
 
   get({ name }) {
-    speciesApi.get(name)
+    cultureApi.get(name)
       .then((s) => {
-        this.setState({ name: s.name, genetics: s.expression });
+        this.setState({ 
+          name: s.name, 
+          names: { family: s.family_names, genderNames: s.gender_names } },
+        );
       });
   }
 
   render() {
-    if (this.state.genetics.traits.length === 0) {
-      return (<div />);
-    }
     return (
       <div>
         <Paper elevation={4}>
           <Typography variant="headline" component="h1">
             {this.state.name}
           </Typography>
-          <Genetics traits={this.state.genetics.traits} />
-          <GeneticsMap traits={this.state.genetics.traits} />
+          <Card>
+            <CardHeader title="Family Names"/>
+            <CardContent>
+              { this.state.names.family.map(f => (<p>{f}</p>))}
+            </CardContent>
+          </Card>
         </Paper>
       </div>
     );
   }
 }
 
-Species.propTypes = {
+Culture.propTypes = {
   match: PropTypes.object.isRequired,
 };
 
-module.exports = Species;
+module.exports = Culture;
