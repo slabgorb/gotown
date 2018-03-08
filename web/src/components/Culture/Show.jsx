@@ -1,9 +1,22 @@
 import React from 'react';
 import Paper from 'material-ui/Paper';
-import Card, { CardHeader, CardContent } from 'material-ui/Card';
+import { withStyles } from 'material-ui/styles';
 import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
+import inflection from 'inflection';
 import cultureApi from './api';
+import NameList from '../NameList';
+
+const styles = theme => ({
+  root: {
+    backgroundColor: theme.palette.background.paper,
+    fontFamily: 'Montserrat',
+  },
+  headline: {
+    fontFamily: 'Montserrat',
+    marginLeft: '20',
+  },
+});
 
 class Culture extends React.Component {
   constructor(props) {
@@ -11,6 +24,7 @@ class Culture extends React.Component {
     this.state = {
       name: props.match.params.name,
       names: { family: [], genderNames: {} },
+      loaded: false,
     };
     this.get = this.get.bind(this);
   }
@@ -31,23 +45,27 @@ class Culture extends React.Component {
         this.setState({
           name: s.name,
           names: { family: s.family_names, genderNames: s.gender_names },
+          loaded: true,
         });
       });
   }
 
+
   render() {
+    const { classes } = this.props;
+    if (!this.state.loaded) {
+      return (<div>loading</div>);
+    }
     return (
       <div>
-        <Paper elevation={4}>
-          <Typography variant="headline" component="h1">
-            {this.state.name}
+        <Paper elevation={4} className={classes.root}>
+          <Typography variant="headline" component="h1" className={classes.headline}>
+            {inflection.titleize(this.state.name)}
           </Typography>
-          <Card>
-            <CardHeader title="Family Names" />
-            <CardContent>
-              { this.state.names.family.map(f => (<p>{f}</p>))}
-            </CardContent>
-          </Card>
+          <div className="flex-container">
+            { (this.state.names.family.length > 0) ? (<NameList title="family names" listItems={this.state.names.family} />) : null}
+            {this.state.names.genderNames.map(gn => (<NameList title={inflection.titleize(`${gn.gender} Names`)} listItems={gn.given_names} />))}
+          </div>
         </Paper>
       </div>
     );
@@ -56,6 +74,7 @@ class Culture extends React.Component {
 
 Culture.propTypes = {
   match: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired,
 };
 
-module.exports = Culture;
+module.exports = withStyles(styles)(Culture);
