@@ -11,10 +11,26 @@ import (
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
-	Name              string
-	nameStrategies    map[Gender]NameStrategy
-	maritalStrategies []maritalStrategy
-	Namers            map[Gender]*words.Namer
+	Name              string                  `json:"name"`
+	NameStrategies    map[Gender]string       `json:"name_strategies"`
+	MaritalStrategies []string                `json:"marital_strategies"`
+	Namers            map[Gender]*words.Namer `json:"names"`
+}
+
+type cultureSerializer struct {
+	Name              string                  `json:"name"`
+	MaritalStrategies []string                `json:"marital_strategies"`
+	Patronymics       []string                `json:"patronymics"`
+	Matronymics       []string                `json:"matronymics"`
+	FamilyNames       []string                `json:"family_names"`
+	GenderNames       []genderNamesSerializer `json:"gender_names"`
+}
+
+type genderNamesSerializer struct {
+	Gender       Gender   `json:"gender"`
+	Patterns     []string `json:"patterns"`
+	GivenNames   []string `json:"given_names"`
+	NameStrategy string   `json:"name_strategy"`
 }
 
 // maritalStrategy is a function which indicates whether the two beings are
@@ -71,30 +87,36 @@ func (c *Culture) String() string {
 	return fmt.Sprintf("%s", c.Name)
 }
 
-func (c *Culture) UnmarshalJSON(data []byte) error {
-	type cultureLoader struct {
-		Name              string   `json:"name"`
-		MaritalStrategies []string `json:"marital_strategies"`
-		Patronymics       []string `json:"patronymics"`
-		Matronymics       []string `json:"matronymics"`
-		FamilyNames       []string `json:"family_names"`
-		GenderNames       []struct {
-			Gender       Gender   `json:"gender"`
-			Patterns     []string `json:"patterns"`
-			GivenNames   []string `json:"given_names"`
-			NameStrategy string   `json:"name_strategy"`
-		} `json:"gender_names"`
+func (c *Culture) MarshalJSON() ([]byte, error) {
+	cl := &cultureSerializer{}
+	cl.Name = c.Name
+	cl.MaritalStrategies = c.MaritalStrategies
+	cl.GenderNames = []genderNamesSerializer{}
+	for gender, gn := range c.Namers {
+		cl.Patronymics = gn.Dictionary["patronymics"]
+		cl.Matronymics = gn.Dictionary["matronymics"]
+		cl.FamilyNames = gn.Dictionary["familyNames"]
+		cl.GenderNames = append(cl.GenderNames, genderNamesSerializer{
+			Gender:       gender,
+			Patterns:     gn.PatternList(),
+			NameStrategy: c.NameStrategies[gender],
+			GivenNames:   gn.Dictionary["givenNames"],
+		})
+
 	}
-	cl := &cultureLoader{}
+	return json.Marshal(cl)
+}
+
+func (c *Culture) UnmarshalJSON(data []byte) error {
+
+	cl := &cultureSerializer{}
 	err := json.Unmarshal(data, cl)
 	if err != nil {
 		return err
 	}
 	c.Name = cl.Name
-	for _, ms := range cl.MaritalStrategies {
-		c.maritalStrategies = append(c.maritalStrategies, maritalStrategies[ms])
-	}
-	c.nameStrategies = make(map[Gender]NameStrategy)
+	c.MaritalStrategies = cl.MaritalStrategies
+	c.NameStrategies = make(map[Gender]string)
 	c.Namers = make(map[Gender]*words.Namer)
 	for _, gn := range cl.GenderNames {
 		w := words.NewWords()
@@ -103,7 +125,7 @@ func (c *Culture) UnmarshalJSON(data []byte) error {
 		w.AddList("givenNames", gn.GivenNames)
 		w.AddList("familyNames", cl.FamilyNames)
 		c.Namers[gn.Gender] = words.NewNamer(gn.Patterns, w, gn.NameStrategy)
-		c.nameStrategies[gn.Gender] = NameStrategies[gn.NameStrategy]
+		c.NameStrategies[gn.Gender] = gn.NameStrategy
 	}
 
 	return nil
@@ -111,15 +133,15 @@ func (c *Culture) UnmarshalJSON(data []byte) error {
 
 func (c *Culture) MaritalCandidate(a, b *Being) bool {
 	out := true
-	for _, s := range c.maritalStrategies {
-		out = out && s(a, b)
+	for _, s := range c.MaritalStrategies {
+		out = out && maritalStrategies[s](a, b)
 	}
 	return out
 }
 
 func (c *Culture) GetName(b *Being) *Name {
-	f := c.nameStrategies[b.Sex]
-	return f(b)
+	f := c.NameStrategies[b.Sex]
+	return NameStrategies[f](b)
 }
 
 var NameStrategies = map[string]NameStrategy{

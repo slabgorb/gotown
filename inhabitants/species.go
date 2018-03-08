@@ -9,32 +9,6 @@ import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 )
 
-type Gender string
-
-const (
-	Asexual Gender = "neuter"
-	Male    Gender = "male"
-	Female  Gender = "female"
-)
-
-func (g Gender) String() string {
-	return string(g)
-}
-
-func (g Gender) MarshalJSON() ([]byte, error) {
-	return json.Marshal(g.String())
-}
-
-func (g *Gender) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	*g = Gender(s)
-	return nil
-
-}
-
 type Fertility struct {
 	Start int
 	End   int

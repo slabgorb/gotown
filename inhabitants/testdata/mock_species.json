@@ -1,17 +1,44 @@
 {
   "name": "Human",
   "genders": ["male", "female"],
-  "demography": [
-    {"max_age": 14, "cumulative_percent":29},
-    {"max_age": 18, "cumulative_percent":36},
-    {"max_age": 26, "cumulative_percent":50},
-    {"max_age": 31, "cumulative_percent":58},
-    {"max_age": 41, "cumulative_percent":72},
-    {"max_age": 51, "cumulative_percent":84},
-    {"max_age": 61, "cumulative_percent":93},
-    {"max_age": 71, "cumulative_percent":98},
-    {"max_age": 100,"cumulative_percent": 100}
-  ],
+  "demography": {
+    "0": {
+      "max_age": 14,
+      "cumulative_percent": 29
+    },
+    "1": {
+      "max_age": 18,
+      "cumulative_percent": 36
+    },
+    "2": {
+      "max_age": 26,
+      "cumulative_percent": 50
+    },
+    "3": {
+      "max_age": 31,
+      "cumulative_percent": 58
+    },
+    "4": {
+      "max_age": 41,
+      "cumulative_percent": 72
+    },
+    "5": {
+      "max_age": 51,
+      "cumulative_percent": 84
+    },
+    "6": {
+      "max_age": 61,
+      "cumulative_percent": 93
+    },
+    "7": {
+      "max_age": 71,
+      "cumulative_percent": 98
+    },
+    "8": {
+      "max_age": 100,
+      "cumulative_percent": 100
+    }
+  },
   "expression":{
     "traits":[
       {

@@ -1,6 +1,6 @@
 import React from 'react';
 import Paper from 'material-ui/Paper';
-import Card, { CardHeader, CardContent, CardActions } from 'material-ui/Card';
+import Card, { CardHeader, CardContent } from 'material-ui/Card';
 import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
 import cultureApi from './api';
@@ -10,7 +10,7 @@ class Culture extends React.Component {
     super(props);
     this.state = {
       name: props.match.params.name,
-      names: { family: [], genderNames: {} } ,
+      names: { family: [], genderNames: {} },
     };
     this.get = this.get.bind(this);
   }
@@ -28,10 +28,10 @@ class Culture extends React.Component {
   get({ name }) {
     cultureApi.get(name)
       .then((s) => {
-        this.setState({ 
-          name: s.name, 
-          names: { family: s.family_names, genderNames: s.gender_names } },
-        );
+        this.setState({
+          name: s.name,
+          names: { family: s.family_names, genderNames: s.gender_names },
+        });
       });
   }
 
@@ -43,7 +43,7 @@ class Culture extends React.Component {
             {this.state.name}
           </Typography>
           <Card>
-            <CardHeader title="Family Names"/>
+            <CardHeader title="Family Names" />
             <CardContent>
               { this.state.names.family.map(f => (<p>{f}</p>))}
             </CardContent>

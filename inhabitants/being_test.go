@@ -19,7 +19,7 @@ func TestName(t *testing.T) {
 	if culture == nil {
 		t.Error("culture not loaded")
 	}
-	expected := "Hauk Haukson"
+	expected := "Arnulf Arnulfson"
 	being := &Being{Species: species, Culture: culture, Sex: Male}
 	words.SetRandomizer(random.NewMock())
 	being.RandomizeName()

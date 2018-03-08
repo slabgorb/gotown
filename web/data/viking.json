@@ -1,6 +1,7 @@
 {
    "name":"viking",
    "species": "human",
+   "marital_strategies": ["heterosexual","monogamous"],
    "patronymics":[
       "son"
    ],

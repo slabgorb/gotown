@@ -9,9 +9,17 @@ import (
 )
 
 type Namer struct {
-	Patterns []Pattern
-	*Words
-	NameStrategy string
+	Patterns     []Pattern `json:"patterns"`
+	*Words       `json:"words"`
+	NameStrategy string `json:"name_strategy"`
+}
+
+func (n *Namer) PatternList() []string {
+	pl := []string{}
+	for _, p := range n.Patterns {
+		pl = append(pl, string(p))
+	}
+	return pl
 }
 
 func (n *Namer) Template() *template.Template {

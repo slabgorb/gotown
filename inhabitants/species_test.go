@@ -27,7 +27,7 @@ func TestGenders(t *testing.T) {
 	b := &Being{Sex: Male, Species: mockSpecies, Culture: culture}
 	name := culture.GetName(b)
 	nameDisplay := name.Display
-	expected := "Hauk Haukson"
+	expected := "Arnulf Arnulfson"
 	if nameDisplay != expected {
 		t.Errorf("expected %s got %s", expected, nameDisplay)
 	}

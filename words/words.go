@@ -18,8 +18,8 @@ func chooseRandomString(s []string) string {
 }
 
 type Words struct {
-	Dictionary map[string][]string
-	Backup     *Words
+	Dictionary map[string][]string `json:"dictionary"`
+	Backup     *Words              `json:"-"`
 }
 
 func (w *Words) Noun() string {

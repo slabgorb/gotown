@@ -151,7 +151,7 @@ func (b *Being) RandomizeGender() {
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName() {
-	b.Name = b.Culture.nameStrategies[b.Sex](b)
+	b.Name = NameStrategies[b.Culture.NameStrategies[b.Sex]](b)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.

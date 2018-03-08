@@ -31,6 +31,7 @@ func helperMockCulture(t *testing.T, name string) *Culture {
 	data := helperLoadBytes(t, fmt.Sprintf("mock_culture_%s.json", name))
 	c := &Culture{}
 	err := json.Unmarshal(data, c)
+	t.Logf("%#v", c)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -18,10 +18,12 @@ class CultureList extends React.Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
-  componentWillMount() { cultureApi.getAll().then(data => this.setState({ list: data })); }
+  componentWillMount() {
+    cultureApi.getAll().then(data => this.setState({ list: data }));
+  }
 
   handleClick(value) {
-    this.props.history.push(`/culture/${value}`);
+    this.props.history.push(`/cultures/${value}`);
   }
 
 

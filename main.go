@@ -159,12 +159,12 @@ func showCulturesHandler(c echo.Context) error {
 	err := cc.session.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("cultures"))
 		v := b.Get([]byte(c.Param("name")))
-		c.Echo().Logger.Debug(string(v))
 		return json.Unmarshal(v, culture)
 	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	c.Echo().Logger.Debug(fmt.Sprintf("%#v", culture))
 	return c.JSON(http.StatusOK, culture)
 }
 

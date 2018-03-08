@@ -44,7 +44,7 @@ func TestAddTo(t *testing.T) {
 func BenchmarkPop(b *testing.B) {
 	culture := helperMockCulture(b, "italian")
 
-	s := inhabitants.NewSpecies("Human", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, nil)
+	s := inhabitants.NewSpecies("Human", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, nil, nil)
 	area := NewArea(Town, nil, nil)
 	for i := 0; i < b.N; i++ {
 		being := inhabitants.Being{Species: s, Culture: culture}
