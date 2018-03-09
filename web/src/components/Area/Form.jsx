@@ -3,14 +3,25 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Radio, { RadioGroup } from 'material-ui/Radio';
 import { FormLabel, FormControl, FormControlLabel } from 'material-ui/Form';
+import Button from 'material-ui/Button';
+import Grid from 'material-ui/Grid';
+import IconButton from 'material-ui/IconButton';
+import TextField from 'material-ui/TextField';
+import AutoRenewIcon from 'material-ui-icons/Autorenew';
 import inflection from 'inflection';
 import areaApi from './api';
 
-const styles = () => ({
+const styles = theme => ({
   root: {
     padding: '15',
   },
   formControl: {},
+  textField: {},
+  avatar: {
+  },
+  button: {
+    margin: theme.spacing.unit,
+  },
 });
 
 
@@ -21,7 +32,10 @@ class Form extends React.Component {
       cultures: [],
       species: [],
       loaded: false,
+      name: '',
     };
+    this.clickRandomTownName = this.clickRandomTownName.bind(this);
+    this.submitForm = this.submitForm.bind(this);
   }
 
   componentWillMount() {
@@ -39,11 +53,31 @@ class Form extends React.Component {
   }
 
   handleChange(control) {
-    return (event, value) => {
+    return (event) => {
       this.setState({
-        [control]: value,
+        [control]: event.target.value,
       });
     };
+  }
+
+  submitForm(event) {
+    event.preventDefault();
+    const params = {
+      culture: this.state.currentCulture,
+      species: this.state.currentSpecies,
+      name: this.state.name,
+    };
+    console.log('submitted');
+    console.log(event);
+    areaApi.create(params).then(data => console.log(data))
+  }
+
+  clickRandomTownName() {
+    areaApi.name().then((name) => {
+      this.setState({
+        name,
+      });
+    });
   }
 
   radioGroup(legend, name, list, value, onChange) {
@@ -53,7 +87,12 @@ class Form extends React.Component {
         <FormLabel component="legend">{legend}</FormLabel>
         <RadioGroup name={name} value={value} onChange={onChange}>
           {list.map(f => (
-            <FormControlLabel key={f} value={f} control={<Radio />} label={inflection.titleize(f)} />
+            <FormControlLabel
+              key={f}
+              value={f}
+              control={<Radio />}
+              label={inflection.titleize(f)}
+            />
        ))}
         </RadioGroup>
       </FormControl>
@@ -66,10 +105,28 @@ class Form extends React.Component {
       return (<div>Loading</div>);
     }
     return (
-      <div className={classes.root}>
-        {this.radioGroup('Species', 'species', this.state.species, this.state.currentSpecies, this.handleChange('currentSpecies'))}
-        {this.radioGroup('Culture', 'culture', this.state.cultures, this.state.currentCulture, this.handleChange('currentCulture'))}
-      </div>
+      <form className={classes.root} onSubmit={this.submitForm}>
+        <Grid container>
+          <Grid item xs={6}>
+            <div className="flex-container">
+              <TextField id="name-tf" label="Name" placeholder="Name" value={this.state.name} className={classes.textField} onChange={this.handleChange('name')} />
+              <IconButton className={classes.avatar} onClick={this.clickRandomTownName}>
+                <AutoRenewIcon />
+              </IconButton>
+            </div>
+          </Grid>
+          <Grid item xs={6}>
+            <Button variant="raised" color="primary" type="submit" className={classes.button}>Create</Button>
+          </Grid>
+          <Grid item xs={6}>
+            {this.radioGroup('Species', 'species', this.state.species, this.state.currentSpecies, this.handleChange('currentSpecies'))}
+          </Grid>
+          <Grid item xs={6}>
+            {this.radioGroup('Culture', 'culture', this.state.cultures, this.state.currentCulture, this.handleChange('currentCulture'))}
+          </Grid>
+
+        </Grid>
+      </form>
     );
   }
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/locations"
+	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -126,8 +127,8 @@ func main() {
 	api.GET("/cultures/:name", showCulturesHandler)
 	api.GET("/species", listSpeciesHandler)
 	api.GET("/species/:name", showSpeciesHandler)
-	api.GET("/town_names", townNamesHandler)
-	//e.GET("/town", townHandler)
+	api.GET("/town/name", townNameHandler)
+	api.POST("/towns/create", townHandler)
 	api.GET("/being", beingHandler)
 	//e.GET("/household", householdHandler)
 	api.GET("/random/chromosome", randomChromosomeHandler)
@@ -246,49 +247,37 @@ func loadCulture(name string) (*inhabitants.Culture, error) {
 // 	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
 // }
 
-// func townHandler(c echo.Context) error {
-// 	culture, err := loadCulture(c.QueryParam("culture"))
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, err)
-// 	}
-// 	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", "human"))
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
-// 	}
-// 	s, err := inhabitants.LoadSpecies(r)
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
-// 	}
-// 	area := locations.NewArea(locations.Town, nil, nil)
-// 	count := 100
-// 	var wg sync.WaitGroup
-// 	wg.Add(count)
-// 	for i := 0; i < count; i++ {
-// 		go func(wg *sync.WaitGroup) {
-// 			being := inhabitants.Being{Species: &s, Culture: culture, Chronology: timeline.NewChronology()}
-// 			being.Randomize()
-// 			area.Add(&being)
-// 			wg.Done()
-// 		}(&wg)
-// 	}
-// 	wg.Wait()
-// 	return c.JSON(http.StatusOK, area)
-
-// }
-
-func townNamesHandler(c echo.Context) error {
-	count := 1000
+func townHandler(c echo.Context) error {
+	cc := c.(*contextWithSession)
+	fc := fetchableCulture{culture: &inhabitants.Culture{}}
+	err := fc.fetch(c.Param("culture"), cc.session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	culture := fc.culture
+	fs := fetchableSpecies{species: &inhabitants.Species{}}
+	err = fs.fetch(c.Param("species"), cc.session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	species := fs.species
+	area := locations.NewArea(locations.Town, nil, nil)
+	count := 100
 	var wg sync.WaitGroup
-	names := []string{}
 	wg.Add(count)
 	for i := 0; i < count; i++ {
-		go func() {
-			defer wg.Done()
-			area := locations.NewArea(locations.Town, nil, nil)
-			names = append(names, area.Name)
-		}()
-
+		go func(wg *sync.WaitGroup) {
+			being := inhabitants.Being{Species: species, Culture: culture, Chronology: timeline.NewChronology()}
+			being.Randomize()
+			area.Add(&being)
+			wg.Done()
+		}(&wg)
 	}
 	wg.Wait()
-	return c.JSON(http.StatusOK, names)
+	return c.JSON(http.StatusOK, area)
+}
+
+func townNameHandler(c echo.Context) error {
+	area := locations.NewArea(locations.Town, nil, nil)
+	return c.JSON(http.StatusOK, area.Name)
 }
