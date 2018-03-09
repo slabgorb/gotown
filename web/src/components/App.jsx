@@ -7,22 +7,37 @@ import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import SimpleBottomNavigation from './Nav/SimpleBottomNavigation';
 
+const ralewayFF = ({ fontFamily: 'Raleway'});
+const montserratFF = ({ fontFamily: 'Montserrat'});
 
 const theme = createMuiTheme({
   palette: {
     primary: {
-      main: '#37474f',
-      light: '#62727b',
-      dark: '#102027',
+      light: '#757ce8',
+      main: '#3f50b5',
+      dark: '#002884',
       contrastText: '#fff',
     },
     secondary: {
-      main: '#afbdc4',
-      light: '#e1eff7',
-      dark: '#808d94',
+      light: '#ff7961',
+      main: '#f44336',
+      dark: '#ba000d',
       contrastText: '#000',
     },
 
+
+  },
+  typography: {
+    fontFamily: 'Raleway',
+    body1: ralewayFF,
+    body2: ralewayFF,
+    display1: ralewayFF,
+    display2: ralewayFF,
+    display3: ralewayFF,
+    display4: ralewayFF,
+    caption: ralewayFF,
+    headline: montserratFF,
+    title: montserratFF,
   },
 });
 

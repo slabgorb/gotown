@@ -6,6 +6,7 @@ import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { SpeciesShow, SpeciesList } from './components/Species';
 import { CulturesShow, CulturesList } from './components/Culture';
+import { TownForm } from './components/Area';
 import App from './components/App';
 import rootReducer from './reducers';
 import './main.scss';
@@ -20,6 +21,7 @@ render(
           <Route path="/species/:name" component={SpeciesShow} />
           <Route path="/cultures" component={CulturesList} />
           <Route path="/cultures/:name" component={CulturesShow} />
+          <Route path="/towns" component={TownForm} />
         </App>
       </BrowserRouter>
     </Provider>

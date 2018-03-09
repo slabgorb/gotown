@@ -1,14 +1,16 @@
 package words
 
+// DEPRECATED in favor of cultural names, but left for testing inside words package
+
 var (
-	NorseFemaleNameWords *Words = NewWords()
-	NorseMaleNameWords   *Words = NewWords()
-	NorseMaleNamer       *Namer = NewNamer(
+	NorseFemaleNameWords = NewWords()
+	NorseMaleNameWords   = NewWords()
+	NorseMaleNamer       = NewNamer(
 		[]string{
 			"{{.GivenName}} {{.FamilyName}}{{.Patronymic}}",
 		}, NorseMaleNameWords, "patronymic",
 	)
-	NorseFemaleNamer *Namer = NewNamer(
+	NorseFemaleNamer = NewNamer(
 		[]string{
 			"{{.GivenName}} {{.FamilyName}}{{.Matronymic}}",
 		}, NorseFemaleNameWords, "matronymic",

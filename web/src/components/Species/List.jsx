@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
 import List, { ListItem, ListItemText } from 'material-ui/List';
+import inflection from 'inflection';
 import speciesApi from './api';
 
 const styles = () => {
@@ -33,7 +34,7 @@ class SpeciesList extends React.Component {
       <List component="nav">
         {this.state.list.map(item => (
           <ListItem button divider key={item} onClick={() => this.handleClick(item)}>
-            <ListItemText primary={item} />
+            <ListItemText primary={inflection.titleize(item)} />
           </ListItem>
           ))}
       </List>
