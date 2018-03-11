@@ -78,7 +78,11 @@ func doFetch(j interface{}, bucket string, key string, db *bolt.DB) error {
 	return db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		v := b.Get([]byte(key))
-		return json.Unmarshal(v, j)
+		err := json.Unmarshal(v, j)
+		if err != nil {
+			return fmt.Errorf("Error unmarshaling %s %s", bucket, key)
+		}
+		return nil
 	})
 }
 
@@ -153,14 +157,14 @@ func main() {
 
 func listCulturesHandler(c echo.Context) error {
 	cc := c.(*contextWithSession)
-	return c.JSON(http.StatusOK, listBucketKeys("cultures", cc.session))
+	return c.JSON(http.StatusOK, listBucketKeys(cultureBucket, cc.session))
 }
 
 func showCulturesHandler(c echo.Context) error {
 	cc := c.(*contextWithSession)
 	culture := &inhabitants.Culture{}
 	err := cc.session.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("cultures"))
+		b := tx.Bucket([]byte(cultureBucket))
 		v := b.Get([]byte(c.Param("name")))
 		return json.Unmarshal(v, culture)
 	})
@@ -173,7 +177,7 @@ func showCulturesHandler(c echo.Context) error {
 
 func listSpeciesHandler(c echo.Context) error {
 	cc := c.(*contextWithSession)
-	return c.JSON(http.StatusOK, listBucketKeys("species", cc.session))
+	return c.JSON(http.StatusOK, listBucketKeys(speciesBucket, cc.session))
 }
 
 func showSpeciesHandler(c echo.Context) error {
@@ -181,7 +185,6 @@ func showSpeciesHandler(c echo.Context) error {
 	fs := newFetchableSpecies()
 	err := fs.fetch(c.Param("name"), cc.session)
 	if err != nil {
-		panic(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, fs.species)
@@ -247,33 +250,58 @@ func loadCulture(name string) (*inhabitants.Culture, error) {
 // 	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
 // }
 
+type townHandlerRequest struct {
+	Culture string `json:"culture" form:"culture" query:"culture"`
+	Species string `json:"species" form:"species" query:"species"`
+	Name    string `json:"name" form:"name" query:"name"`
+}
+
 func townHandler(c echo.Context) error {
+	c.Logger().Debug("Ok in handler")
 	cc := c.(*contextWithSession)
+	req := new(townHandlerRequest)
+	if err := cc.Bind(req); err != nil {
+		c.Logger().Debug("Error in binding")
+		c.Logger().Debug(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	c.Logger().Debug(req)
 	fc := fetchableCulture{culture: &inhabitants.Culture{}}
-	err := fc.fetch(c.Param("culture"), cc.session)
-	if err != nil {
+	err := fc.fetch(req.Culture, cc.session)
+	if err != nil || fc.culture == nil {
+		c.Logger().Debug("error fetching culture")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	culture := fc.culture
 	fs := fetchableSpecies{species: &inhabitants.Species{}}
-	err = fs.fetch(c.Param("species"), cc.session)
-	if err != nil {
+	err = fs.fetch(req.Species, cc.session)
+	if err != nil || fs.species == nil {
+		c.Logger().Debug("error fetching species")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	species := fs.species
+	c.Logger().Debug(culture)
+	c.Logger().Debug(species)
 	area := locations.NewArea(locations.Town, nil, nil)
 	count := 100
 	var wg sync.WaitGroup
 	wg.Add(count)
+	c.Logger().Debug("got past prep, working on making")
 	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
 			being := inhabitants.Being{Species: species, Culture: culture, Chronology: timeline.NewChronology()}
-			being.Randomize()
+			if err := being.Randomize(); err != nil {
+				c.Logger().Debug("error in randomizing")
+				c.Logger().Debug(err)
+			}
+			c.Logger().Debugf("%s", being.Name.Display)
+
 			area.Add(&being)
 			wg.Done()
 		}(&wg)
 	}
 	wg.Wait()
+	c.Logger().Debug(area)
 	return c.JSON(http.StatusOK, area)
 }
 

@@ -1,6 +1,7 @@
 package locations_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/slabgorb/gotown/inhabitants"
@@ -12,6 +13,14 @@ import (
 func init() {
 	SetRandomizer(random.NewMock())
 	words.SetRandomizer(random.NewMock())
+}
+
+func TestJsonEncode(t *testing.T) {
+	area := NewArea(Town, nil, nil)
+	_, err := json.Marshal(area)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestAddTo(t *testing.T) {
