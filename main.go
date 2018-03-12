@@ -55,7 +55,12 @@ type contextWithSession struct {
 const (
 	cultureBucket = "cultures"
 	speciesBucket = "species"
+	areaBucket    = "area"
 )
+
+type saveable interface {
+	save(key string, db *bolt.DB) error
+}
 
 type fetchable interface {
 	fetch(key string, db *bolt.DB) error
@@ -72,6 +77,20 @@ func listBucketKeys(bucket string, db *bolt.DB) []string {
 		return nil
 	})
 	return names
+}
+
+func doSave(j interface{}, bucket string, key string, db *bolt.DB) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		if err != nil {
+			return err
+		}
+		encoded, err := json.Marshal(j)
+		if err != nil {
+			return err
+		}
+		return b.Put([]byte(key), encoded)
+	})
 }
 
 func doFetch(j interface{}, bucket string, key string, db *bolt.DB) error {
@@ -96,6 +115,10 @@ func (f fetchableCulture) fetch(key string, db *bolt.DB) error {
 	return doFetch(f.culture, cultureBucket, key, db)
 }
 
+func (f fetchableCulture) save(key string, db *bolt.DB) error {
+	return doSave(f.culture, cultureBucket, key, db)
+}
+
 type fetchableSpecies struct{ species *inhabitants.Species }
 
 func newFetchableSpecies() fetchableSpecies {
@@ -104,6 +127,24 @@ func newFetchableSpecies() fetchableSpecies {
 
 func (f fetchableSpecies) fetch(key string, db *bolt.DB) error {
 	return doFetch(f.species, speciesBucket, key, db)
+}
+
+func (f fetchableSpecies) save(key string, db *bolt.DB) error {
+	return doSave(f.species, speciesBucket, key, db)
+}
+
+type fetchableArea struct{ area *locations.Area }
+
+func newFetchableArea() fetchableArea {
+	return fetchableArea{area: &locations.Area{}}
+}
+
+func (f fetchableArea) fetch(key string, db *bolt.DB) error {
+	return doFetch(f.area, areaBucket, key, db)
+}
+
+func (f fetchableArea) save(key string, db *bolt.DB) error {
+	return doSave(f.area, areaBucket, key, db)
 }
 
 func main() {
@@ -132,6 +173,8 @@ func main() {
 	api.GET("/species", listSpeciesHandler)
 	api.GET("/species/:name", showSpeciesHandler)
 	api.GET("/town/name", townNameHandler)
+	api.GET("/towns", listAreasHandler)
+	api.GET("/towns/:name", showAreaHandler)
 	api.POST("/towns/create", townHandler)
 	api.GET("/being", beingHandler)
 	//e.GET("/household", householdHandler)
@@ -188,6 +231,21 @@ func showSpeciesHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, fs.species)
+}
+
+func listAreasHandler(c echo.Context) error {
+	cc := c.(*contextWithSession)
+	return c.JSON(http.StatusOK, listBucketKeys(areaBucket, cc.session))
+}
+
+func showAreaHandler(c echo.Context) error {
+	cc := c.(*contextWithSession)
+	fs := newFetchableArea()
+	err := fs.fetch(c.Param("name"), cc.session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, fs.area)
 }
 
 func beingHandler(c echo.Context) error {
@@ -257,51 +315,43 @@ type townHandlerRequest struct {
 }
 
 func townHandler(c echo.Context) error {
-	c.Logger().Debug("Ok in handler")
 	cc := c.(*contextWithSession)
 	req := new(townHandlerRequest)
 	if err := cc.Bind(req); err != nil {
-		c.Logger().Debug("Error in binding")
-		c.Logger().Debug(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	c.Logger().Debug(req)
 	fc := fetchableCulture{culture: &inhabitants.Culture{}}
 	err := fc.fetch(req.Culture, cc.session)
 	if err != nil || fc.culture == nil {
-		c.Logger().Debug("error fetching culture")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	culture := fc.culture
 	fs := fetchableSpecies{species: &inhabitants.Species{}}
 	err = fs.fetch(req.Species, cc.session)
 	if err != nil || fs.species == nil {
-		c.Logger().Debug("error fetching species")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	species := fs.species
-	c.Logger().Debug(culture)
-	c.Logger().Debug(species)
 	area := locations.NewArea(locations.Town, nil, nil)
+	if req.Name != "" {
+		area.Name = req.Name
+	}
 	count := 100
 	var wg sync.WaitGroup
 	wg.Add(count)
-	c.Logger().Debug("got past prep, working on making")
 	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
 			being := inhabitants.Being{Species: species, Culture: culture, Chronology: timeline.NewChronology()}
-			if err := being.Randomize(); err != nil {
-				c.Logger().Debug("error in randomizing")
-				c.Logger().Debug(err)
-			}
-			c.Logger().Debugf("%s", being.Name.Display)
-
+			being.Randomize()
 			area.Add(&being)
 			wg.Done()
 		}(&wg)
 	}
 	wg.Wait()
-	c.Logger().Debug(area)
+	fa := &fetchableArea{area: area}
+	if err := fa.save(area.Name, cc.session); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 	return c.JSON(http.StatusOK, area)
 }
 

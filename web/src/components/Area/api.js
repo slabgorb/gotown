@@ -10,8 +10,13 @@ class areaApi {
     return cultureApi.getAll();
   }
   static get(name) {
-    return axios.get(`/api/town/${name}`).then(resp => resp.data);
+    return axios.get(`/api/towns/${name}`).then(resp => resp.data);
   }
+
+  static getAll() {
+    return axios.get('api/towns').then(resp => resp.data);
+  }
+
   static create(params) {
     return axios.post('/api/towns/create', params).then(resp => resp.data);
   }

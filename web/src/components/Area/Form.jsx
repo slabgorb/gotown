@@ -33,6 +33,8 @@ class Form extends React.Component {
       species: [],
       loaded: false,
       name: '',
+      currentCulture: null,
+      currentSpecies: null, 
     };
     this.clickRandomTownName = this.clickRandomTownName.bind(this);
     this.submitForm = this.submitForm.bind(this);
@@ -67,8 +69,6 @@ class Form extends React.Component {
       species: this.state.currentSpecies,
       name: this.state.name,
     };
-    console.log('submitted');
-    console.log(event);
     areaApi.create(params).then(data => console.log(data))
   }
 
@@ -116,7 +116,7 @@ class Form extends React.Component {
             </div>
           </Grid>
           <Grid item xs={6}>
-            <Button variant="raised" color="primary" type="submit" className={classes.button}>Create</Button>
+            <Button variant="raised" color="primary" type="submit" disabled={!(this.state.currentCulture && this.state.currentSpecies)} className={classes.button}>Create</Button>
           </Grid>
           <Grid item xs={6}>
             {this.radioGroup('Species', 'species', this.state.species, this.state.currentSpecies, this.handleChange('currentSpecies'))}

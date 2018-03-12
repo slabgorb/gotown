@@ -6,11 +6,11 @@ const styles = () => ({
 
 });
 
-class Show extends React.Component {
+class AreaShow extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
+      name: this.props.name,
     };
   }
 
@@ -21,6 +21,10 @@ class Show extends React.Component {
       });
     });
   }
+
+  render() {
+    return (<div>{this.state.name}</div>);
+  }
 }
 
-export default withStyles(styles)(Show)
+export default withStyles(styles)(AreaShow);
