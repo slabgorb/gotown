@@ -93,16 +93,17 @@ func main() {
 	e.File("/manifest.json", "web/manifest.json")
 	e.File("/", "web")
 	e.File("/*", "web/index.html")
-	e.Use(middleware.Logger())
 	e.Use(addSessionMiddleware)
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
-
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "${time_rfc3339} ${method} ${uri} => ${status} ${latency_human}\n${query} ${form}",
+	}))
 	e.Logger.SetLevel(log.DEBUG)
-	e.Logger.Fatal(e.Start(":8003"))
+	e.Start(":8003")
 }
 
 func listCulturesHandler(c echo.Context) error {
@@ -147,8 +148,8 @@ func deleteAreaHandler(c echo.Context) error {
 	if err := cc.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	a := locations.Area{}
-	a.Name = req.Name
+	a := locations.NewArea(locations.Hut, nil, nil, nil) // TODO: rethink this initializer!
+	a.Habitation.Name = req.Name
 	err := a.Delete()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
