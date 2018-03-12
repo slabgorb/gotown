@@ -59,7 +59,7 @@ func (m Members) String() string {
 
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	*Name
+	*Name `json:"name"`
 	*Species
 	*Culture
 	Parents    Members
@@ -103,6 +103,7 @@ func (b *Being) MarshalJSON() ([]byte, error) {
 		Living     bool                      `json:"alive"`
 		Events     map[int][]*timeline.Event `json:"events"`
 		Culture    *Culture                  `json:"culture"`
+		Name       *Name                     `json:"name"`
 	}{
 		Expression: b.Expression(),
 		Age:        b.Age(),
@@ -114,6 +115,7 @@ func (b *Being) MarshalJSON() ([]byte, error) {
 		Living:     !b.Dead,
 		Events:     b.Chronology.Events,
 		Culture:    b.Culture,
+		Name:       b.Name,
 	})
 }
 

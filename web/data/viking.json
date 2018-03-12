@@ -16,6 +16,7 @@
          "patterns":[
             "{{.GivenName}} {{.FamilyName}}{{.Patronymic}}"
          ],
+         "name_strategy": "patronymic",
          "given_names":[
             "Aasbjorn",
             "Aasgeir",
@@ -357,6 +358,7 @@
          "patterns":[
             "{{.GivenName}} {{.FamilyName}}{{.Matronymic}}"
          ],
+         "name_strategy": "matronymic",
          "given_names":[
             "Aadny",
             "Aafrid",

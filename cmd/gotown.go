@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,6 +10,8 @@ import (
 	"sync"
 	"text/tabwriter"
 	"time"
+
+	"github.com/slabgorb/gotown/persist"
 
 	"github.com/abiosoft/ishell"
 	bolt "github.com/coreos/bbolt"
@@ -28,6 +29,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	persist.SetDB(session)
 	defer session.Close()
 	shell := ishell.New()
 	commandList := []*ishell.Cmd{
@@ -129,17 +131,7 @@ func tickCommand(ctx context.Context, session *bolt.DB) *ishell.Cmd {
 }
 
 func doSaveCulture(culture *inhabitants.Culture, db *bolt.DB) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte("cultures"))
-		if err != nil {
-			return err
-		}
-		encoded, err := json.Marshal(culture)
-		if err != nil {
-			return err
-		}
-		return b.Put([]byte(culture.Name), encoded)
-	})
+	return culture.Save()
 }
 
 func doLoadCulture(name string, db *bolt.DB) error {
@@ -209,17 +201,7 @@ func doLoadSpecies(name string, db *bolt.DB) error {
 }
 
 func doSaveSpecies(species *inhabitants.Species, db *bolt.DB) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte("species"))
-		if err != nil {
-			return err
-		}
-		encoded, err := json.Marshal(species)
-		if err != nil {
-			return err
-		}
-		return b.Put([]byte(species.Name), encoded)
-	})
+	return species.Save()
 }
 
 func showTown(c *ishell.Context) {
@@ -256,7 +238,7 @@ func createTown(c *ishell.Context) {
 		c.Println(err)
 		return
 	}
-	area := locations.NewArea(locations.Town, nil, nil)
+	area := locations.NewArea(locations.Town, currentCulture, nil, nil)
 	var wg sync.WaitGroup
 	wg.Add(pop)
 	for i := 0; i < pop; i++ {

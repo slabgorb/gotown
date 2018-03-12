@@ -100,7 +100,7 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${time_rfc3339} ${method} ${uri} => ${status} ${latency_human}\n${query} ${form}",
+		Format: "${time_rfc3339} ${method} ${uri}\t=>\t${status}\t${latency_human}\n${query} ${form}",
 	}))
 	e.Logger.SetLevel(log.DEBUG)
 	e.Start(":8003")
