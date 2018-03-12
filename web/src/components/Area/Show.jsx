@@ -1,16 +1,17 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import areaApi from './api';
 
 const styles = () => ({
-
+  root: {},
 });
 
 class AreaShow extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: this.props.name,
+      name: props.match.params.name,
     };
   }
 
@@ -23,8 +24,15 @@ class AreaShow extends React.Component {
   }
 
   render() {
-    return (<div>{this.state.name}</div>);
+    const { classes } = this.props;
+    return (<div className={ classes.root }>{this.state.name}</div>);
   }
 }
+
+AreaShow.propTypes = {
+  match: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired,
+};
+
 
 export default withStyles(styles)(AreaShow);

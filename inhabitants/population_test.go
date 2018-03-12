@@ -1,6 +1,7 @@
 package inhabitants_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"testing"
@@ -8,6 +9,21 @@ import (
 	. "github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/timeline"
 )
+
+func TestSerialization(t *testing.T) {
+	mockCulture := helperMockCulture(t, "italian")
+	p := NewPopulation([]*Being{}, nil, mockCulture)
+	j, err := json.Marshal(p)
+	if err != nil {
+		t.Error(err)
+	}
+	q := &Population{}
+	err = json.Unmarshal(j, q)
+	if err != nil {
+		t.Error(err)
+	}
+
+}
 
 func TestAging(t *testing.T) {
 	mockSpecies := helperMockSpecies(t)

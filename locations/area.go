@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/persist"
+	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -16,7 +18,32 @@ type Area struct {
 	Enclosures map[string]*Area `json:"enclosures"`
 }
 
-func NewArea(size AreaSize, ruler *inhabitants.Being, location *Area) *Area {
+// GetBucket implements persist.Persistable
+func (a *Area) GetBucket() persist.Bucket {
+	return persist.AreaBucket
+}
+
+// GetKey implements persist.Persistable
+func (a *Area) GetKey() string {
+	return a.Habitation.Name
+}
+
+// Save implements persist.Persistable
+func (a *Area) Save() error {
+	return persist.DoSave(a)
+}
+
+// Delete implements persist.Persistable
+func (a *Area) Delete() error {
+	return persist.DoDelete(a)
+}
+
+// Fetch implements persist.Persistable
+func (a *Area) Fetch() error {
+	return persist.DoFetch(a)
+}
+
+func NewArea(size AreaSize, culture *inhabitants.Culture, ruler *inhabitants.Being, location *Area) *Area {
 	var n *words.Namer
 	if location != nil {
 		n = location.Namer
@@ -24,7 +51,7 @@ func NewArea(size AreaSize, ruler *inhabitants.Being, location *Area) *Area {
 		n = words.TownNamer
 	}
 	a := &Area{Size: size, Ruler: ruler, Location: location}
-	a.Habitation = NewHabitation()
+	a.Habitation = NewHabitation(timeline.NewChronology(), culture)
 	a.Enclosures = make(map[string]*Area)
 	a.SetNamer(n)
 	a.Name = a.Namer.Name()

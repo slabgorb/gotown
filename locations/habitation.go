@@ -2,17 +2,18 @@ package locations
 
 import (
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
 type Habitation struct {
-	Residents    *inhabitants.Population `json:"residents"`
+	Residents    *inhabitants.Population `json:"population"`
 	Name         string                  `json:"name"`
 	*words.Namer `json:"-"`
 }
 
-func NewHabitation() *Habitation {
-	return &Habitation{Residents: inhabitants.NewPopulation([]*inhabitants.Being{}, nil, nil)}
+func NewHabitation(chronology *timeline.Chronology, culture *inhabitants.Culture) *Habitation {
+	return &Habitation{Residents: inhabitants.NewPopulation([]*inhabitants.Being{}, chronology, culture)}
 }
 
 func (h *Habitation) SetNamer(namer *words.Namer) {

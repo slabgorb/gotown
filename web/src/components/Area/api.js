@@ -23,6 +23,11 @@ class areaApi {
   static name() {
     return axios.get('/api/town/name').then(resp => resp.data);
   }
+
+  static delete(name) {
+    return axios.delete(`/api/towns/${name}`, { params: { name } }).then(resp => resp.data)
+  }
+
 }
 
 export default areaApi;

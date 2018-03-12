@@ -1,6 +1,7 @@
 package locations_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/slabgorb/gotown/inhabitants"
@@ -8,7 +9,8 @@ import (
 )
 
 func TestPopulation(t *testing.T) {
-	h := NewArea(Village, nil, nil)
+	culture := helperMockCulture(t, "italian")
+	h := NewArea(Village, culture, nil, nil)
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
 	}
@@ -24,5 +26,14 @@ func TestPopulation(t *testing.T) {
 	h.Remove(b)
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
+	}
+	j, err := json.Marshal(h)
+	if err != nil {
+		t.Error(err)
+	}
+	h2 := &Area{}
+	err = json.Unmarshal(j, h2)
+	if err != nil {
+		t.Error(err)
 	}
 }

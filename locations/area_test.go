@@ -16,7 +16,7 @@ func init() {
 }
 
 func TestJsonEncode(t *testing.T) {
-	area := NewArea(Town, nil, nil)
+	area := NewArea(Town, nil, nil, nil)
 	_, err := json.Marshal(area)
 	if err != nil {
 		t.Error(err)
@@ -24,9 +24,9 @@ func TestJsonEncode(t *testing.T) {
 }
 
 func TestAddTo(t *testing.T) {
-	a1 := NewArea(Town, nil, nil)
-	a2 := NewArea(Castle, nil, nil)
-	a3 := NewArea(Town, nil, nil)
+	a1 := NewArea(Town, nil, nil, nil)
+	a2 := NewArea(Castle, nil, nil, nil)
+	a3 := NewArea(Town, nil, nil, nil)
 	a2.AttachTo(a1)
 	if !a1.Encloses(a2) {
 		t.Errorf("Encloses not registering added area")
@@ -54,7 +54,7 @@ func BenchmarkPop(b *testing.B) {
 	culture := helperMockCulture(b, "italian")
 
 	s := inhabitants.NewSpecies("Human", []inhabitants.Gender{inhabitants.Male, inhabitants.Female}, nil, nil)
-	area := NewArea(Town, nil, nil)
+	area := NewArea(Town, nil, nil, nil)
 	for i := 0; i < b.N; i++ {
 		being := inhabitants.Being{Species: s, Culture: culture}
 		being.Randomize()

@@ -102,6 +102,7 @@ func (b *Being) MarshalJSON() ([]byte, error) {
 		Spouses    []string                  `json:"spouses"`
 		Living     bool                      `json:"alive"`
 		Events     map[int][]*timeline.Event `json:"events"`
+		Culture    *Culture                  `json:"culture"`
 	}{
 		Expression: b.Expression(),
 		Age:        b.Age(),
@@ -112,6 +113,7 @@ func (b *Being) MarshalJSON() ([]byte, error) {
 		Spouses:    b.Spouses.Strings(),
 		Living:     !b.Dead,
 		Events:     b.Chronology.Events,
+		Culture:    b.Culture,
 	})
 }
 

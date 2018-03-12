@@ -16,14 +16,33 @@ type Population struct {
 	*Culture
 }
 
+type populationSerialize struct {
+	Beings     []*Being             `json:"residents"`
+	Chronology *timeline.Chronology `json:"chronology"`
+	Culture    *Culture             `json:"culture"`
+}
+
 func (p *Population) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		Beings     []*Being             `json:"residents"`
-		Chronology *timeline.Chronology `json:"chronology"`
-	}{
+	return json.Marshal(&populationSerialize{
 		Beings:     p.Beings(),
 		Chronology: p.Chronology,
+		Culture:    p.Culture,
 	})
+}
+
+func (p *Population) UnmarshalJSON(data []byte) error {
+	ps := &populationSerialize{}
+	err := json.Unmarshal(data, ps)
+	if err != nil {
+		return err
+	}
+	for _, b := range ps.Beings {
+		p.Add(b)
+	}
+	p.Culture = ps.Culture
+	p.Chronology = ps.Chronology
+	return nil
+
 }
 
 type MaritalCandidate struct {

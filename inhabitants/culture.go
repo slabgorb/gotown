@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/slabgorb/gotown/persist"
+
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -105,6 +107,31 @@ func (c *Culture) MarshalJSON() ([]byte, error) {
 
 	}
 	return json.Marshal(cl)
+}
+
+// GetBucket implements persist.Persistable
+func (c *Culture) GetBucket() persist.Bucket {
+	return persist.CultureBucket
+}
+
+// GetKey implements persist.Persistable
+func (c *Culture) GetKey() string {
+	return c.Name
+}
+
+// Save implements persist.Persistable
+func (c *Culture) Save() error {
+	return persist.DoSave(c)
+}
+
+// Delete implements persist.Persistable
+func (c *Culture) Delete() error {
+	return persist.DoDelete(c)
+}
+
+// Fetch implements persist.Persistable
+func (c *Culture) Fetch() error {
+	return persist.DoFetch(c)
 }
 
 func (c *Culture) UnmarshalJSON(data []byte) error {

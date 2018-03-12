@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -17,6 +16,7 @@ import (
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/locations"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
@@ -52,107 +52,13 @@ type contextWithSession struct {
 	session *bolt.DB
 }
 
-const (
-	cultureBucket = "cultures"
-	speciesBucket = "species"
-	areaBucket    = "area"
-)
-
-type saveable interface {
-	save(key string, db *bolt.DB) error
-}
-
-type fetchable interface {
-	fetch(key string, db *bolt.DB) error
-}
-
-func listBucketKeys(bucket string, db *bolt.DB) []string {
-	names := []string{}
-	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		c := b.Cursor()
-		for k, _ := c.First(); k != nil; k, _ = c.Next() {
-			names = append(names, string(k))
-		}
-		return nil
-	})
-	return names
-}
-
-func doSave(j interface{}, bucket string, key string, db *bolt.DB) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(bucket))
-		if err != nil {
-			return err
-		}
-		encoded, err := json.Marshal(j)
-		if err != nil {
-			return err
-		}
-		return b.Put([]byte(key), encoded)
-	})
-}
-
-func doFetch(j interface{}, bucket string, key string, db *bolt.DB) error {
-	return db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		v := b.Get([]byte(key))
-		err := json.Unmarshal(v, j)
-		if err != nil {
-			return fmt.Errorf("Error unmarshaling %s %s", bucket, key)
-		}
-		return nil
-	})
-}
-
-type fetchableCulture struct{ culture *inhabitants.Culture }
-
-func newFetchableCulture() fetchableCulture {
-	return fetchableCulture{culture: &inhabitants.Culture{}}
-}
-
-func (f fetchableCulture) fetch(key string, db *bolt.DB) error {
-	return doFetch(f.culture, cultureBucket, key, db)
-}
-
-func (f fetchableCulture) save(key string, db *bolt.DB) error {
-	return doSave(f.culture, cultureBucket, key, db)
-}
-
-type fetchableSpecies struct{ species *inhabitants.Species }
-
-func newFetchableSpecies() fetchableSpecies {
-	return fetchableSpecies{species: &inhabitants.Species{}}
-}
-
-func (f fetchableSpecies) fetch(key string, db *bolt.DB) error {
-	return doFetch(f.species, speciesBucket, key, db)
-}
-
-func (f fetchableSpecies) save(key string, db *bolt.DB) error {
-	return doSave(f.species, speciesBucket, key, db)
-}
-
-type fetchableArea struct{ area *locations.Area }
-
-func newFetchableArea() fetchableArea {
-	return fetchableArea{area: &locations.Area{}}
-}
-
-func (f fetchableArea) fetch(key string, db *bolt.DB) error {
-	return doFetch(f.area, areaBucket, key, db)
-}
-
-func (f fetchableArea) save(key string, db *bolt.DB) error {
-	return doSave(f.area, areaBucket, key, db)
-}
-
 func main() {
 
 	session, err := bolt.Open("gotown.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		panic(err)
 	}
+	persist.SetDB(session)
 
 	defer session.Close()
 
@@ -173,6 +79,7 @@ func main() {
 	api.GET("/species", listSpeciesHandler)
 	api.GET("/species/:name", showSpeciesHandler)
 	api.GET("/town/name", townNameHandler)
+	api.DELETE("/towns/:name", deleteAreaHandler)
 	api.GET("/towns", listAreasHandler)
 	api.GET("/towns/:name", showAreaHandler)
 	api.POST("/towns/create", townHandler)
@@ -199,53 +106,64 @@ func main() {
 }
 
 func listCulturesHandler(c echo.Context) error {
-	cc := c.(*contextWithSession)
-	return c.JSON(http.StatusOK, listBucketKeys(cultureBucket, cc.session))
+	return c.JSON(http.StatusOK, persist.ListBucketKeys(persist.CultureBucket))
 }
 
 func showCulturesHandler(c echo.Context) error {
-	cc := c.(*contextWithSession)
-	culture := &inhabitants.Culture{}
-	err := cc.session.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(cultureBucket))
-		v := b.Get([]byte(c.Param("name")))
-		return json.Unmarshal(v, culture)
-	})
+	culture := &inhabitants.Culture{Name: c.Param("name")}
+	err := culture.Fetch()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	c.Echo().Logger.Debug(fmt.Sprintf("%#v", culture))
 	return c.JSON(http.StatusOK, culture)
 }
 
 func listSpeciesHandler(c echo.Context) error {
-	cc := c.(*contextWithSession)
-	return c.JSON(http.StatusOK, listBucketKeys(speciesBucket, cc.session))
+	return c.JSON(http.StatusOK, persist.ListBucketKeys(persist.SpeciesBucket))
 }
 
 func showSpeciesHandler(c echo.Context) error {
-	cc := c.(*contextWithSession)
-	fs := newFetchableSpecies()
-	err := fs.fetch(c.Param("name"), cc.session)
+	species := inhabitants.Species{Name: c.Param("name")}
+	err := species.Fetch()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, fs.species)
+	return c.JSON(http.StatusOK, species)
+}
+
+type townHandlerRequest struct {
+	Culture string `json:"culture" form:"culture" query:"culture"`
+	Species string `json:"species" form:"species" query:"species"`
+	Name    string `json:"name" form:"name" query:"name"`
 }
 
 func listAreasHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, persist.ListBucketKeys(persist.AreaBucket))
+}
+
+func deleteAreaHandler(c echo.Context) error {
 	cc := c.(*contextWithSession)
-	return c.JSON(http.StatusOK, listBucketKeys(areaBucket, cc.session))
+	req := new(townHandlerRequest)
+	if err := cc.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	a := locations.Area{}
+	a.Name = req.Name
+	err := a.Delete()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	return c.JSON(http.StatusOK, struct{ success bool }{success: true})
 }
 
 func showAreaHandler(c echo.Context) error {
-	cc := c.(*contextWithSession)
-	fs := newFetchableArea()
-	err := fs.fetch(c.Param("name"), cc.session)
+	a := &locations.Area{}
+	a.Name = c.Param("name")
+	err := a.Fetch()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, fs.area)
+	return c.JSON(http.StatusOK, a)
 }
 
 func beingHandler(c echo.Context) error {
@@ -308,54 +226,46 @@ func loadCulture(name string) (*inhabitants.Culture, error) {
 // 	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
 // }
 
-type townHandlerRequest struct {
-	Culture string `json:"culture" form:"culture" query:"culture"`
-	Species string `json:"species" form:"species" query:"species"`
-	Name    string `json:"name" form:"name" query:"name"`
-}
-
 func townHandler(c echo.Context) error {
 	cc := c.(*contextWithSession)
 	req := new(townHandlerRequest)
 	if err := cc.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	fc := fetchableCulture{culture: &inhabitants.Culture{}}
-	err := fc.fetch(req.Culture, cc.session)
-	if err != nil || fc.culture == nil {
+	culture := &inhabitants.Culture{Name: req.Culture}
+	err := culture.Fetch()
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	culture := fc.culture
-	fs := fetchableSpecies{species: &inhabitants.Species{}}
-	err = fs.fetch(req.Species, cc.session)
-	if err != nil || fs.species == nil {
+	species := &inhabitants.Species{Name: req.Species}
+	err = species.Fetch()
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	species := fs.species
-	area := locations.NewArea(locations.Town, nil, nil)
+	area := locations.NewArea(locations.Town, culture, nil, nil)
 	if req.Name != "" {
 		area.Name = req.Name
 	}
 	count := 100
 	var wg sync.WaitGroup
 	wg.Add(count)
+	cron := timeline.NewChronology()
 	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
-			being := inhabitants.Being{Species: species, Culture: culture, Chronology: timeline.NewChronology()}
+			being := inhabitants.Being{Species: species, Culture: culture, Chronology: cron}
 			being.Randomize()
 			area.Add(&being)
 			wg.Done()
 		}(&wg)
 	}
 	wg.Wait()
-	fa := &fetchableArea{area: area}
-	if err := fa.save(area.Name, cc.session); err != nil {
+	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.JSON(http.StatusOK, area)
 }
 
 func townNameHandler(c echo.Context) error {
-	area := locations.NewArea(locations.Town, nil, nil)
+	area := locations.NewArea(locations.Town, nil, nil, nil)
 	return c.JSON(http.StatusOK, area.Name)
 }
