@@ -1,9 +1,7 @@
 package inhabitants
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 
 	"github.com/slabgorb/gotown/persist"
 
@@ -13,26 +11,11 @@ import (
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
-	Name              string                  `json:"name"`
+	ID                int `json:"id" storm:"id,increment"`
+	Name              string                  `json:"name" storm:"unique"`
 	NameStrategies    map[Gender]string       `json:"name_strategies"`
 	MaritalStrategies []string                `json:"marital_strategies"`
 	Namers            map[Gender]*words.Namer `json:"names"`
-}
-
-type cultureSerializer struct {
-	Name              string                  `json:"name"`
-	MaritalStrategies []string                `json:"marital_strategies"`
-	Patronymics       []string                `json:"patronymics"`
-	Matronymics       []string                `json:"matronymics"`
-	FamilyNames       []string                `json:"family_names"`
-	GenderNames       []genderNamesSerializer `json:"gender_names"`
-}
-
-type genderNamesSerializer struct {
-	Gender       Gender   `json:"gender"`
-	Patterns     []string `json:"patterns"`
-	GivenNames   []string `json:"given_names"`
-	NameStrategy string   `json:"name_strategy"`
 }
 
 // maritalStrategy is a function which indicates whether the two beings are
@@ -77,87 +60,73 @@ var maritalStrategies = map[string]maritalStrategy{
 	},
 }
 
-func (c *Culture) Load(r io.Reader) error {
-	err := json.NewDecoder(r).Decode(&c)
-	if err != nil {
-		return fmt.Errorf("could not parse json file")
-	}
-	return nil
-}
-
+// String implements fmt.Stringer
 func (c *Culture) String() string {
 	return fmt.Sprintf("%s", c.Name)
 }
 
-func (c *Culture) MarshalJSON() ([]byte, error) {
-	cl := &cultureSerializer{}
-	cl.Name = c.Name
-	cl.MaritalStrategies = c.MaritalStrategies
-	cl.GenderNames = []genderNamesSerializer{}
-	for gender, gn := range c.Namers {
-		cl.Patronymics = gn.Dictionary["patronymics"]
-		cl.Matronymics = gn.Dictionary["matronymics"]
-		cl.FamilyNames = gn.Dictionary["familyNames"]
-		cl.GenderNames = append(cl.GenderNames, genderNamesSerializer{
-			Gender:       gender,
-			Patterns:     gn.PatternList(),
-			NameStrategy: c.NameStrategies[gender],
-			GivenNames:   gn.Dictionary["givenNames"],
-		})
+// UnmarshalJSON implements json.Unmarshaler
+// func (c *Culture) UnmarshalJSON(data []byte) error {
+// 	cl := &cultureSerializer{}
+// 	err := json.Unmarshal(data, cl)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	c.Name = cl.Name
+// 	c.MaritalStrategies = cl.MaritalStrategies
+// 	c.NameStrategies = make(map[Gender]string)
+// 	c.Namers = make(map[Gender]*words.Namer)
+// 	for _, gn := range cl.GenderNames {
+// 		w := words.NewWords()
+// 		w.AddList("patronymics", cl.Patronymics)
+// 		w.AddList("matronymics", cl.Matronymics)
+// 		w.AddList("givenNames", gn.GivenNames)
+// 		w.AddList("familyNames", cl.FamilyNames)
+// 		c.Namers[gn.Gender] = words.NewNamer(gn.Patterns, w, gn.NameStrategy)
+// 		c.NameStrategies[gn.Gender] = gn.NameStrategy
+// 	}
 
-	}
-	return json.Marshal(cl)
-}
+// 	return nil
+// }
 
-// GetBucket implements persist.Persistable
-func (c *Culture) GetBucket() persist.Bucket {
-	return persist.CultureBucket
-}
+// // MarshalJSON implements json.marshaler
+// func (c *Culture) MarshalJSON() ([]byte, error) {
+// 	cl := &cultureSerializer{}
+// 	cl.Name = c.Name
+// 	cl.MaritalStrategies = c.MaritalStrategies
+// 	cl.GenderNames = []genderNamesSerializer{}
+// 	for gender, gn := range c.Namers {
+// 		cl.Patronymics = gn.Dictionary["patronymics"]
+// 		cl.Matronymics = gn.Dictionary["matronymics"]
+// 		cl.FamilyNames = gn.Dictionary["familyNames"]
+// 		cl.GenderNames = append(cl.GenderNames, genderNamesSerializer{
+// 			Gender:       gender,
+// 			Patterns:     gn.PatternList(),
+// 			NameStrategy: c.NameStrategies[gender],
+// 			GivenNames:   gn.Dictionary["givenNames"],
+// 		})
 
-// GetKey implements persist.Persistable
-func (c *Culture) GetKey() string {
-	return c.Name
-}
+// 	}
+// 	return json.Marshal(cl)
+// }
 
 // Save implements persist.Persistable
 func (c *Culture) Save() error {
-	return persist.DoSave(c)
+	return persist.DB.Save(c)
 }
 
 // Delete implements persist.Persistable
 func (c *Culture) Delete() error {
-	return persist.DoDelete(c)
+	return persist.DB.DeleteStruct(c)
 }
 
 // Fetch implements persist.Persistable
-func (c *Culture) Fetch() error {
-	return persist.DoFetch(c)
+func (c *Culture) Read() error {
+	return persist.DB.One("Name", c.Name, c)
 }
 
-func (c *Culture) UnmarshalJSON(data []byte) error {
-
-	cl := &cultureSerializer{}
-	err := json.Unmarshal(data, cl)
-	if err != nil {
-		return err
-	}
-	c.Name = cl.Name
-	c.MaritalStrategies = cl.MaritalStrategies
-	c.NameStrategies = make(map[Gender]string)
-	c.Namers = make(map[Gender]*words.Namer)
-	for _, gn := range cl.GenderNames {
-		w := words.NewWords()
-		w.AddList("patronymics", cl.Patronymics)
-		w.AddList("matronymics", cl.Matronymics)
-		w.AddList("givenNames", gn.GivenNames)
-		w.AddList("familyNames", cl.FamilyNames)
-		c.Namers[gn.Gender] = words.NewNamer(gn.Patterns, w, gn.NameStrategy)
-		c.NameStrategies[gn.Gender] = gn.NameStrategy
-	}
-
-	return nil
-}
-
+// MaritalCandidate decides whether this pair of Beings is a valid candidate for
+// marriage, based on the culture's marital rules.
 func (c *Culture) MaritalCandidate(a, b *Being) bool {
 	out := true
 	for _, s := range c.MaritalStrategies {
@@ -166,11 +135,13 @@ func (c *Culture) MaritalCandidate(a, b *Being) bool {
 	return out
 }
 
+// GetName returns a name appropriate for the passed in Being
 func (c *Culture) GetName(b *Being) *Name {
 	f := c.NameStrategies[b.Sex]
 	return NameStrategies[f](b)
 }
 
+// NameStrategies deliniates the various naming strategy functions
 var NameStrategies = map[string]NameStrategy{
 	"matrilineal": func(b *Being) *Name {
 		namer := b.Culture.Namers[b.Sex]

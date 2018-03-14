@@ -1,23 +1,26 @@
-{
+{  
    "name":"viking",
-   "species": "human",
-   "marital_strategies": ["heterosexual","monogamous"],
-   "patronymics":[
-      "son"
+   "species":"human",
+   "marital_strategies":[  
+      "heterosexual",
+      "monogamous"
    ],
-   "matronymics":[
-      "dottir"
-   ],
-   "family_names": [],
-   
-   "gender_names":[
-      {
-         "gender":"male",
-         "patterns":[
+   "names":{  
+      "male":{  
+         "patterns":[  
             "{{.GivenName}} {{.FamilyName}}{{.Patronymic}}"
          ],
-         "name_strategy": "patronymic",
-         "given_names":[
+         "name_strategy":"patronymic",
+         "family_names":[  
+
+         ],
+         "patronymics":[  
+            "son"
+         ],
+         "matronymics":[  
+            "dottir"
+         ],
+         "given_names":[  
             "Aasbjorn",
             "Aasgeir",
             "Aasgrim",
@@ -353,13 +356,21 @@
             "Yngvi"
          ]
       },
-      {
-         "gender":"female",
-         "patterns":[
+      "female":{  
+         "patterns":[  
             "{{.GivenName}} {{.FamilyName}}{{.Matronymic}}"
          ],
-         "name_strategy": "matronymic",
-         "given_names":[
+         "family_names":[  
+
+         ],
+         "patronymics":[  
+            "son"
+         ],
+         "matronymics":[  
+            "dottir"
+         ],
+         "name_strategy":"matronymic",
+         "given_names":[  
             "Aadny",
             "Aafrid",
             "Aagunn",
@@ -680,5 +691,5 @@
             "Yngvild"
          ]
       }
-   ]
+   }
 }

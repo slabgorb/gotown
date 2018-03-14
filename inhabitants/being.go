@@ -94,6 +94,7 @@ func (b *Being) genderedParent(gender Gender) *Being {
 func (b *Being) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		Expression map[string]string         `json:"expression"`
+		Chromosome *genetics.Chromosome      `json:"chromosome"`
 		Age        int                       `json:"age"`
 		Sex        string                    `json:"sex"`
 		Species    string                    `json:"species"`

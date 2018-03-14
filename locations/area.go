@@ -1,46 +1,20 @@
 package locations
 
 import (
-	"fmt"
-
 	"github.com/slabgorb/gotown/inhabitants"
-	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
 type Area struct {
+	ID   int    `json:"id" storm:"id,increment"`
+	Name string `storm:"index"`
 	*Habitation
 	Size  AreaSize           `json:"size"`
 	Ruler *inhabitants.Being `json:"ruler"`
 	Graveyard
 	Location   *Area            `json:"location"`
 	Enclosures map[string]*Area `json:"enclosures"`
-}
-
-// GetBucket implements persist.Persistable
-func (a *Area) GetBucket() persist.Bucket {
-	return persist.AreaBucket
-}
-
-// GetKey implements persist.Persistable
-func (a *Area) GetKey() string {
-	return a.Habitation.Name
-}
-
-// Save implements persist.Persistable
-func (a *Area) Save() error {
-	return persist.DoSave(a)
-}
-
-// Delete implements persist.Persistable
-func (a *Area) Delete() error {
-	return persist.DoDelete(a)
-}
-
-// Fetch implements persist.Persistable
-func (a *Area) Fetch() error {
-	return persist.DoFetch(a)
 }
 
 func NewArea(size AreaSize, culture *inhabitants.Culture, ruler *inhabitants.Being, location *Area) *Area {
@@ -127,15 +101,19 @@ func (a *Area) AttachTo(area *Area) bool {
 }
 
 func (a *Area) String() string {
-	loc := ""
-	if a.Location != nil {
-		loc += fmt.Sprintf("%s, %s %s within %s", a.Name, a.Size.article(), a.Size, a.Location.Name)
-	} else {
-		loc += fmt.Sprintf("%s, %s %s", a.Name, a.Size.article(), a.Size)
-	}
-	if a.Ruler != nil {
-		loc += fmt.Sprintf(" ruled by %s", a.Ruler)
-	}
-	loc += "."
-	return loc
+	return a.Name
 }
+
+// func (a *Area) String() string {
+// 	loc := ""
+// 	if a.Location != nil {
+// 		loc += fmt.Sprintf("%s, %s %s within %s", a.Name, a.Size.article(), a.Size, a.Location.Name)
+// 	} else {
+// 		loc += fmt.Sprintf("%s, %s %s", a.Name, a.Size.article(), a.Size)
+// 	}
+// 	if a.Ruler != nil {
+// 		loc += fmt.Sprintf(" ruled by %s", a.Ruler)
+// 	}
+// 	loc += "."
+// 	return loc
+// }

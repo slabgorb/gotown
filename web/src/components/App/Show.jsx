@@ -4,11 +4,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
+import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
-import SimpleBottomNavigation from './Nav/SimpleBottomNavigation';
+import axios from 'axios';
+import SimpleBottomNavigation from '../Nav/SimpleBottomNavigation';
 
-const ralewayFF = ({ fontFamily: 'Raleway'});
-const montserratFF = ({ fontFamily: 'Montserrat'});
+const ralewayFF = ({ fontFamily: 'Raleway' });
+const montserratFF = ({ fontFamily: 'Montserrat' });
 
 const theme = createMuiTheme({
   palette: {
@@ -41,6 +43,8 @@ const theme = createMuiTheme({
   },
 });
 
+const seed = () => axios.put('/api/seed');
+
 const App = ({ children, classes }) =>
   (
     <div>
@@ -52,6 +56,7 @@ const App = ({ children, classes }) =>
                 <Typography variant="title" color="inherit" className={classes.flex}>
                   Gotown
                 </Typography>
+                <Button variant="raised" onClick={() => seed()}>Seed</Button>
               </Toolbar>
             </AppBar>
             {children}

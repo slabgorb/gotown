@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { SpeciesShow, SpeciesList } from './components/Species';
 import { CulturesShow, CulturesList } from './components/Culture';
 import { TownForm, AreaList, AreaShow } from './components/Area';
-import App from './components/App';
+import { App } from './components/App';
 import rootReducer from './reducers';
 import './main.scss';
 

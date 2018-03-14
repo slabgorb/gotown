@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	bolt "github.com/coreos/bbolt"
+	"github.com/asdine/storm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
@@ -17,7 +18,6 @@ import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/locations"
 	"github.com/slabgorb/gotown/persist"
-	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -47,30 +47,15 @@ type namerKey struct {
 
 var namers = make(map[namerKey]*words.Namer)
 
-type contextWithSession struct {
-	echo.Context
-	session *bolt.DB
-}
-
 func main() {
 
-	session, err := bolt.Open("gotown.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
+	session, err := storm.Open("gotown.db")
 	if err != nil {
 		panic(err)
 	}
 	persist.SetDB(session)
 
 	defer session.Close()
-
-	addSessionMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			cws := &contextWithSession{
-				Context: c,
-				session: session,
-			}
-			return next(cws)
-		}
-	}
 
 	e := echo.New()
 	api := e.Group("/api")
@@ -84,6 +69,7 @@ func main() {
 	api.GET("/towns/:name", showAreaHandler)
 	api.POST("/towns/create", townHandler)
 	api.GET("/being", beingHandler)
+	api.PUT("/seed", seedHandler)
 	//e.GET("/household", householdHandler)
 	api.GET("/random/chromosome", randomChromosomeHandler)
 	e.Static("/fonts", "web/fonts")
@@ -93,7 +79,6 @@ func main() {
 	e.File("/manifest.json", "web/manifest.json")
 	e.File("/", "web")
 	e.File("/*", "web/index.html")
-	e.Use(addSessionMiddleware)
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -106,30 +91,90 @@ func main() {
 	e.Start(":8003")
 }
 
+func seedSpecies() error {
+	speciesNames := []string{"human", "elf"}
+	for _, name := range speciesNames {
+		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
+		if err != nil {
+			return err
+		}
+		species := &inhabitants.Species{}
+		if err := json.NewDecoder(r).Decode(species); err != nil {
+			return fmt.Errorf("could not load, %s", err)
+		}
+		if err = persist.DB.Save(species); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func seedCultures() error {
+	cultureNames := []string{"italianate", "viking"}
+	for _, name := range cultureNames {
+		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
+		if err != nil {
+			return err
+		}
+		culture := &inhabitants.Culture{}
+		if err := json.NewDecoder(r).Decode(culture); err != nil {
+			return fmt.Errorf("could not load, %s", err)
+		}
+		if err = persist.DB.Save(culture); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func seedHandler(c echo.Context) error {
+	if err := seedSpecies(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if err := seedCultures(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, nil)
+}
+
 func listCulturesHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, persist.ListBucketKeys(persist.CultureBucket))
+	all := []*inhabitants.Culture{}
+	if err := persist.DB.All(&all); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	names := []string{}
+	for _, t := range all {
+		names = append(names, t.String())
+	}
+	return c.JSON(http.StatusOK, names)
 }
 
 func showCulturesHandler(c echo.Context) error {
-	culture := &inhabitants.Culture{Name: c.Param("name")}
-	err := culture.Fetch()
-	if err != nil {
+	var item inhabitants.Culture
+	if err := persist.DB.One("Name", c.Param("name"), &item); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, culture)
+	return c.JSON(http.StatusOK, item)
 }
 
 func listSpeciesHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, persist.ListBucketKeys(persist.SpeciesBucket))
+	all := []*inhabitants.Species{}
+	if err := persist.DB.All(&all); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	names := []string{}
+	for _, t := range all {
+		names = append(names, t.String())
+	}
+	return c.JSON(http.StatusOK, names)
 }
 
 func showSpeciesHandler(c echo.Context) error {
-	species := inhabitants.Species{Name: c.Param("name")}
-	err := species.Fetch()
-	if err != nil {
+	var item inhabitants.Species
+	if err := persist.DB.One("Name", c.Param("name"), &item); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, species)
+	return c.JSON(http.StatusOK, item)
 }
 
 type townHandlerRequest struct {
@@ -139,29 +184,36 @@ type townHandlerRequest struct {
 }
 
 func listAreasHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, persist.ListBucketKeys(persist.AreaBucket))
+	all := []*locations.Area{}
+	if err := persist.DB.All(&all); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	names := []string{}
+	for _, t := range all {
+		names = append(names, t.String())
+	}
+	return c.JSON(http.StatusOK, names)
 }
 
 func deleteAreaHandler(c echo.Context) error {
-	cc := c.(*contextWithSession)
+	var a locations.Area
 	req := new(townHandlerRequest)
-	if err := cc.Bind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	a := locations.NewArea(locations.Hut, nil, nil, nil) // TODO: rethink this initializer!
-	a.Habitation.Name = req.Name
-	err := a.Delete()
-	if err != nil {
+	if err := persist.DB.One("Name", req.Name, &a); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err := persist.DB.DeleteStruct(&a); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	return c.JSON(http.StatusOK, struct{ success bool }{success: true})
 }
 
 func showAreaHandler(c echo.Context) error {
-	a := &locations.Area{}
+	var a locations.Area
 	a.Name = c.Param("name")
-	err := a.Fetch()
-	if err != nil {
+	if err := persist.DB.One("Name", c.Param("name"), &a); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, a)
@@ -187,18 +239,6 @@ func randomChromosomeHandler(c echo.Context) error {
 
 func renameHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, struct{}{})
-}
-
-func loadCulture(name string) (*inhabitants.Culture, error) {
-	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", name))
-	if err != nil {
-		return nil, fmt.Errorf("could not load internal data file")
-	}
-	culture := &inhabitants.Culture{}
-	if err = culture.Load(r); err != nil {
-		return nil, err
-	}
-	return culture, nil
 }
 
 // func householdHandler(c echo.Context) error {
@@ -228,40 +268,38 @@ func loadCulture(name string) (*inhabitants.Culture, error) {
 // }
 
 func townHandler(c echo.Context) error {
-	cc := c.(*contextWithSession)
 	req := new(townHandlerRequest)
-	if err := cc.Bind(req); err != nil {
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	culture := &inhabitants.Culture{Name: req.Culture}
-	err := culture.Fetch()
-	if err != nil {
+	var culture inhabitants.Culture
+	if err := persist.DB.One("Name", req.Culture, &culture); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	species := &inhabitants.Species{Name: req.Species}
-	err = species.Fetch()
-	if err != nil {
+	var species inhabitants.Species
+	if err := persist.DB.One("Name", req.Species, &species); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	area := locations.NewArea(locations.Town, culture, nil, nil)
+	area := locations.NewArea(locations.Town, &culture, nil, nil)
 	if req.Name != "" {
 		area.Name = req.Name
 	}
 	count := 100
 	var wg sync.WaitGroup
 	wg.Add(count)
-	cron := timeline.NewChronology()
+	//cron := timeline.NewChronology()
 	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
-			being := inhabitants.Being{Species: species, Culture: culture, Chronology: cron}
-			being.Randomize()
-			area.Add(&being)
+			//being := inhabitants.Being{Species: &species, Culture: &culture, Chronology: cron}
+			//being.Randomize()
+			//area.Add(&being)
 			wg.Done()
 		}(&wg)
 	}
 	wg.Wait()
-	if err := area.Save(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	a := *area
+	if err := persist.DB.Save(&a); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, area)
 }
