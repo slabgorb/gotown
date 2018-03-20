@@ -7,7 +7,7 @@ import Toolbar from 'material-ui/Toolbar';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import axios from 'axios';
-import SimpleBottomNavigation from '../Nav/SimpleBottomNavigation';
+import SimpleBottomNavigation from './SimpleBottomNavigation';
 
 const ralewayFF = ({ fontFamily: 'Raleway' });
 const montserratFF = ({ fontFamily: 'Montserrat' });
