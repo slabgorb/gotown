@@ -7,25 +7,29 @@ import (
 	"strings"
 )
 
-type gene string
+// Gene is part of a Chromosome, represented by a hexstring
+type Gene string
 
-func (g gene) Int64() int64 {
+// Int64 converts the hexstring of a Gene into an integer
+func (g Gene) Int64() int64 {
 	v, _ := strconv.ParseInt(string(g), 16, 64)
 	return v
 }
 
-func (g gene) String() string {
+// String implements fmt.Stringer
+func (g Gene) String() string {
 	return string(g)
 }
 
-func RandomGene() gene {
+// RandomGene creates a randomized gene
+func RandomGene() Gene {
 	r := randomizer.Intn(16777215)
-	return gene(fmt.Sprintf("%06x", r))
+	return Gene(fmt.Sprintf("%06x", r))
 }
 
 // Chromosome represents a collection of genes
 type Chromosome struct {
-	Genes []gene `json:"genes"`
+	Genes []Gene `json:"genes"`
 }
 
 // RandomChromosome returns a Chromosome with randomized genes.
@@ -37,12 +41,12 @@ func RandomChromosome(count int) *Chromosome {
 
 // Add adds a 'custom' gene to a Chromosome, used for testing, usually
 func (c *Chromosome) Add(s string) {
-	c.Genes = append(c.Genes, gene(s))
+	c.Genes = append(c.Genes, Gene(s))
 
 }
 
 // Index returns the gene at the passed in index number
-func (c Chromosome) Index(i int) gene {
+func (c Chromosome) Index(i int) Gene {
 	return c.Genes[i]
 }
 
@@ -66,7 +70,7 @@ func (c *Chromosome) Combine(other *Chromosome) (*Chromosome, error) {
 		return nil, fmt.Errorf("cannot combine chromosomes of differing gene counts, got %d and %d", c.Len(), other.Len())
 	}
 	combined := &Chromosome{}
-	combined.Genes = make([]gene, c.Len())
+	combined.Genes = make([]Gene, c.Len())
 	for i := 0; i < c.Len(); i++ {
 		if rand.Float64() > 0.5 {
 			combined.Genes[i] = c.Genes[i]
@@ -90,7 +94,7 @@ func (c *Chromosome) Express(e Expression) map[string]string {
 
 // Randomize randomizes all the genes in this Chromosome.
 func (c *Chromosome) Randomize(count int) {
-	c.Genes = make([]gene, count)
+	c.Genes = make([]Gene, count)
 	for i := 0; i < count; i++ {
 		c.Genes[i] = RandomGene()
 	}

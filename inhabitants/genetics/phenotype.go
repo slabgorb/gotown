@@ -3,7 +3,6 @@ package genetics
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"regexp"
 	"sort"
 )
@@ -13,16 +12,12 @@ type Expression struct {
 	Traits []Trait `json:"traits"`
 }
 
+// Add adds a Trait to an Expression
 func (e *Expression) Add(trait Trait) {
 	e.Traits = append(e.Traits, trait)
 }
 
-func LoadExpression(r io.Reader) (Expression, error) {
-	exp := Expression{}
-	err := json.NewDecoder(r).Decode(&exp)
-	return exp, err
-}
-
+// UnmarshalJSON implements json.Unmarshaler
 func (e *Expression) UnmarshalJSON(data []byte) error {
 	tmp := make(map[string][]Trait)
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -34,6 +29,7 @@ func (e *Expression) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Variant is the abstraction of a genetic variant
 type Variant struct {
 	Name  string
 	Match *regexp.Regexp
@@ -44,6 +40,7 @@ type serializableVariant struct {
 	Match string `json:"match"`
 }
 
+// MarshalJSON implements json.Marshaler
 func (v *Variant) MarshalJSON() ([]byte, error) {
 	sv := &serializableVariant{
 		Name:  v.Name,
@@ -52,6 +49,7 @@ func (v *Variant) MarshalJSON() ([]byte, error) {
 	return json.Marshal(sv)
 }
 
+// UnmarshalJSON implements json.Unmarshaler
 func (v *Variant) UnmarshalJSON(data []byte) error {
 	sv := &serializableVariant{}
 	json.Unmarshal(data, sv)
@@ -74,6 +72,7 @@ func NewVariant(name, match string) (*Variant, error) {
 
 }
 
+// Matches checks a variant against a string
 func (v *Variant) Matches(s string) int {
 	matches := v.Match.FindAllStringIndex(s, -1)
 	return len(matches)
@@ -85,7 +84,7 @@ type Trait struct {
 	Variants []*Variant `json:"variants"`
 }
 
-// UnmarshalJSON unmarshals the JSON. Yep.
+// UnmarshalJSON implements json.Unmarshaler
 func (t *Trait) UnmarshalJSON(data []byte) error {
 	tmp := make(map[string]interface{})
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -143,6 +142,7 @@ func (p pairList) Less(i, j int) bool {
 }
 func (p pairList) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
+// Expression is the genetic expression of a Trait
 func (t Trait) Expression(s string) (string, int) {
 	m := t.matches(s)
 	pl := make(pairList, len(m))

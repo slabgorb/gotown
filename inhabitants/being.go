@@ -164,11 +164,13 @@ func (b *Being) RandomizeChromosome() {
 	b.Chromosome = genetics.RandomChromosome(20)
 }
 
-//
+// Express is the being's chromosome's expression
 func (b *Being) Express(e genetics.Expression) map[string]string {
 	return b.Chromosome.Express(e)
 }
 
+// Expression returns the genetic expression of the being's chromosome in the
+// context of the being's species.
 func (b *Being) Expression() map[string]string {
 	return b.Express(*b.Species.Expression)
 }
@@ -232,6 +234,7 @@ func (b *Being) Piblings() Members {
 	return parentSiblings
 }
 
+// Cousins returns the beings who are cousins of this being
 func (b *Being) Cousins() Members {
 	piblings := b.Piblings()
 	cousins := Members{}
@@ -289,6 +292,7 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	return b.Children, nil
 }
 
+// Age returns the age of the being
 func (b *Being) Age() int {
 	return b.Chronology.CurrentYear
 }

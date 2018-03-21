@@ -48,7 +48,7 @@ func TestCombined(t *testing.T) {
 	}
 	for i := 0; i < c.Len(); i++ {
 		if !(c.Index(i) == c1.Index(i) || c.Index(i) == c2.Index(i)) {
-			t.Errorf("Index %d should have been from one of the two parent chromosomes")
+			t.Errorf("Index %d should have been from one of the two parent chromosomes", i)
 		}
 	}
 
