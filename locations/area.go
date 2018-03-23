@@ -2,6 +2,7 @@ package locations
 
 import (
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
@@ -17,19 +18,22 @@ type Area struct {
 	Enclosures map[string]*Area `json:"enclosures"`
 }
 
-func NewArea(size AreaSize, culture *inhabitants.Culture, ruler *inhabitants.Being, location *Area) *Area {
+func NewArea(size AreaSize, culture *inhabitants.Culture, ruler *inhabitants.Being, location *Area) (*Area, error) {
 	var n *words.Namer
 	if location != nil {
 		n = location.Namer
 	} else {
-		n = words.TownNamer
+		if err := persist.DB.One("Name", "english towns", n); err != nil {
+			return nil, err
+		}
 	}
+
 	a := &Area{Size: size, Ruler: ruler, Location: location}
 	a.Habitation = NewHabitation(timeline.NewChronology(), culture)
 	a.Enclosures = make(map[string]*Area)
 	a.SetNamer(n)
-	a.Name = a.Namer.Name()
-	return a
+	a.Name = a.Namer.CreateName()
+	return a, nil
 }
 
 func (a *Area) Population() int {

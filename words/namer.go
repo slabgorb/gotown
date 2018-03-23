@@ -6,12 +6,17 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/slabgorb/gotown/persist"
 )
 
 type Namer struct {
+	Words        *Words
+	ID           int       `json:"id" storm:"increment"`
+	Name         string    `json:"name" storm:"unique"`
 	Patterns     []Pattern `json:"patterns"`
-	*Words       `json:"words"`
-	NameStrategy string `json:"name_strategy"`
+	WordsName    string    `json:"words"`
+	NameStrategy string    `json:"name_strategy"`
 }
 
 func (n *Namer) PatternList() []string {
@@ -20,6 +25,21 @@ func (n *Namer) PatternList() []string {
 		pl = append(pl, string(p))
 	}
 	return pl
+}
+
+// Save implements persist.Persistable
+func (n *Namer) Save() error {
+	return persist.DB.Save(n)
+}
+
+// Delete implements persist.Persistable
+func (n *Namer) Delete() error {
+	return persist.DB.DeleteStruct(n)
+}
+
+// Fetch implements persist.Persistable
+func (n *Namer) Read() error {
+	return persist.DB.One("Name", n.Name, n)
 }
 
 func (n *Namer) Template() *template.Template {
@@ -46,7 +66,7 @@ func (n *Namer) Execute(with interface{}) (string, error) {
 	return edgeCases(lowercaseJoiners(strings.Title(buf.String()))), err
 }
 
-func (n *Namer) Name() string {
+func (n *Namer) CreateName() string {
 	s, err := n.Execute(n.Words)
 	if err != nil {
 		log.Println(err)
@@ -54,10 +74,14 @@ func (n *Namer) Name() string {
 	return s
 }
 
-func NewNamer(patterns []string, words *Words, nameStrategy string) *Namer {
+func NewNamer(patterns []string, words string, nameStrategy string) *Namer {
 	ps := []Pattern{}
 	for _, p := range patterns {
 		ps = append(ps, Pattern(p))
 	}
-	return &Namer{Patterns: ps, Words: words, NameStrategy: nameStrategy}
+	w := &Words{Name: words}
+	if err := w.Read(); err != nil {
+		panic(err)
+	}
+	return &Namer{Patterns: ps, WordsName: words, Words: w, NameStrategy: nameStrategy}
 }

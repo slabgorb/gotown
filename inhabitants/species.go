@@ -4,12 +4,13 @@ import (
 	"sort"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/persist"
 )
 
 // Species represents a species or a race.
 type Species struct {
 	ID         int                       `json:"id" storm:"id,increment"`
-	Name       string                    `json:"name"`
+	Name       string                    `json:"name" storm:"index,unique"`
 	Genders    []Gender                  `json:"genders"`
 	Expression *genetics.Expression      `json:"expression"`
 	Demography map[DemographyBucket]Demo `json:"demography"`
@@ -28,6 +29,21 @@ func NewSpecies(name string, genders []Gender, e *genetics.Expression, d map[Dem
 // String implements fmt.Stringer
 func (s *Species) String() string {
 	return s.Name
+}
+
+// Save implements persist.Persistable
+func (s *Species) Save() error {
+	return persist.DB.Save(s)
+}
+
+// Delete implements persist.Persistable
+func (s *Species) Delete() error {
+	return persist.DB.DeleteStruct(s)
+}
+
+// Fetch implements persist.Persistable
+func (s *Species) Read() error {
+	return persist.DB.One("ID", s.ID, s)
 }
 
 // GetGenders returns the genders appropriate for this species

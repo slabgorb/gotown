@@ -1,16 +1,12 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/asdine/storm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
@@ -26,36 +22,13 @@ func init() {
 
 }
 
-type namerLoad struct {
-	Name        string   `json:"name"`
-	Species     string   `json:"species"`
-	Patronymics []string `json:"patronymics"`
-	Matronymics []string `json:"matronymics"`
-	FamilyNames []string `json:"family_names"`
-	GenderNames []struct {
-		Gender       string   `json:"gender"`
-		Patterns     []string `json:"patterns"`
-		GivenNames   []string `json:"given_names"`
-		NameStrategy string   `json:"name_strategy"`
-	} `json:"gender_names"`
-}
-
-type namerKey struct {
-	name   string
-	gender inhabitants.Gender
-}
-
-var namers = make(map[namerKey]*words.Namer)
-
 func main() {
-
-	session, err := storm.Open("gotown.db")
+	err := persist.Open("gotown.db")
 	if err != nil {
 		panic(err)
 	}
-	persist.SetDB(session)
 
-	defer session.Close()
+	defer persist.Close()
 
 	e := echo.New()
 	api := e.Group("/api")
@@ -68,7 +41,7 @@ func main() {
 	api.GET("/towns", listAreasHandler)
 	api.GET("/towns/:name", showAreaHandler)
 	api.POST("/towns/create", townHandler)
-	api.GET("/being", beingHandler)
+	api.GET("/being/:id", showBeingHandler)
 	api.PUT("/seed", seedHandler)
 	//e.GET("/household", householdHandler)
 	api.GET("/random/chromosome", randomChromosomeHandler)
@@ -91,50 +64,9 @@ func main() {
 	e.Start(":8003")
 }
 
-func seedSpecies() error {
-	speciesNames := []string{"human", "elf"}
-	for _, name := range speciesNames {
-		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
-		if err != nil {
-			return err
-		}
-		species := &inhabitants.Species{}
-		if err := json.NewDecoder(r).Decode(species); err != nil {
-			return fmt.Errorf("could not load, %s", err)
-		}
-		if err = persist.DB.Save(species); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func seedCultures() error {
-	cultureNames := []string{"italianate", "viking"}
-	for _, name := range cultureNames {
-		r, err := os.Open(fmt.Sprintf("web/data/%s.json", name))
-		if err != nil {
-			return err
-		}
-		culture := &inhabitants.Culture{}
-		if err := json.NewDecoder(r).Decode(culture); err != nil {
-			return fmt.Errorf("could not load, %s", err)
-		}
-		if err = persist.DB.Save(culture); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func seedHandler(c echo.Context) error {
-	if err := seedSpecies(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	if err := seedCultures(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, nil)
+	inhabitants.Seed()
+	words.Seed()
 }
 
 func listCulturesHandler(c echo.Context) error {
@@ -172,6 +104,14 @@ func listSpeciesHandler(c echo.Context) error {
 func showSpeciesHandler(c echo.Context) error {
 	var item inhabitants.Species
 	if err := persist.DB.One("Name", c.Param("name"), &item); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, item)
+}
+
+func showBeingHandler(c echo.Context) error {
+	var item inhabitants.Being
+	if err := persist.DB.One("ID", c.Param("id"), &item); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, item)
@@ -217,14 +157,6 @@ func showAreaHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, a)
-}
-
-func beingHandler(c echo.Context) error {
-	species := &inhabitants.Species{Name: "human"}
-	being := &inhabitants.Being{
-		Species: species,
-	}
-	return c.JSON(http.StatusOK, being)
 }
 
 func randomChromosomeHandler(c echo.Context) error {
@@ -280,7 +212,10 @@ func townHandler(c echo.Context) error {
 	if err := persist.DB.One("Name", req.Species, &species); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	area := locations.NewArea(locations.Town, &culture, nil, nil)
+	area, err := locations.NewArea(locations.Town, &culture, nil, nil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	if req.Name != "" {
 		area.Name = req.Name
 	}
@@ -305,6 +240,9 @@ func townHandler(c echo.Context) error {
 }
 
 func townNameHandler(c echo.Context) error {
-	area := locations.NewArea(locations.Town, nil, nil, nil)
+	area, err := locations.NewArea(locations.Town, nil, nil, nil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	return c.JSON(http.StatusOK, area.Name)
 }

@@ -2,6 +2,7 @@ package inhabitants
 
 import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
 )
 
@@ -16,4 +17,23 @@ var randomizer random.Generator = random.Random
 // tests.
 func SetRandomizer(g random.Generator) {
 	randomizer = g
+}
+
+func Seed() {
+	if err := seedSpecies(); err != nil {
+		panic(err)
+	}
+	if err := seedCultures(); err != nil {
+		panic(err)
+	}
+}
+
+func seedSpecies() error {
+	var species = &Species{}
+	return persist.SeedHelper("../web/data/species", species)
+}
+
+func seedCultures() error {
+	var culture = &Culture{}
+	return persist.SeedHelper("../web/data/cultures", culture)
 }

@@ -11,7 +11,7 @@ import (
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
-	ID                int `json:"id" storm:"id,increment"`
+	ID                int                     `json:"id" storm:"id,increment"`
 	Name              string                  `json:"name" storm:"unique"`
 	NameStrategies    map[Gender]string       `json:"name_strategies"`
 	MaritalStrategies []string                `json:"marital_strategies"`
@@ -145,55 +145,55 @@ func (c *Culture) GetName(b *Being) *Name {
 var NameStrategies = map[string]NameStrategy{
 	"matrilineal": func(b *Being) *Name {
 		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.GivenName()}
+		name := &Name{GivenName: namer.Words.GivenName()}
 		if b.Mother() != nil {
 			name.FamilyName = b.Mother().FamilyName
 			return name
 		}
-		name.FamilyName = namer.GivenName()
+		name.FamilyName = namer.Words.GivenName()
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
 	},
 	"patrilineal": func(b *Being) *Name {
 		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.GivenName()}
+		name := &Name{GivenName: namer.Words.GivenName()}
 		if b.Father() != nil {
 			name.FamilyName = b.Father().FamilyName
 			return name
 		}
-		name.FamilyName = namer.GivenName()
+		name.FamilyName = namer.Words.GivenName()
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
 	},
 	"matronymic": func(b *Being) *Name {
 		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.GivenName()}
+		name := &Name{GivenName: namer.Words.GivenName()}
 		if b.Mother() != nil {
-			name.FamilyName = b.Mother().GivenName + namer.Matronymic()
+			name.FamilyName = b.Mother().GivenName + namer.Words.Matronymic()
 			return name
 		}
-		name.FamilyName = namer.GivenName() + namer.Matronymic()
+		name.FamilyName = namer.Words.GivenName() + namer.Words.Matronymic()
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
 	},
 	"patronymic": func(b *Being) *Name {
 		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.GivenName()}
+		name := &Name{GivenName: namer.Words.GivenName()}
 		if b.Father() != nil {
-			name.FamilyName = b.Father().GivenName + namer.Patronymic()
+			name.FamilyName = b.Father().GivenName + namer.Words.Patronymic()
 			return name
 		}
-		name.FamilyName = namer.GivenName() + namer.Patronymic()
+		name.FamilyName = namer.Words.GivenName() + namer.Words.Patronymic()
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
 	},
 	"onename": func(b *Being) *Name {
 		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.GivenName()}
+		name := &Name{GivenName: namer.Words.GivenName()}
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name

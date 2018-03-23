@@ -2,6 +2,7 @@ package words
 
 import (
 	"github.com/jinzhu/inflection"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
 )
 
@@ -19,8 +20,26 @@ func chooseRandomString(s []string) string {
 }
 
 type Words struct {
+	ID         int                 `json:"id" storm:"increment"`
+	Name       string              `json:"name" storm:"unique"`
 	Dictionary map[string][]string `json:"dictionary"`
-	Backup     *Words              `json:"-"`
+	backup     *Words
+	BackupName string `json:"backup"`
+}
+
+// Save implements persist.Persistable
+func (w *Words) Save() error {
+	return persist.DB.Save(w)
+}
+
+// Delete implements persist.Persistable
+func (w *Words) Delete() error {
+	return persist.DB.DeleteStruct(w)
+}
+
+// Fetch implements persist.Persistable
+func (w *Words) Read() error {
+	return persist.DB.One("Name", w.Name, w)
 }
 
 // Noun returns a noun
@@ -66,12 +85,31 @@ func shortFilter(list []string) []string {
 	return newList
 }
 
+func (w *Words) loadBackup() error {
+	if w.BackupName == "" {
+		return nil
+	}
+	var backupWords Words
+	if err := persist.DB.One("Name", w.BackupName, &backupWords); err != nil {
+		return err
+	}
+	w.SetBackup(&backupWords)
+	return nil
+}
+
+func (w *Words) SetBackup(b *Words) {
+	w.backup = b
+}
+
 func (w *Words) withBackup(f func(w *Words) string) string {
 	if s := f(w); s != "" {
 		return s
 	}
-	if w.Backup != nil {
-		return w.Backup.withBackup(f)
+	if w.backup == nil {
+		w.loadBackup()
+	}
+	if w.backup != nil {
+		return w.backup.withBackup(f)
 	}
 	return ""
 }
@@ -127,11 +165,42 @@ func (w *Words) Patronymic() string {
 }
 
 // NewWords initializes a Words struct
-func NewWords() *Words {
-	return &Words{Dictionary: make(map[string][]string)}
+func NewWords(name string) *Words {
+	return &Words{Name: name, Dictionary: make(map[string][]string)}
 }
 
 // AddList adds a list of words to a particular key, e.g. 'noun'
 func (w *Words) AddList(key string, list []string) {
 	w.Dictionary[key] = list
+}
+
+func Seed() {
+	if err := seedWords(); err != nil {
+		panic(err)
+	}
+	if err := seedNamers(); err != nil {
+		panic(err)
+	}
+}
+
+func List() ([]string, error) {
+	wds := []Words{}
+	if err := persist.DB.All(&wds); err != nil {
+		return nil, err
+	}
+	names := []string{}
+	for _, w := range wds {
+		names = append(names, w.Name)
+	}
+	return names, nil
+}
+
+func seedWords() error {
+	var words = &Words{}
+	return persist.SeedHelper("../web/data/words", words)
+}
+
+func seedNamers() error {
+	var namer = &Namer{}
+	return persist.SeedHelper("../web/data/namers", namer)
 }

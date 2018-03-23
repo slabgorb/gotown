@@ -1,0 +1,21 @@
+{
+  "name": "english towns",
+  "words": "english town names",
+  "patterns": ["{{.Prefix}}{{.Suffix}}",
+    "{{.Prefix}} {{.Noun}}{{.Suffix}}",
+    "{{.ShortAdjective}}{{.ShortNoun}}{{.Suffix}}",
+    "{{.Prefix}} {{.ShortAdjective}}{{.ShortNoun}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.Adjective}}{{.Suffix}}",
+    "{{.Adjective}}{{.Suffix}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.Adjective}}{{.Suffix}}",
+    "{{.Adjective}}{{.Suffix}}",
+    "{{.ShortAdjective}}{{.Suffix}}",
+    "{{.ShortAdjective}}{{.Suffix}}",
+    "{{.Adjective}} {{.EndNoun}}",
+    "{{.Noun}} {{.EndNoun}}",
+    "{{.Adjective}} {{.EndNoun}}"]
+}

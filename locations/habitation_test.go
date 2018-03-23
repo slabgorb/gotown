@@ -9,8 +9,11 @@ import (
 )
 
 func TestPopulation(t *testing.T) {
-	culture := helperMockCulture(t, "italian")
-	h := NewArea(Village, culture, nil, nil)
+	culture := &inhabitants.Culture{Name: "italianate"}
+	if err := culture.Read(); err != nil {
+		panic(err)
+	}
+	h, _ := NewArea(Village, culture, nil, nil)
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
 	}

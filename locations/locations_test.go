@@ -1,12 +1,12 @@
 package locations_test
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"path/filepath"
+	"os"
+	"testing"
 
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/persist"
+	"github.com/slabgorb/gotown/words"
 )
 
 type tester interface {
@@ -15,21 +15,10 @@ type tester interface {
 	Fatal(args ...interface{})
 }
 
-func helperLoadBytes(t tester, name string) []byte {
-	path := filepath.Join("testdata", name)
-	bytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return bytes
-}
-
-func helperMockCulture(t tester, name string) *inhabitants.Culture {
-	data := helperLoadBytes(t, fmt.Sprintf("mock_culture_%s.json", name))
-	c := &inhabitants.Culture{}
-	err := json.Unmarshal(data, c)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return c
+func TestMain(m *testing.M) {
+	persist.OpenTestDB()
+	inhabitants.Seed()
+	words.Seed()
+	code := m.Run()
+	os.Exit(code)
 }

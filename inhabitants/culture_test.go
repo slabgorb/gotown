@@ -46,8 +46,8 @@ func TestMarshal(t *testing.T) {
 		t.Errorf("did not get female namer")
 
 	}
-	if culture.Namers[inhabitants.Female].Matronymic() != "dottir" {
-		t.Errorf("expected dottir got %s", culture.Namers[inhabitants.Female].Matronymic())
+	if culture.Namers[inhabitants.Female].Words.Matronymic() != "dottir" {
+		t.Errorf("expected dottir got %s", culture.Namers[inhabitants.Female].Words.Matronymic())
 	}
 }
 

@@ -52,6 +52,7 @@ const theme = createMuiTheme({
   },
 });
 
+
 const seed = () => axios.put('/api/seed');
 
 class App extends React.Component {
@@ -70,7 +71,7 @@ class App extends React.Component {
 
   handleMenuItem(value) {
     const { history } = this.props;
-    history.push(`/${value}`)
+    history.push(`/${value}`);
     this.handleClose();
   }
 
