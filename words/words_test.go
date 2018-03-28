@@ -33,6 +33,7 @@ func TestWords(t *testing.T) {
 		}
 	}
 	if !found {
+		t.Log(list)
 		t.Fatal("english town names not seeded")
 	}
 

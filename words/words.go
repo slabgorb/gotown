@@ -42,6 +42,14 @@ func (w *Words) Read() error {
 	return persist.DB.One("Name", w.Name, w)
 }
 
+func (w *Words) Reset() {
+	w.ID = 0
+	w.Name = ""
+	w.Dictionary = make(map[string][]string)
+	w.backup = nil
+	w.BackupName = ""
+}
+
 // Noun returns a noun
 func (w *Words) Noun() string {
 	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("nouns")) })
@@ -197,10 +205,10 @@ func List() ([]string, error) {
 
 func seedWords() error {
 	var words = &Words{}
-	return persist.SeedHelper("../web/data/words", words)
+	return persist.SeedHelper("words", words)
 }
 
 func seedNamers() error {
 	var namer = &Namer{}
-	return persist.SeedHelper("../web/data/namers", namer)
+	return persist.SeedHelper("namers", namer)
 }

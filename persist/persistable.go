@@ -3,9 +3,8 @@ package persist
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path"
+	"strings"
 
 	"github.com/asdine/storm"
 )
@@ -23,6 +22,7 @@ type Persistable interface {
 	Save() error
 	Read() error
 	Delete() error
+	Reset()
 }
 
 func Open(path string) error {
@@ -51,27 +51,26 @@ func CloseTestDB() {
 }
 
 func SeedHelper(pathname string, item Persistable) error {
-	files, err := ioutil.ReadDir(pathname)
-	if err != nil {
-		return err
-	}
+	bundle := PersistBundle
 	if err := DB.Drop(item); err != nil {
 		if err.Error() != "bucket not found" {
 			return fmt.Errorf("could not delete bucket %s:%s", pathname, err)
 		}
 	}
-	for _, file := range files {
-		filepath := path.Join(pathname, file.Name())
-		r, err := os.Open(filepath)
-		if err != nil {
-			return err
+	for _, name := range bundle.Files() {
+		splits := strings.Split(name, "/")
+		if splits[0] != pathname {
+			continue
 		}
+		r, _ := bundle.Open(name)
 		if err := json.NewDecoder(r).Decode(item); err != nil {
-			return fmt.Errorf("could not decode %s from file %s: %s", pathname, file.Name(), err)
+			return fmt.Errorf("could not decode %s/%s: %s", pathname, name, err)
 		}
 		if err := DB.Save(item); err != nil {
-			return fmt.Errorf("could not save %s: %s", pathname, err)
+			return fmt.Errorf("could not save %s/%s: %s", pathname, name, err)
 		}
+		item.Reset()
 	}
+
 	return nil
 }

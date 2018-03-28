@@ -30,10 +30,10 @@ func Seed() {
 
 func seedSpecies() error {
 	var species = &Species{}
-	return persist.SeedHelper("../web/data/species", species)
+	return persist.SeedHelper("species", species)
 }
 
 func seedCultures() error {
 	var culture = &Culture{}
-	return persist.SeedHelper("../web/data/cultures", culture)
+	return persist.SeedHelper("cultures", culture)
 }

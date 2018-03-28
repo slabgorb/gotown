@@ -36,6 +36,14 @@ func (s *Species) Save() error {
 	return persist.DB.Save(s)
 }
 
+func (s *Species) Reset() {
+	s.Name = ""
+	s.ID = 0
+	s.Genders = []Gender{}
+	s.Expression = nil
+	s.Demography = make(map[DemographyBucket]Demo)
+}
+
 // Delete implements persist.Persistable
 func (s *Species) Delete() error {
 	return persist.DB.DeleteStruct(s)

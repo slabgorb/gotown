@@ -125,6 +125,14 @@ func (c *Culture) Read() error {
 	return persist.DB.One("Name", c.Name, c)
 }
 
+func (c *Culture) Reset() {
+	c.ID = 0
+	c.Name = ""
+	c.NameStrategies = make(map[Gender]string)
+	c.MaritalStrategies = []string{}
+	c.Namers = make(map[Gender]*words.Namer)
+}
+
 // MaritalCandidate decides whether this pair of Beings is a valid candidate for
 // marriage, based on the culture's marital rules.
 func (c *Culture) MaritalCandidate(a, b *Being) bool {

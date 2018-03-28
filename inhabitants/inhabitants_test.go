@@ -2,13 +2,24 @@ package inhabitants_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
 	. "github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/persist"
+	"github.com/slabgorb/gotown/words"
 )
+
+func TestMain(m *testing.M) {
+	persist.OpenTestDB()
+	words.Seed()
+	Seed()
+	code := m.Run()
+	persist.CloseTestDB()
+	os.Exit(code)
+}
 
 type beingFixture struct {
 	Label   string `json:"label"`
@@ -28,13 +39,8 @@ func helperLoadBytes(t *testing.T, name string) []byte {
 }
 
 func helperMockCulture(t *testing.T, name string) *Culture {
-	data := helperLoadBytes(t, fmt.Sprintf("mock_culture_%s.json", name))
-	c := &Culture{}
-	err := json.Unmarshal(data, c)
-	t.Logf("%#v", c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	c := &Culture{Name: name}
+	c.Read()
 	return c
 }
 

@@ -42,6 +42,15 @@ func (n *Namer) Read() error {
 	return persist.DB.One("Name", n.Name, n)
 }
 
+func (n *Namer) Reset() {
+	n.Words = nil
+	n.ID = 0
+	n.Name = ""
+	n.Patterns = []Pattern{}
+	n.WordsName = ""
+	n.NameStrategy = ""
+}
+
 func (n *Namer) Template() *template.Template {
 	randomChoice := n.Patterns[randomizer.Intn(len(n.Patterns))]
 	return randomChoice.Template()

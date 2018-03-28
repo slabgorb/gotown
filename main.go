@@ -67,6 +67,7 @@ func main() {
 func seedHandler(c echo.Context) error {
 	inhabitants.Seed()
 	words.Seed()
+	return nil
 }
 
 func listCulturesHandler(c echo.Context) error {
