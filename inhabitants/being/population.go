@@ -1,10 +1,10 @@
 package inhabitants
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 
+	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/timeline"
 )
 
@@ -13,37 +13,37 @@ type Population struct {
 	mux    sync.Mutex
 	beings map[*Being]struct{}
 	*timeline.Chronology
-	*Culture
+	Culture Cultured
 }
 
-type populationSerialize struct {
-	Beings     []*Being             `json:"residents"`
-	Chronology *timeline.Chronology `json:"chronology"`
-	Culture    *Culture             `json:"culture"`
-}
+// type populationSerialize struct {
+// 	Beings     []*Being             `json:"residents"`
+// 	Chronology *timeline.Chronology `json:"chronology"`
+// 	Culture    *Culture             `json:"culture"`
+// }
 
-func (p *Population) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&populationSerialize{
-		Beings:     p.Beings(),
-		Chronology: p.Chronology,
-		Culture:    p.Culture,
-	})
-}
+// func (p *Population) MarshalJSON() ([]byte, error) {
+// 	return json.Marshal(&populationSerialize{
+// 		Beings:     p.Beings(),
+// 		Chronology: p.Chronology,
+// 		Culture:    p.Culture,
+// 	})
+// }
 
-func (p *Population) UnmarshalJSON(data []byte) error {
-	ps := &populationSerialize{}
-	err := json.Unmarshal(data, ps)
-	if err != nil {
-		return err
-	}
-	for _, b := range ps.Beings {
-		p.Add(b)
-	}
-	p.Culture = ps.Culture
-	p.Chronology = ps.Chronology
-	return nil
+// func (p *Population) UnmarshalJSON(data []byte) error {
+// 	ps := &populationSerialize{}
+// 	err := json.Unmarshal(data, ps)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for _, b := range ps.Beings {
+// 		p.Add(b)
+// 	}
+// 	p.Culture = ps.Culture
+// 	p.Chronology = ps.Chronology
+// 	return nil
 
-}
+// }
 
 type MaritalCandidate struct {
 	male, female *Being
@@ -63,7 +63,7 @@ func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 }
 
 // NewPopulation initializes a Population
-func NewPopulation(beings []*Being, chronology *timeline.Chronology, culture *Culture) *Population {
+func NewPopulation(beings []*Being, chronology *timeline.Chronology, culture Cultured) *Population {
 	p := &Population{Chronology: chronology, Culture: culture}
 	if chronology == nil {
 		p.Chronology = timeline.NewChronology()
@@ -102,7 +102,7 @@ func reproduction(p *Population) timeline.Callback {
 					with = r.b.Spouses[0]
 				} else {
 					// choose random guy for now, will work on the choice later
-					men := p.ByGender(Male)
+					men := p.ByGender(inhabitants.Male)
 					with = men[randomizer.Intn(len(men))]
 				}
 				r.b.Reproduce(with)
@@ -163,7 +163,7 @@ func (p *Population) Remove(b *Being) bool {
 	return found
 }
 
-func (p Population) ByGender(g Gender) []*Being {
+func (p *Population) ByGender(g inhabitants.Gender) []*Being {
 	out := []*Being{}
 	for b := range p.beings {
 		if b.Sex == g {
@@ -178,9 +178,9 @@ func (p Population) ByGender(g Gender) []*Being {
 func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 	candidates := []*ReproductionCandidate{}
 
-	for _, b := range p.ByGender(Gender("female")) {
-		maxAge := b.Species.Demography[Adult].MaxAge
-		minAge := b.Species.Demography[Child].MaxAge + 1
+	for _, b := range p.ByGender(inhabitants.Female) {
+		maxAge := b.Species.GetDemography()[Adult].MaxAge
+		minAge := b.Species.GetDemography()[Child].MaxAge + 1
 		if b.Age() > maxAge || b.Age() < minAge {
 			continue
 		}

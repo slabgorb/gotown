@@ -1,61 +1,74 @@
-package inhabitants
+package culture
 
 import (
 	"fmt"
 
+	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/persist"
-
 	"github.com/slabgorb/gotown/words"
 )
+
+type Marriageable interface {
+	Alive() bool
+	Unmarried() bool
+	Sex() inhabitants.Gender
+	IsCloseRelativeOf(Marriageable) bool
+	Age() int
+}
+
+type Nameable interface {
+	Father() Nameable
+	Mother() Nameable
+	Culture() *Culture
+	Name() *inhabitants.Name
+	Sex() inhabitants.Gender
+}
 
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
-	ID                int                     `json:"id" storm:"id,increment"`
-	Name              string                  `json:"name" storm:"unique"`
-	NameStrategies    map[Gender]string       `json:"name_strategies"`
-	MaritalStrategies []string                `json:"marital_strategies"`
-	Namers            map[Gender]*words.Namer `json:"names"`
+	ID                int                                 `json:"id" storm:"id,increment"`
+	Name              string                              `json:"name" storm:"unique"`
+	NameStrategies    map[inhabitants.Gender]string       `json:"name_strategies"`
+	MaritalStrategies []string                            `json:"marital_strategies"`
+	Namers            map[inhabitants.Gender]*words.Namer `json:"names"`
 }
 
 // maritalStrategy is a function which indicates whether the two beings are
 // marriage candidates
-type maritalStrategy func(a, b *Being) bool
-
-// NameStrategy is a function which describes how children are named
-type NameStrategy func(b *Being) *Name
+type maritalStrategy func(a, b Marriageable) bool
 
 var maritalStrategies = map[string]maritalStrategy{
-	"living": func(a, b *Being) bool {
+	"living": func(a, b Marriageable) bool {
 		return a.Alive() && b.Alive()
 	},
-	"monogamous": func(a, b *Being) bool {
-		return len(a.Spouses) == 0 && len(b.Spouses) == 0
+	"monogamous": func(a, b Marriageable) bool {
+		return a.Unmarried() && b.Unmarried()
 	},
-	"heterosexual": func(a, b *Being) bool {
-		return a.Sex != b.Sex
+	"heterosexual": func(a, b Marriageable) bool {
+		return a.Sex() != b.Sex()
 	},
-	"homosexual": func(a, b *Being) bool {
-		return a.Sex == b.Sex
+	"homosexual": func(a, b Marriageable) bool {
+		return a.Sex() == b.Sex()
 	},
-	"close age male older": func(a, b *Being) bool {
+	"close age male older": func(a, b Marriageable) bool {
 		// divide by 2 add 7
-		if a.Sex == Gender("male") {
+		if a.Sex() == inhabitants.Gender("male") {
 			return (a.Age()/2)+7 < b.Age() && a.Age() >= b.Age()
 		}
 		return (b.Age()/2)+7 < a.Age() && b.Age() >= a.Age()
 	},
-	"close age female older": func(a, b *Being) bool {
+	"close age female older": func(a, b Marriageable) bool {
 		// divide by 2 add 7
-		if a.Sex == Gender("female") {
+		if a.Sex() == inhabitants.Gender("female") {
 			return (a.Age()/2)+7 < b.Age() && a.Age() >= b.Age()
 		}
 		return (b.Age()/2)+7 < a.Age() && b.Age() >= a.Age()
 	},
-	"close age": func(a, b *Being) bool {
+	"close age": func(a, b Marriageable) bool {
 		return (a.Age()/2)+7 < b.Age() && (b.Age()/2)+7 < a.Age()
 	},
-	"unrelated": func(a, b *Being) bool {
+	"unrelated": func(a, b Marriageable) bool {
 		return !a.IsCloseRelativeOf(b)
 	},
 }
@@ -128,14 +141,14 @@ func (c *Culture) Read() error {
 func (c *Culture) Reset() {
 	c.ID = 0
 	c.Name = ""
-	c.NameStrategies = make(map[Gender]string)
+	c.NameStrategies = make(map[inhabitants.Gender]string)
 	c.MaritalStrategies = []string{}
-	c.Namers = make(map[Gender]*words.Namer)
+	c.Namers = make(map[inhabitants.Gender]*words.Namer)
 }
 
 // MaritalCandidate decides whether this pair of Beings is a valid candidate for
 // marriage, based on the culture's marital rules.
-func (c *Culture) MaritalCandidate(a, b *Being) bool {
+func (c *Culture) MaritalCandidate(a, b Marriageable) bool {
 	out := true
 	for _, s := range c.MaritalStrategies {
 		out = out && maritalStrategies[s](a, b)
@@ -143,19 +156,22 @@ func (c *Culture) MaritalCandidate(a, b *Being) bool {
 	return out
 }
 
+// NameStrategy is a function which describes how children are named
+type NameStrategy func(b Nameable) *inhabitants.Name
+
 // GetName returns a name appropriate for the passed in Being
-func (c *Culture) GetName(b *Being) *Name {
-	f := c.NameStrategies[b.Sex]
+func (c *Culture) GetName(b Nameable) *inhabitants.Name {
+	f := c.NameStrategies[b.Sex()]
 	return NameStrategies[f](b)
 }
 
 // NameStrategies deliniates the various naming strategy functions
 var NameStrategies = map[string]NameStrategy{
-	"matrilineal": func(b *Being) *Name {
-		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.Words.GivenName()}
+	"matrilineal": func(b Nameable) *inhabitants.Name {
+		namer := b.Culture().Namers[b.Sex()]
+		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
 		if b.Mother() != nil {
-			name.FamilyName = b.Mother().FamilyName
+			name.FamilyName = b.Mother().Name().FamilyName
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName()
@@ -163,11 +179,11 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"patrilineal": func(b *Being) *Name {
-		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.Words.GivenName()}
+	"patrilineal": func(b Nameable) *inhabitants.Name {
+		namer := b.Culture().Namers[b.Sex()]
+		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
 		if b.Father() != nil {
-			name.FamilyName = b.Father().FamilyName
+			name.FamilyName = b.Father().Name().FamilyName
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName()
@@ -175,11 +191,11 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"matronymic": func(b *Being) *Name {
-		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.Words.GivenName()}
+	"matronymic": func(b Nameable) *inhabitants.Name {
+		namer := b.Culture().Namers[b.Sex()]
+		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
 		if b.Mother() != nil {
-			name.FamilyName = b.Mother().GivenName + namer.Words.Matronymic()
+			name.FamilyName = b.Mother().Name().GivenName + namer.Words.Matronymic()
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName() + namer.Words.Matronymic()
@@ -187,11 +203,11 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"patronymic": func(b *Being) *Name {
-		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.Words.GivenName()}
+	"patronymic": func(b Nameable) *inhabitants.Name {
+		namer := b.Culture().Namers[b.Sex()]
+		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
 		if b.Father() != nil {
-			name.FamilyName = b.Father().GivenName + namer.Words.Patronymic()
+			name.FamilyName = b.Father().Name().GivenName + namer.Words.Patronymic()
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName() + namer.Words.Patronymic()
@@ -199,11 +215,16 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"onename": func(b *Being) *Name {
-		namer := b.Culture.Namers[b.Sex]
-		name := &Name{GivenName: namer.Words.GivenName()}
+	"onename": func(b Nameable) *inhabitants.Name {
+		namer := b.Culture().Namers[b.Sex()]
+		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
 	},
+}
+
+func Seed() error {
+	var culture = &Culture{}
+	return persist.SeedHelper("cultures", culture)
 }

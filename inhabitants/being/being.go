@@ -1,41 +1,37 @@
 package inhabitants
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/timeline"
 )
 
-// Name is the name of a being.
-type Name struct {
-	GivenName  string   `json:"given_name"`
-	FamilyName string   `json:"family_name"`
-	Other      []string `json:"other_name"`
-	Display    string   `json:"display_name"`
+var randomizer random.Generator = random.Random
+
+// SetRandomizer sets the random generator for the package. Generally used by
+// tests.
+func SetRandomizer(g random.Generator) {
+	randomizer = g
 }
 
-// OtherNames returns any other names a being may have as a space-separated list
-func (n *Name) OtherNames() string {
-	return strings.Join(n.Other, " ")
+type Specieser interface {
+	RandomAge(slot int) int
+	MaxAge(slot int) int
+	GetGenders() []inhabitants.Gender
+	Expression() inhabitants.Expresser
 }
 
-// NewName tries valiantly to create a formal name from a string
-func NewName(fullName string) *Name {
-	name := &Name{Display: fullName}
-	names := strings.Split(fullName, " ")
-	if len(names) > 0 {
-		name.GivenName = names[0]
-	}
-	if len(names) > 1 {
-		name.FamilyName = names[1]
-	}
-	if len(names) > 2 {
-		name.Other = names[2:]
-	}
-	return name
+type Cultured interface {
+	RandomName(inhabitants.Gender) Namer
+}
+
+type Namer interface {
+	Display() string
 }
 
 // Members is a set of Being
@@ -59,20 +55,20 @@ func (m Members) String() string {
 
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	*Name `json:"name"`
-	*Species
-	*Culture
+	Name       Namer `json:"name"`
+	Species    Specieser
+	Culture    Cultured
 	Parents    Members
 	Children   Members              `json:"children"`
 	Spouses    Members              `json:"spouses"`
-	Sex        Gender               `json:"gender"`
+	Sex        inhabitants.Gender   `json:"gender"`
 	Dead       bool                 `json:"dead"`
 	Chromosome *genetics.Chromosome `json:"chromosome"`
 	Chronology *timeline.Chronology
 }
 
 // NewBeing initializes a being
-func NewBeing(s *Species, c *Culture) *Being {
+func NewBeing(s Specieser, c Cultured) *Being {
 	return &Being{
 		Species:    s,
 		Culture:    c,
@@ -81,7 +77,7 @@ func NewBeing(s *Species, c *Culture) *Being {
 	}
 }
 
-func (b *Being) genderedParent(gender Gender) *Being {
+func (b *Being) genderedParent(gender inhabitants.Gender) *Being {
 	for _, b := range b.Parents {
 		if b.Sex == gender {
 			return b
@@ -91,43 +87,43 @@ func (b *Being) genderedParent(gender Gender) *Being {
 }
 
 // MarshalJSON implements json.marshaler
-func (b *Being) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		Expression map[string]string         `json:"expression"`
-		Chromosome *genetics.Chromosome      `json:"chromosome"`
-		Age        int                       `json:"age"`
-		Sex        string                    `json:"sex"`
-		Species    string                    `json:"species"`
-		Parents    []string                  `json:"parents"`
-		Children   []string                  `json:"children"`
-		Spouses    []string                  `json:"spouses"`
-		Living     bool                      `json:"alive"`
-		Events     map[int][]*timeline.Event `json:"events"`
-		Culture    *Culture                  `json:"culture"`
-		Name       *Name                     `json:"name"`
-	}{
-		Expression: b.Expression(),
-		Age:        b.Age(),
-		Sex:        b.Sex.String(),
-		Species:    b.Species.String(),
-		Parents:    b.Parents.Strings(),
-		Children:   b.Children.Strings(),
-		Spouses:    b.Spouses.Strings(),
-		Living:     !b.Dead,
-		Events:     b.Chronology.Events,
-		Culture:    b.Culture,
-		Name:       b.Name,
-	})
-}
+// func (b *Being) MarshalJSON() ([]byte, error) {
+// 	return json.Marshal(&struct {
+// 		Expression map[string]string         `json:"expression"`
+// 		Chromosome *genetics.Chromosome      `json:"chromosome"`
+// 		Age        int                       `json:"age"`
+// 		Sex        string                    `json:"sex"`
+// 		Species    string                    `json:"species"`
+// 		Parents    []string                  `json:"parents"`
+// 		Children   []string                  `json:"children"`
+// 		Spouses    []string                  `json:"spouses"`
+// 		Living     bool                      `json:"alive"`
+// 		Events     map[int][]*timeline.Event `json:"events"`
+// 		Culture    string                    `json:"culture"`
+// 		Name       *Name                     `json:"name"`
+// 	}{
+// 		Expression: b.Expression(),
+// 		Age:        b.Age(),
+// 		Sex:        b.Sex.String(),
+// 		Species:    b.Species.String(),
+// 		Parents:    b.Parents.Strings(),
+// 		Children:   b.Children.Strings(),
+// 		Spouses:    b.Spouses.Strings(),
+// 		Living:     !b.Dead,
+// 		Events:     b.Chronology.Events,
+// 		Culture:    b.Culture,
+// 		Name:       b.Name,
+// 	})
+// }
 
 // Father returns a male parent of the Being
 func (b *Being) Father() *Being {
-	return b.genderedParent(Male)
+	return b.genderedParent(inhabitants.Male)
 }
 
 // Mother returns a female parent of the Being
 func (b *Being) Mother() *Being {
-	return b.genderedParent(Female)
+	return b.genderedParent(inhabitants.Female)
 }
 
 // Randomize scrambles a Being randomly
@@ -151,12 +147,13 @@ func (b *Being) RandomizeAge(slot int) {
 // RandomizeGender randomizes the Being's gender based on the possible genders
 // the species exposes.
 func (b *Being) RandomizeGender() {
-	b.Sex = b.Species.Genders[randomizer.Intn(len(b.Species.Genders))]
+	b.Sex = b.Species.GetGenders()[randomizer.Intn(len(b.Species.GetGenders()))]
 }
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName() {
-	b.Name = NameStrategies[b.Culture.NameStrategies[b.Sex]](b)
+	b.Name = b.Culture.RandomName(b.Sex)
+	//b.Name = NameStrategies[b.Culture.GetNameStrategies()[b.Sex]](b)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.
@@ -165,14 +162,14 @@ func (b *Being) RandomizeChromosome() {
 }
 
 // Express is the being's chromosome's expression
-func (b *Being) Express(e genetics.Expression) map[string]string {
+func (b *Being) Express(e inhabitants.Expresser) map[string]string {
 	return b.Chromosome.Express(e)
 }
 
 // Expression returns the genetic expression of the being's chromosome in the
 // context of the being's species.
 func (b *Being) Expression() map[string]string {
-	return b.Express(*b.Species.Expression)
+	return b.Express(b.Species.Expression())
 }
 
 // Marry marries two beings together. Marry does not check whether the beings
@@ -278,7 +275,7 @@ func (b *Being) IsCloseRelativeOf(with *Being) bool {
 
 // Reproduce creates new Being objects from the 'parent' beings
 func (b *Being) Reproduce(with *Being) ([]*Being, error) {
-	if with == nil && b.Sex != Asexual {
+	if with == nil && b.Sex != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
 	child := &Being{Species: b.Species, Chronology: timeline.NewChronology(), Culture: b.Culture}
@@ -309,7 +306,7 @@ func (b *Being) Die(explanation ...string) {
 
 // String returns the string representation of the being.
 func (b *Being) String() string {
-	return strings.Trim(b.Name.Display, " ")
+	return strings.Trim(b.Name.Display(), " ")
 }
 
 // Alive returns whether this being is currently alive

@@ -1,11 +1,8 @@
-package inhabitants
-
-// DemographyBucket splits the ages of a being, i.e. Child, Elderly
-type DemographyBucket int
+package species
 
 // DemographyBucket enum
 const (
-	Child DemographyBucket = iota
+	Child int = iota
 	Teenager
 	YoungAdult
 	EarlyAdult
@@ -14,7 +11,10 @@ const (
 	Senior
 	Elderly
 	Ancient
+	MaxDemographyBucket
 )
+
+const Random int = -1
 
 // Demo forms part of a demography
 type Demo struct {
