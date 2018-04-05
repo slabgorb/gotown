@@ -26,7 +26,7 @@ type Species struct {
 }
 
 // New creates and initializes a *Species
-func New(name string, genders []inhabitants.Gender, e Expresser, d map[int]Demo) *Species {
+func New(name string, genders []inhabitants.Gender, e inhabitants.Expresser, d map[int]Demo) *Species {
 	return &Species{
 		Name:       name,
 		Genders:    genders,
@@ -51,7 +51,7 @@ func (s *Species) Reset() {
 	s.ID = 0
 	s.Genders = []inhabitants.Gender{}
 	s.Expression = nil
-	s.Demography = make(map[DemographyBucket]Demo)
+	s.Demography = make(map[int]Demo)
 }
 
 // Delete implements persist.Persistable
@@ -71,8 +71,8 @@ func (s *Species) GetGenders() []inhabitants.Gender {
 
 // RandomAge provides a random age within a 'slot', or a demography bucket. If th
 func (s *Species) RandomAge(slot int) int {
-	if slot == -1 || slot > int(MaxDemographyBucket) {
-		slot = randomizer.Intn(int(MaxDemographyBucket))
+	if slot == -1 || slot > int(inhabitants.MaxDemographyBucket) {
+		slot = randomizer.Intn(int(inhabitants.MaxDemographyBucket))
 	}
 	min := 0
 	var keys []int

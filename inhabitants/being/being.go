@@ -1,4 +1,4 @@
-package inhabitants
+package being
 
 import (
 	//"encoding/json"

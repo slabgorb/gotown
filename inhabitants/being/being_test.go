@@ -1,16 +1,16 @@
-package inhabitants_test
+package being_test
 
 import (
 	"testing"
 
-	. "github.com/slabgorb/gotown/inhabitants"
+	. "github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
-func init() {
-	SetRandomizer(random.NewMock())
+func TestMain(m *testing.M) {
+	Seed()
 }
 
 func TestName(t *testing.T) {

@@ -17,6 +17,10 @@ func (e *Expression) Add(trait Trait) {
 	e.Traits = append(e.Traits, trait)
 }
 
+func (e *Expression) GetTraits() []Trait {
+	return e.Traits
+}
+
 // UnmarshalJSON implements json.Unmarshaler
 func (e *Expression) UnmarshalJSON(data []byte) error {
 	tmp := make(map[string][]Trait)

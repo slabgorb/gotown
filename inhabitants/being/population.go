@@ -1,4 +1,4 @@
-package inhabitants
+package being
 
 import (
 	"fmt"
@@ -179,8 +179,8 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 	candidates := []*ReproductionCandidate{}
 
 	for _, b := range p.ByGender(inhabitants.Female) {
-		maxAge := b.Species.GetDemography()[Adult].MaxAge
-		minAge := b.Species.GetDemography()[Child].MaxAge + 1
+		maxAge := b.Species.MaxAge(inhabitants.Adult)
+		minAge := b.Species.MaxAge(inhabitants.Child) + 1
 		if b.Age() > maxAge || b.Age() < minAge {
 			continue
 		}

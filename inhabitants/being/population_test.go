@@ -1,4 +1,4 @@
-package inhabitants_test
+package being_test
 
 import (
 	"encoding/json"

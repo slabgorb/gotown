@@ -17,3 +17,16 @@ func SetRandomizer(g random.Generator) {
 type Expresser interface {
 	Express(e genetics.Expression) map[string]string
 }
+
+const (
+	Child int = iota
+	Teenager
+	YoungAdult
+	EarlyAdult
+	Adult
+	MiddleAge
+	Senior
+	Elderly
+	Ancient
+	MaxDemographyBucket
+)

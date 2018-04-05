@@ -4,21 +4,22 @@ import (
 	"os"
 	"testing"
 
+	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
 )
 
-var demog map[DemographyBucket]Demo = map[DemographyBucket]Demo{
-	Child:      {MaxAge: 14, CumulativePercent: 29},
-	Teenager:   {MaxAge: 18, CumulativePercent: 36},
-	YoungAdult: {MaxAge: 26, CumulativePercent: 50},
-	EarlyAdult: {MaxAge: 31, CumulativePercent: 58},
-	Adult:      {MaxAge: 41, CumulativePercent: 72},
-	MiddleAge:  {MaxAge: 51, CumulativePercent: 74},
-	Senior:     {MaxAge: 61, CumulativePercent: 93},
-	Elderly:    {MaxAge: 71, CumulativePercent: 98},
-	Ancient:    {MaxAge: 100, CumulativePercent: 100},
+var demog = map[int]Demo{
+	inhabitants.Child:      {MaxAge: 14, CumulativePercent: 29},
+	inhabitants.Teenager:   {MaxAge: 18, CumulativePercent: 36},
+	inhabitants.YoungAdult: {MaxAge: 26, CumulativePercent: 50},
+	inhabitants.EarlyAdult: {MaxAge: 31, CumulativePercent: 58},
+	inhabitants.Adult:      {MaxAge: 41, CumulativePercent: 72},
+	inhabitants.MiddleAge:  {MaxAge: 51, CumulativePercent: 74},
+	inhabitants.Senior:     {MaxAge: 61, CumulativePercent: 93},
+	inhabitants.Elderly:    {MaxAge: 71, CumulativePercent: 98},
+	inhabitants.Ancient:    {MaxAge: 100, CumulativePercent: 100},
 }
 
 func TestMain(m *testing.M) {
@@ -28,13 +29,6 @@ func TestMain(m *testing.M) {
 	persist.CloseTestDB()
 	os.Exit(code)
 }
-
-// func TestToString(t *testing.T) {
-// 	mockSpecies := (t)
-// 	if mockSpecies.String() != "Human" {
-// 		t.Error(mockSpecies.String())
-// 	}
-// }
 
 // func TestGenders(t *testing.T) {
 // 	mockSpecies := helperMockSpecies(t)
