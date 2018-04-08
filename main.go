@@ -11,7 +11,9 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/locations"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/words"
@@ -65,7 +67,8 @@ func main() {
 }
 
 func seedHandler(c echo.Context) error {
-	inhabitants.Seed()
+	species.Seed()
+	culture.Seed()
 	words.Seed()
 	return nil
 }

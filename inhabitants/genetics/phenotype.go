@@ -88,6 +88,10 @@ type Trait struct {
 	Variants []*Variant `json:"variants"`
 }
 
+func (t *Trait) GetName() string {
+	return t.Name
+}
+
 // UnmarshalJSON implements json.Unmarshaler
 func (t *Trait) UnmarshalJSON(data []byte) error {
 	tmp := make(map[string]interface{})
@@ -111,6 +115,20 @@ func (t *Trait) UnmarshalJSON(data []byte) error {
 	t.Name = name
 	t.Variants = variants
 	return nil
+}
+
+// Expression is the genetic expression of a Trait
+func (t Trait) Expression(s string) (string, int) {
+	m := t.matches(s)
+	pl := make(pairList, len(m))
+	i := 0
+	for k, v := range m {
+		pl[i] = pair{key: k, value: v, index: i}
+		i++
+	}
+	sort.Sort(pl)
+	return pl[len(m)-1].key, pl[len(m)-1].value
+
 }
 
 // NewTrait instantiates a Trait
@@ -145,17 +163,3 @@ func (p pairList) Less(i, j int) bool {
 	return p[i].value < p[j].value
 }
 func (p pairList) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
-
-// Expression is the genetic expression of a Trait
-func (t Trait) Expression(s string) (string, int) {
-	m := t.matches(s)
-	pl := make(pairList, len(m))
-	i := 0
-	for k, v := range m {
-		pl[i] = pair{key: k, value: v, index: i}
-		i++
-	}
-	sort.Sort(pl)
-	return pl[len(m)-1].key, pl[len(m)-1].value
-
-}

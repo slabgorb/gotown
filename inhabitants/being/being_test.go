@@ -3,6 +3,7 @@ package being_test
 import (
 	"testing"
 
+	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/timeline"
@@ -10,21 +11,18 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	Seed()
+	//Seed()
 }
 
 func TestName(t *testing.T) {
-	species := helperMockSpecies(t)
-	culture := helperMockCulture(t, "viking")
-	if culture == nil {
-		t.Error("culture not loaded")
-	}
+	species := &mockSpecies{}
+	culture := &mockCulture{}
 	expected := "Arnulf Arnulfson"
-	being := &Being{Species: species, Culture: culture, Sex: Male}
+	being := &Being{Species: species, Culture: culture, Gender: inhabitants.Male}
 	words.SetRandomizer(random.NewMock())
 	being.RandomizeName()
-	if being.Sex != Male {
-		t.Errorf("Expected Male got %s", being.Sex)
+	if being.Sex() != inhabitants.Male {
+		t.Errorf("Expected Male got %s", being.Sex())
 	}
 	if being.String() != expected {
 		t.Errorf("Expected %s got %s", expected, being.String())
@@ -32,11 +30,11 @@ func TestName(t *testing.T) {
 }
 
 func TestInheritedName(t *testing.T) {
-	species := helperMockSpecies(t)
-	culture := helperMockCulture(t, "viking")
-	m := &Being{Species: species, Sex: Female, Culture: culture, Chronology: timeline.NewChronology()}
+	species := &mockSpecies{}
+	culture := &mockCulture{}
+	m := &Being{Species: species, Gender: inhabitants.Female, Culture: culture, Chronology: timeline.NewChronology()}
 	m.Name = m.Culture.GetName(m)
-	f := &Being{Species: species, Sex: Male, Culture: culture, Chronology: timeline.NewChronology()}
+	f := &Being{Species: species, Gender: inhabitants.Male, Culture: culture, Chronology: timeline.NewChronology()}
 	f.Name = f.Culture.GetName(f)
 	//runtime.Breakpoint()
 	children, err := f.Reproduce(m)

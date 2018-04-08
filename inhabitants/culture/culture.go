@@ -8,14 +8,6 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
-type Marriageable interface {
-	Alive() bool
-	Unmarried() bool
-	Sex() inhabitants.Gender
-	IsCloseRelativeOf(Marriageable) bool
-	Age() int
-}
-
 type Nameable interface {
 	Father() Nameable
 	Mother() Nameable
@@ -36,39 +28,39 @@ type Culture struct {
 
 // maritalStrategy is a function which indicates whether the two beings are
 // marriage candidates
-type maritalStrategy func(a, b Marriageable) bool
+type maritalStrategy func(a, b inhabitants.Marriageable) bool
 
 var maritalStrategies = map[string]maritalStrategy{
-	"living": func(a, b Marriageable) bool {
+	"living": func(a, b inhabitants.Marriageable) bool {
 		return a.Alive() && b.Alive()
 	},
-	"monogamous": func(a, b Marriageable) bool {
+	"monogamous": func(a, b inhabitants.Marriageable) bool {
 		return a.Unmarried() && b.Unmarried()
 	},
-	"heterosexual": func(a, b Marriageable) bool {
+	"heterosexual": func(a, b inhabitants.Marriageable) bool {
 		return a.Sex() != b.Sex()
 	},
-	"homosexual": func(a, b Marriageable) bool {
+	"homosexual": func(a, b inhabitants.Marriageable) bool {
 		return a.Sex() == b.Sex()
 	},
-	"close age male older": func(a, b Marriageable) bool {
+	"close age male older": func(a, b inhabitants.Marriageable) bool {
 		// divide by 2 add 7
 		if a.Sex() == inhabitants.Gender("male") {
 			return (a.Age()/2)+7 < b.Age() && a.Age() >= b.Age()
 		}
 		return (b.Age()/2)+7 < a.Age() && b.Age() >= a.Age()
 	},
-	"close age female older": func(a, b Marriageable) bool {
+	"close age female older": func(a, b inhabitants.Marriageable) bool {
 		// divide by 2 add 7
 		if a.Sex() == inhabitants.Gender("female") {
 			return (a.Age()/2)+7 < b.Age() && a.Age() >= b.Age()
 		}
 		return (b.Age()/2)+7 < a.Age() && b.Age() >= a.Age()
 	},
-	"close age": func(a, b Marriageable) bool {
+	"close age": func(a, b inhabitants.Marriageable) bool {
 		return (a.Age()/2)+7 < b.Age() && (b.Age()/2)+7 < a.Age()
 	},
-	"unrelated": func(a, b Marriageable) bool {
+	"unrelated": func(a, b inhabitants.Marriageable) bool {
 		return !a.IsCloseRelativeOf(b)
 	},
 }
@@ -148,7 +140,7 @@ func (c *Culture) Reset() {
 
 // MaritalCandidate decides whether this pair of Beings is a valid candidate for
 // marriage, based on the culture's marital rules.
-func (c *Culture) MaritalCandidate(a, b Marriageable) bool {
+func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
 	out := true
 	for _, s := range c.MaritalStrategies {
 		out = out && maritalStrategies[s](a, b)

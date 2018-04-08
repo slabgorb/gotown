@@ -6,13 +6,43 @@ import (
 	"sort"
 	"testing"
 
-	. "github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants"
+	. "github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/timeline"
 )
 
+type mockCulture struct {
+}
+
+func (m *mockCulture) RandomName(inhabitants.Gender) inhabitants.Namer {
+	panic("not implemented")
+}
+
+func (m *mockCulture) IsMaritalCandidate(inhabitants.Marriageable, inhabitants.Marriageable) bool {
+	panic("not implemented")
+}
+
+type mockSpecies struct {
+}
+
+func (m *mockSpecies) RandomAge(slot int) int {
+	panic("not implemented")
+}
+
+func (m *mockSpecies) MaxAge(slot int) int {
+	panic("not implemented")
+}
+
+func (m *mockSpecies) GetGenders() []inhabitants.Gender {
+	panic("not implemented")
+}
+
+func (m *mockSpecies) Expression() inhabitants.Expresser {
+	panic("not implemented")
+}
+
 func TestSerialization(t *testing.T) {
-	mockCulture := helperMockCulture(t, "italian")
-	p := NewPopulation([]*Being{}, nil, mockCulture)
+	p := NewPopulation([]*Being{}, nil, &mockCulture{})
 	j, err := json.Marshal(p)
 	if err != nil {
 		t.Error(err)
@@ -26,12 +56,11 @@ func TestSerialization(t *testing.T) {
 }
 
 func TestAging(t *testing.T) {
-	mockSpecies := helperMockSpecies(t)
 	p := NewPopulation([]*Being{}, nil, nil)
 	count := 10
 	beings := make([]*Being, count)
 	for i := 0; i < count; i++ {
-		beings[i] = &Being{Species: mockSpecies, Chronology: &timeline.Chronology{CurrentYear: i}}
+		beings[i] = &Being{Species: &mockSpecies{}, Chronology: &timeline.Chronology{CurrentYear: i}}
 		p.Add(beings[i])
 	}
 	p.Age()

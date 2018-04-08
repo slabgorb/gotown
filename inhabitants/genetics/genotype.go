@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+
+	"github.com/slabgorb/gotown/inhabitants"
 )
 
 // Gene is part of a Chromosome, represented by a hexstring
@@ -82,12 +84,12 @@ func (c *Chromosome) Combine(other *Chromosome) (*Chromosome, error) {
 }
 
 // Express applies an Expression to the Chromosome
-func (c *Chromosome) Express(e Expression) map[string]string {
+func (c *Chromosome) Express(e inhabitants.Expresser) map[string]string {
 	set := c.String()
 	express := make(map[string]string)
-	for _, trait := range e.Traits {
+	for _, trait := range e.GetTraits() {
 		k, _ := trait.Expression(set)
-		express[trait.Name] = k
+		express[trait.GetName()] = k
 	}
 	return express
 }

@@ -7,12 +7,15 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
+type Ruler interface {
+}
+
 type Area struct {
 	ID   int    `json:"id" storm:"id,increment"`
 	Name string `storm:"index"`
 	*Habitation
-	Size  AreaSize           `json:"size"`
-	Ruler *inhabitants.Being `json:"ruler"`
+	Size  AreaSize `json:"size"`
+	Ruler `json:"ruler"`
 	Graveyard
 	Location   *Area            `json:"location"`
 	Enclosures map[string]*Area `json:"enclosures"`

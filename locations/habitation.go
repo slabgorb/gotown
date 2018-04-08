@@ -2,13 +2,14 @@ package locations
 
 import (
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
 type Habitation struct {
-	Residents    *inhabitants.Population `json:"population"`
-	Name         string                  `json:"name"`
+	Residents    *being.Population `json:"population"`
+	Name         string            `json:"name"`
 	*words.Namer `json:"-"`
 }
 

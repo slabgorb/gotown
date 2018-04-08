@@ -19,21 +19,6 @@ func SetRandomizer(g random.Generator) {
 	randomizer = g
 }
 
-type Specieser interface {
-	RandomAge(slot int) int
-	MaxAge(slot int) int
-	GetGenders() []inhabitants.Gender
-	Expression() inhabitants.Expresser
-}
-
-type Cultured interface {
-	RandomName(inhabitants.Gender) Namer
-}
-
-type Namer interface {
-	Display() string
-}
-
 // Members is a set of Being
 type Members []*Being
 
@@ -55,20 +40,20 @@ func (m Members) String() string {
 
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	Name       Namer `json:"name"`
-	Species    Specieser
-	Culture    Cultured
+	Name       inhabitants.Namer `json:"name"`
+	Species    inhabitants.Specieser
+	Culture    inhabitants.Cultured
 	Parents    Members
 	Children   Members              `json:"children"`
 	Spouses    Members              `json:"spouses"`
-	Sex        inhabitants.Gender   `json:"gender"`
+	Gender     inhabitants.Gender   `json:"gender"`
 	Dead       bool                 `json:"dead"`
 	Chromosome *genetics.Chromosome `json:"chromosome"`
 	Chronology *timeline.Chronology
 }
 
 // NewBeing initializes a being
-func NewBeing(s Specieser, c Cultured) *Being {
+func NewBeing(s inhabitants.Specieser, c inhabitants.Cultured) *Being {
 	return &Being{
 		Species:    s,
 		Culture:    c,
@@ -79,11 +64,15 @@ func NewBeing(s Specieser, c Cultured) *Being {
 
 func (b *Being) genderedParent(gender inhabitants.Gender) *Being {
 	for _, b := range b.Parents {
-		if b.Sex == gender {
+		if b.Sex() == gender {
 			return b
 		}
 	}
 	return nil
+}
+
+func (b *Being) History() *timeline.Chronology {
+	return b.Chronology
 }
 
 // MarshalJSON implements json.marshaler
@@ -147,12 +136,12 @@ func (b *Being) RandomizeAge(slot int) {
 // RandomizeGender randomizes the Being's gender based on the possible genders
 // the species exposes.
 func (b *Being) RandomizeGender() {
-	b.Sex = b.Species.GetGenders()[randomizer.Intn(len(b.Species.GetGenders()))]
+	b.Gender = b.Species.GetGenders()[randomizer.Intn(len(b.Species.GetGenders()))]
 }
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName() {
-	b.Name = b.Culture.RandomName(b.Sex)
+	b.Name = b.Culture.RandomName(b.Sex())
 	//b.Name = NameStrategies[b.Culture.GetNameStrategies()[b.Sex]](b)
 }
 
@@ -185,9 +174,9 @@ func (b *Being) Marry(with *Being) {
 }
 
 // IsParentOf returns true of the receiver is the parent of the passed in being
-func (b *Being) IsParentOf(with *Being) bool {
+func (b *Being) IsParentOf(with inhabitants.Relatable) bool {
 	for _, c := range b.Children {
-		if c == with {
+		if inhabitants.Relatable(c) == with {
 			return true
 		}
 	}
@@ -196,13 +185,30 @@ func (b *Being) IsParentOf(with *Being) bool {
 
 // IsChildOf returns true if the receiver being is a child of the passed in
 // being
-func (b *Being) IsChildOf(with *Being) bool {
-	for _, c := range with.Children {
+func (b *Being) IsChildOf(with inhabitants.Relatable) bool {
+	for _, c := range with.GetChildren() {
 		if c == b {
 			return true
 		}
 	}
 	return false
+}
+
+func (b *Being) Sex() inhabitants.Gender {
+	return b.Gender
+}
+
+func (b *Being) Unmarried() bool {
+	return len(b.Spouses) == 0
+}
+
+func (b *Being) GetChildren() []inhabitants.Relatable {
+	relatables := []inhabitants.Relatable{}
+	for _, child := range b.Children {
+		relatables = append(relatables, child)
+
+	}
+	return relatables
 }
 
 // Siblings gets all siblings (half and full) of the receiver
@@ -253,7 +259,7 @@ func (b *Being) Niblings() Members {
 }
 
 // IsSiblingOf checks to see if the receiver is a sibling of the passed in being
-func (b *Being) IsSiblingOf(with *Being) bool {
+func (b *Being) IsSiblingOf(with inhabitants.Relatable) bool {
 	siblings := b.Siblings()
 	for _, s := range siblings {
 		if s == with {
@@ -265,7 +271,7 @@ func (b *Being) IsSiblingOf(with *Being) bool {
 
 // IsCloseRelativeOf returns true if the receiver is a close relative of the
 // passed in being
-func (b *Being) IsCloseRelativeOf(with *Being) bool {
+func (b *Being) IsCloseRelativeOf(with inhabitants.Relatable) bool {
 	close := false
 	close = close || b.IsChildOf(with)
 	close = close || b.IsParentOf(with)
@@ -275,7 +281,7 @@ func (b *Being) IsCloseRelativeOf(with *Being) bool {
 
 // Reproduce creates new Being objects from the 'parent' beings
 func (b *Being) Reproduce(with *Being) ([]*Being, error) {
-	if with == nil && b.Sex != inhabitants.Asexual {
+	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
 	child := &Being{Species: b.Species, Chronology: timeline.NewChronology(), Culture: b.Culture}

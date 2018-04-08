@@ -1,8 +1,8 @@
 package inhabitants
 
 import (
-	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
+	"github.com/slabgorb/gotown/timeline"
 )
 
 var randomizer random.Generator = random.Random
@@ -15,7 +15,10 @@ func SetRandomizer(g random.Generator) {
 
 // Expresser defines the behavior for anything that can express genetics
 type Expresser interface {
-	Express(e genetics.Expression) map[string]string
+	Express(e Expresser) map[string]string
+	Expression(string) (string, int)
+	GetTraits() []Expresser
+	GetName() string
 }
 
 const (
@@ -30,3 +33,40 @@ const (
 	Ancient
 	MaxDemographyBucket
 )
+
+type Populatable interface {
+	Alive() bool
+	Sex() Gender
+	Age() int
+	History() *timeline.Chronology
+}
+
+type Relatable interface {
+	IsChildOf(Relatable) bool
+	IsParentOf(Relatable) bool
+	IsSiblingOf(Relatable) bool
+	IsCloseRelativeOf(Relatable) bool
+	GetChildren() []Relatable
+}
+
+type Marriageable interface {
+	Relatable
+	Populatable
+	Unmarried() bool
+}
+
+type Specieser interface {
+	RandomAge(slot int) int
+	MaxAge(slot int) int
+	GetGenders() []Gender
+	Expression() Expresser
+}
+
+type Cultured interface {
+	RandomName(Gender) Namer
+	IsMaritalCandidate(Marriageable, Marriageable) bool
+}
+
+type Namer interface {
+	Display() string
+}
