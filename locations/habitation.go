@@ -21,11 +21,11 @@ func (h *Habitation) SetNamer(namer *words.Namer) {
 	h.Namer = namer
 }
 
-func (h *Habitation) Add(b inhabitants.Populatable) (ok bool) {
+func (h *Habitation) Add(b *being.Being) (ok bool) {
 	return h.Residents.Add(b)
 }
 
-func (h *Habitation) Remove(b inhabitants.Populatable) (ok bool) {
+func (h *Habitation) Remove(b *being.Being) (ok bool) {
 	return h.Residents.Remove(b)
 }
 
@@ -33,6 +33,6 @@ func (h *Habitation) Population() int {
 	return h.Residents.Len()
 }
 
-func (h *Habitation) Resident(b inhabitants.Populatable) (found bool) {
+func (h *Habitation) Resident(b *being.Being) (found bool) {
 	return h.Residents.Get(b)
 }

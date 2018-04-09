@@ -8,14 +8,6 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
-type Nameable interface {
-	Father() Nameable
-	Mother() Nameable
-	Culture() *Culture
-	Name() *inhabitants.Name
-	Sex() inhabitants.Gender
-}
-
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
@@ -148,72 +140,19 @@ func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
 	return out
 }
 
-// NameStrategy is a function which describes how children are named
-type NameStrategy func(b Nameable) *inhabitants.Name
-
 // GetName returns a name appropriate for the passed in Being
-func (c *Culture) GetName(b Nameable) *inhabitants.Name {
+func (c *Culture) GetName(b inhabitants.Nameable) *inhabitants.Name {
 	f := c.NameStrategies[b.Sex()]
-	return NameStrategies[f](b)
+	return inhabitants.NameStrategies[f](b, c)
 }
 
-// NameStrategies deliniates the various naming strategy functions
-var NameStrategies = map[string]NameStrategy{
-	"matrilineal": func(b Nameable) *inhabitants.Name {
-		namer := b.Culture().Namers[b.Sex()]
-		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
-		if b.Mother() != nil {
-			name.FamilyName = b.Mother().Name().FamilyName
-			return name
-		}
-		name.FamilyName = namer.Words.GivenName()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"patrilineal": func(b Nameable) *inhabitants.Name {
-		namer := b.Culture().Namers[b.Sex()]
-		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
-		if b.Father() != nil {
-			name.FamilyName = b.Father().Name().FamilyName
-			return name
-		}
-		name.FamilyName = namer.Words.GivenName()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"matronymic": func(b Nameable) *inhabitants.Name {
-		namer := b.Culture().Namers[b.Sex()]
-		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
-		if b.Mother() != nil {
-			name.FamilyName = b.Mother().Name().GivenName + namer.Words.Matronymic()
-			return name
-		}
-		name.FamilyName = namer.Words.GivenName() + namer.Words.Matronymic()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"patronymic": func(b Nameable) *inhabitants.Name {
-		namer := b.Culture().Namers[b.Sex()]
-		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
-		if b.Father() != nil {
-			name.FamilyName = b.Father().Name().GivenName + namer.Words.Patronymic()
-			return name
-		}
-		name.FamilyName = namer.Words.GivenName() + namer.Words.Patronymic()
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
-	"onename": func(b Nameable) *inhabitants.Name {
-		namer := b.Culture().Namers[b.Sex()]
-		name := &inhabitants.Name{GivenName: namer.Words.GivenName()}
-		display, _ := namer.Execute(name)
-		name.Display = display
-		return name
-	},
+func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
+	return c.Namers
+}
+
+func (c *Culture) RandomName(sex inhabitants.Gender, b inhabitants.Nameable) *inhabitants.Name {
+	f := c.NameStrategies[sex]
+	return inhabitants.NameStrategies[f](b, c)
 }
 
 func Seed() error {

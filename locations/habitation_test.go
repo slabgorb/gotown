@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/culture"
 	. "github.com/slabgorb/gotown/locations"
 )
 
 func TestPopulation(t *testing.T) {
-	culture := &inhabitants.Culture{Name: "italianate"}
+	culture := &culture.Culture{Name: "italianate"}
 	if err := culture.Read(); err != nil {
 		panic(err)
 	}

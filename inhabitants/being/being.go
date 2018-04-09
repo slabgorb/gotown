@@ -110,12 +110,12 @@ func (b *Being) GetName() *inhabitants.Name {
 }
 
 // Father returns a male parent of the Being
-func (b *Being) Father() *Being {
+func (b *Being) Father() inhabitants.Nameable {
 	return b.genderedParent(inhabitants.Male)
 }
 
 // Mother returns a female parent of the Being
-func (b *Being) Mother() *Being {
+func (b *Being) Mother() inhabitants.Nameable {
 	return b.genderedParent(inhabitants.Female)
 }
 
@@ -149,7 +149,7 @@ func (b *Being) RandomizeGender() {
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName(c inhabitants.Cultured) {
-	b.Name = c.RandomName(b.Sex())
+	b.Name = c.RandomName(b.Sex(), b)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.

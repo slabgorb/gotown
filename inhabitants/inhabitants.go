@@ -3,6 +3,7 @@ package inhabitants
 import (
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/timeline"
+	"github.com/slabgorb/gotown/words"
 )
 
 var randomizer random.Generator = random.Random
@@ -65,10 +66,18 @@ type Specieser interface {
 }
 
 type Cultured interface {
-	RandomName(Gender) *Name
+	RandomName(Gender, Nameable) *Name
 	MaritalCandidate(Marriageable, Marriageable) bool
+	GetNamers() map[Gender]*words.Namer
 }
 
+type Nameable interface {
+	Father() Nameable
+	Mother() Nameable
+	//Culture() Cultured
+	GetName() *Name
+	Sex() Gender
+}
 type Namer interface {
 	GetDisplay() string
 	GetGivenName() string
