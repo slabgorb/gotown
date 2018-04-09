@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/inhabitants/species"
@@ -74,7 +74,7 @@ func seedHandler(c echo.Context) error {
 }
 
 func listCulturesHandler(c echo.Context) error {
-	all := []*inhabitants.Culture{}
+	all := []*culture.Culture{}
 	if err := persist.DB.All(&all); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -86,7 +86,7 @@ func listCulturesHandler(c echo.Context) error {
 }
 
 func showCulturesHandler(c echo.Context) error {
-	var item inhabitants.Culture
+	var item culture.Culture
 	if err := persist.DB.One("Name", c.Param("name"), &item); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -94,7 +94,7 @@ func showCulturesHandler(c echo.Context) error {
 }
 
 func listSpeciesHandler(c echo.Context) error {
-	all := []*inhabitants.Species{}
+	all := []*species.Species{}
 	if err := persist.DB.All(&all); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -106,7 +106,7 @@ func listSpeciesHandler(c echo.Context) error {
 }
 
 func showSpeciesHandler(c echo.Context) error {
-	var item inhabitants.Species
+	var item species.Species
 	if err := persist.DB.One("Name", c.Param("name"), &item); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -114,7 +114,7 @@ func showSpeciesHandler(c echo.Context) error {
 }
 
 func showBeingHandler(c echo.Context) error {
-	var item inhabitants.Being
+	var item being.Being
 	if err := persist.DB.One("ID", c.Param("id"), &item); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -208,11 +208,11 @@ func townHandler(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	var culture inhabitants.Culture
+	var culture culture.Culture
 	if err := persist.DB.One("Name", req.Culture, &culture); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	var species inhabitants.Species
+	var species species.Species
 	if err := persist.DB.One("Name", req.Species, &species); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}

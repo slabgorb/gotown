@@ -15,6 +15,11 @@ func (n *Name) OtherNames() string {
 	return strings.Join(n.Other, " ")
 }
 
+func (n *Name) GetGivenName() string    { return n.GivenName }
+func (n *Name) GetFamilyName() string   { return n.FamilyName }
+func (n *Name) GetOtherNames() []string { return n.Other }
+func (n *Name) GetDisplay() string      { return n.Display }
+
 // NewName tries valiantly to create a formal name from a string
 func NewName(fullName string) *Name {
 	name := &Name{Display: fullName}

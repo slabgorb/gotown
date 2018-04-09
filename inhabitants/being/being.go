@@ -40,9 +40,8 @@ func (m Members) String() string {
 
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	Name       inhabitants.Namer `json:"name"`
+	Name       *inhabitants.Name `json:"name"`
 	Species    inhabitants.Specieser
-	Culture    inhabitants.Cultured
 	Parents    Members
 	Children   Members              `json:"children"`
 	Spouses    Members              `json:"spouses"`
@@ -52,13 +51,14 @@ type Being struct {
 	Chronology *timeline.Chronology
 }
 
-// NewBeing initializes a being
-func NewBeing(s inhabitants.Specieser, c inhabitants.Cultured) *Being {
+// New initializes a being
+func New(s inhabitants.Specieser) *Being {
 	return &Being{
 		Species:    s,
-		Culture:    c,
 		Chronology: timeline.NewChronology(),
 		Chromosome: genetics.RandomChromosome(30),
+		Spouses:    make(Members, 1),
+		Children:   make(Members, 1),
 	}
 }
 
@@ -105,6 +105,10 @@ func (b *Being) History() *timeline.Chronology {
 // 	})
 // }
 
+func (b *Being) GetName() *inhabitants.Name {
+	return b.Name
+}
+
 // Father returns a male parent of the Being
 func (b *Being) Father() *Being {
 	return b.genderedParent(inhabitants.Male)
@@ -115,14 +119,18 @@ func (b *Being) Mother() *Being {
 	return b.genderedParent(inhabitants.Female)
 }
 
+func (b *Being) SetAge(age int) {
+	b.Chronology.CurrentYear = age
+}
+
 // Randomize scrambles a Being randomly
-func (b *Being) Randomize() error {
+func (b *Being) Randomize(c inhabitants.Cultured) error {
 	if b.Species == nil {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
 	b.RandomizeChromosome()
 	b.RandomizeGender()
-	b.RandomizeName()
+	b.RandomizeName(c)
 	b.RandomizeAge(-1)
 	return nil
 }
@@ -140,9 +148,8 @@ func (b *Being) RandomizeGender() {
 }
 
 // RandomizeName creates a new random name based on the being's culture.
-func (b *Being) RandomizeName() {
-	b.Name = b.Culture.RandomName(b.Sex())
-	//b.Name = NameStrategies[b.Culture.GetNameStrategies()[b.Sex]](b)
+func (b *Being) RandomizeName(c inhabitants.Cultured) {
+	b.Name = c.RandomName(b.Sex())
 }
 
 // RandomizeChromosome randomizes the being's chromosome.
@@ -280,14 +287,14 @@ func (b *Being) IsCloseRelativeOf(with inhabitants.Relatable) bool {
 }
 
 // Reproduce creates new Being objects from the 'parent' beings
-func (b *Being) Reproduce(with *Being) ([]*Being, error) {
+func (b *Being) Reproduce(with *Being, c inhabitants.Cultured) ([]*Being, error) {
 	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	child := &Being{Species: b.Species, Chronology: timeline.NewChronology(), Culture: b.Culture}
+	child := &Being{Species: b.Species, Chronology: timeline.NewChronology()}
 
 	child.Parents = Members{b, with}
-	child.Randomize()
+	child.Randomize(c)
 	b.Children = append(b.Children, child)
 	with.Children = append(with.Children, child)
 	b.Chronology.AddCurrentEvent(fmt.Sprintf("%s had a child %s with %s", b, child, with))
@@ -312,7 +319,7 @@ func (b *Being) Die(explanation ...string) {
 
 // String returns the string representation of the being.
 func (b *Being) String() string {
-	return strings.Trim(b.Name.Display(), " ")
+	return strings.Trim(b.Name.GetDisplay(), " ")
 }
 
 // Alive returns whether this being is currently alive

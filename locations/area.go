@@ -21,7 +21,7 @@ type Area struct {
 	Enclosures map[string]*Area `json:"enclosures"`
 }
 
-func NewArea(size AreaSize, culture *inhabitants.Culture, ruler *inhabitants.Being, location *Area) (*Area, error) {
+func NewArea(size AreaSize, culture inhabitants.Cultured, ruler Ruler, location *Area) (*Area, error) {
 	var n *words.Namer
 	if location != nil {
 		n = location.Namer

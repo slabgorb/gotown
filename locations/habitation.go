@@ -13,19 +13,19 @@ type Habitation struct {
 	*words.Namer `json:"-"`
 }
 
-func NewHabitation(chronology *timeline.Chronology, culture *inhabitants.Culture) *Habitation {
-	return &Habitation{Residents: inhabitants.NewPopulation([]*inhabitants.Being{}, chronology, culture)}
+func NewHabitation(chronology *timeline.Chronology, culture inhabitants.Cultured) *Habitation {
+	return &Habitation{Residents: being.NewPopulation([]inhabitants.Populatable{}, chronology, culture)}
 }
 
 func (h *Habitation) SetNamer(namer *words.Namer) {
 	h.Namer = namer
 }
 
-func (h *Habitation) Add(b *inhabitants.Being) (ok bool) {
+func (h *Habitation) Add(b inhabitants.Populatable) (ok bool) {
 	return h.Residents.Add(b)
 }
 
-func (h *Habitation) Remove(b *inhabitants.Being) (ok bool) {
+func (h *Habitation) Remove(b inhabitants.Populatable) (ok bool) {
 	return h.Residents.Remove(b)
 }
 
@@ -33,6 +33,6 @@ func (h *Habitation) Population() int {
 	return h.Residents.Len()
 }
 
-func (h *Habitation) Resident(b *inhabitants.Being) (found bool) {
+func (h *Habitation) Resident(b inhabitants.Populatable) (found bool) {
 	return h.Residents.Get(b)
 }

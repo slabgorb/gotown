@@ -11,38 +11,8 @@ import (
 	"github.com/slabgorb/gotown/timeline"
 )
 
-type mockCulture struct {
-}
-
-func (m *mockCulture) RandomName(inhabitants.Gender) inhabitants.Namer {
-	panic("not implemented")
-}
-
-func (m *mockCulture) IsMaritalCandidate(inhabitants.Marriageable, inhabitants.Marriageable) bool {
-	panic("not implemented")
-}
-
-type mockSpecies struct {
-}
-
-func (m *mockSpecies) RandomAge(slot int) int {
-	panic("not implemented")
-}
-
-func (m *mockSpecies) MaxAge(slot int) int {
-	panic("not implemented")
-}
-
-func (m *mockSpecies) GetGenders() []inhabitants.Gender {
-	panic("not implemented")
-}
-
-func (m *mockSpecies) Expression() inhabitants.Expresser {
-	panic("not implemented")
-}
-
 func TestSerialization(t *testing.T) {
-	p := NewPopulation([]*Being{}, nil, &mockCulture{})
+	p := NewPopulation([]inhabitants.Populatable{}, nil, &mockCulture{})
 	j, err := json.Marshal(p)
 	if err != nil {
 		t.Error(err)
@@ -54,9 +24,8 @@ func TestSerialization(t *testing.T) {
 	}
 
 }
-
 func TestAging(t *testing.T) {
-	p := NewPopulation([]*Being{}, nil, nil)
+	p := NewPopulation([]inhabitants.Populatable{}, nil, nil)
 	count := 10
 	beings := make([]*Being, count)
 	for i := 0; i < count; i++ {
@@ -65,7 +34,7 @@ func TestAging(t *testing.T) {
 	}
 	p.Age()
 	ages := []int{}
-	for _, b := range p.Beings() {
+	for _, b := range p.Inhabitants() {
 		ages = append(ages, b.Age())
 
 	}
@@ -79,28 +48,27 @@ func TestAging(t *testing.T) {
 }
 
 func BenchmarkMaritalCandidates(b *testing.B) {
-	t := &testing.T{}
-	culture := helperMockCulture(t, "italian")
-	beings := []*Being{}
+	beings := []inhabitants.Populatable{}
+	c := &mockCulture{}
+
 	for i := 0; i < 100; i++ {
 		b := &Being{}
-		b.Randomize()
+		b.Randomize(c)
 		beings = append(beings, b)
 	}
 	chronology := timeline.NewChronology()
-	p := NewPopulation(beings, chronology, culture)
+	p := NewPopulation(beings, chronology, c)
 	b.Run("mc benchmark", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = p.MaritalCandidates()
+			_, _ = p.MaritalCandidates(c)
 		}
 	})
 }
 
 func TestReproductionCandidates(t *testing.T) {
-	culture := helperMockCulture(t, "italian")
-	beingFixtures := beingFixtures(t, "italian")
+	culture := &mockCulture{}
 	chronology := timeline.NewChronology()
-	beings := []*Being{
+	beings := []inhabitants.Populatable{
 		beingFixtures["adam"],
 		beingFixtures["eve"],
 		beingFixtures["martha"],
@@ -115,39 +83,44 @@ func TestReproductionCandidates(t *testing.T) {
 }
 
 func TestMaritalCandidates(t *testing.T) {
-	culture := helperMockCulture(t, "italian")
-	beingFixtures := beingFixtures(t, "italian")
+	culture := &mockCulture{name: "italian"}
 	chronology := timeline.NewChronology()
-	beings := []*Being{
+	beings := []inhabitants.Populatable{
 		beingFixtures["adam"],
 		beingFixtures["eve"],
 	}
 	p := NewPopulation(beings, chronology, culture)
-	candidates, _ := p.MaritalCandidates()
+	candidates, err := p.MaritalCandidates(culture)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(candidates) < 1 {
+		t.Log(candidates)
+		t.Errorf("expected a candidate pair")
+	}
 	a, b := candidates[0].Pair()
 	if !(a == beings[0] || b == beings[0]) || !(a == beings[1] || b == beings[1]) {
 		t.Errorf("expected adam and eve")
 	}
 	beings[1].Die()
-	candidates, _ = p.MaritalCandidates()
+	candidates, _ = p.MaritalCandidates(culture)
 	if len(candidates) > 0 {
 		t.Errorf("Did not expect adam and dead eve")
 	}
-	beings = []*Being{
+	beings = []inhabitants.Populatable{
 		beingFixtures["adam"],
 		beingFixtures["steve"],
 	}
 	p = NewPopulation(beings, chronology, culture)
-	candidates, _ = p.MaritalCandidates()
+	candidates, _ = p.MaritalCandidates(culture)
 	if len(candidates) > 0 {
 		t.Errorf("Did not expect adam and steve")
 	}
 }
 
 func TestAddAndRemove(t *testing.T) {
-	mockSpecies := helperMockSpecies(t)
-	b := &Being{Species: mockSpecies}
-	p := NewPopulation([]*Being{b}, nil, nil)
+	b := &Being{Species: &mockSpecies{}}
+	p := NewPopulation([]inhabitants.Populatable{b}, nil, nil)
 	p.Remove(b)
 	if p.Get(b) {
 		t.Fail()
@@ -159,14 +132,12 @@ func TestAddAndRemove(t *testing.T) {
 }
 
 func TestReproductionCandidatesScore(t *testing.T) {
-	culture := helperMockCulture(t, "italian")
-	beingFixtures := beingFixtures(t, "italian")
 	chronology := timeline.NewChronology()
-	pop := []*Being{}
+	pop := []inhabitants.Populatable{}
 	for _, v := range beingFixtures {
 		pop = append(pop, v)
 	}
-	p := NewPopulation(pop, chronology, culture)
+	p := NewPopulation(pop, chronology, &mockCulture{})
 	rcs := p.ReproductionCandidates()
 	for _, rc := range rcs {
 		fmt.Println(rc)
@@ -175,19 +146,17 @@ func TestReproductionCandidatesScore(t *testing.T) {
 }
 
 func TestAdamEve(t *testing.T) {
-	culture := helperMockCulture(t, "italian")
-	beingFixtures := beingFixtures(t, "italian")
 	chronology := timeline.NewChronology()
-	pop := []*Being{}
+	pop := []inhabitants.Populatable{}
 	for _, v := range beingFixtures {
 		pop = append(pop, v)
 	}
-	p := NewPopulation(pop, chronology, culture)
+	p := NewPopulation(pop, chronology, &mockCulture{})
 	for i := 0; i < 100; i++ {
 		chronology.Tick()
 		fmt.Println(p.Chronology.EventsForYear(i))
 	}
-	for _, b := range p.Beings() {
+	for _, b := range p.Inhabitants() {
 		fmt.Println(b)
 	}
 

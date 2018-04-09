@@ -1,6 +1,7 @@
 package being
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -10,40 +11,10 @@ import (
 
 // Population is a set of Being
 type Population struct {
-	mux    sync.Mutex
-	beings map[inhabitants.Populatable]struct{}
-	*timeline.Chronology
-	Culture inhabitants.Cultured
+	mux        sync.Mutex
+	Beings     map[*Being]struct{}  `json:"inhabitants"`
+	Chronology *timeline.Chronology `json:"history"`
 }
-
-// type populationSerialize struct {
-// 	Beings     []*Being             `json:"residents"`
-// 	Chronology *timeline.Chronology `json:"chronology"`
-// 	Culture    *Culture             `json:"culture"`
-// }
-
-// func (p *Population) MarshalJSON() ([]byte, error) {
-// 	return json.Marshal(&populationSerialize{
-// 		Beings:     p.Beings(),
-// 		Chronology: p.Chronology,
-// 		Culture:    p.Culture,
-// 	})
-// }
-
-// func (p *Population) UnmarshalJSON(data []byte) error {
-// 	ps := &populationSerialize{}
-// 	err := json.Unmarshal(data, ps)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	for _, b := range ps.Beings {
-// 		p.Add(b)
-// 	}
-// 	p.Culture = ps.Culture
-// 	p.Chronology = ps.Chronology
-// 	return nil
-
-// }
 
 type MaritalCandidate struct {
 	male, female *Being
@@ -64,26 +35,48 @@ func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 
 // NewPopulation initializes a Population
 func NewPopulation(beings []inhabitants.Populatable, chronology *timeline.Chronology, culture inhabitants.Cultured) *Population {
-	p := &Population{Chronology: chronology, Culture: culture}
+	p := &Population{Chronology: chronology}
 	if chronology == nil {
 		p.Chronology = timeline.NewChronology()
 	}
-	p.Chronology.Register(reproduction(p))
-	p.Chronology.Register(marry(p))
-	p.beings = make(map[inhabitants.Populatable]struct{})
+	p.Chronology.Register(reproduction(p, culture))
+	p.Chronology.Register(marry(p, culture))
+	p.Beings = make(map[*Being]struct{})
 	for _, b := range beings {
-		p.Add(b)
+		if being, ok := b.(*Being); ok {
+			p.Add(being)
+		}
 	}
 	return p
 }
 
-func marry(p *Population) timeline.Callback {
+type populationSerializer struct {
+	Inhabitants []*Being             `json:"inhabitants"`
+	History     *timeline.Chronology `json:"history"`
+}
+
+func (p *Population) MarshalJSON() ([]byte, error) {
+	ps := &populationSerializer{Inhabitants: p.Inhabitants(), History: p.Chronology}
+	return json.Marshal(ps)
+}
+
+func (p *Population) UnmarshalJSON(data []byte) error {
+	ps := &populationSerializer{}
+	if err := json.Unmarshal(data, ps); err != nil {
+		return err
+	}
+	for _, b := range ps.Inhabitants {
+		p.Add(b)
+	}
+	p.Chronology = ps.History
+	return nil
+}
+
+func marry(p *Population, c inhabitants.Cultured) timeline.Callback {
 	return func(_ int) {
-		mc, _ := p.MaritalCandidates()
-		fmt.Println(len(mc))
+		mc, _ := p.MaritalCandidates(c)
 		for _, m := range mc {
 			r := randomizer.Float64()
-			fmt.Println(r)
 			if r < 0.10 {
 				m.female.Marry(m.male)
 			}
@@ -91,7 +84,11 @@ func marry(p *Population) timeline.Callback {
 	}
 }
 
-func reproduction(p *Population) timeline.Callback {
+func (p *Population) History() *timeline.Chronology {
+	return p.Chronology
+}
+
+func reproduction(p *Population, c inhabitants.Cultured) timeline.Callback {
 	return func(_ int) {
 		rc := p.ReproductionCandidates()
 		for _, r := range rc {
@@ -105,17 +102,17 @@ func reproduction(p *Population) timeline.Callback {
 					men := p.ByGender(inhabitants.Male)
 					with = men[randomizer.Intn(len(men))]
 				}
-				r.b.Reproduce(with)
+				r.b.Reproduce(with, c)
 			}
 		}
 	}
 }
 
-// Beings returns the beings in the population
-func (p *Population) Inhabitants() []inhabitants.Populatable {
-	bs := make([]inhabitants.Populatable, p.Len())
+// Inhabitants returns the beings in the population
+func (p *Population) Inhabitants() []*Being {
+	bs := make([]*Being, p.Len())
 	i := 0
-	for b := range p.beings {
+	for b := range p.Beings {
 		bs[i] = b
 		i++
 	}
@@ -124,23 +121,23 @@ func (p *Population) Inhabitants() []inhabitants.Populatable {
 
 // Age ages all the beings in this population
 func (p *Population) Age() {
-	for b := range p.beings {
-		b.Chronology.Tick()
+	for b := range p.Beings {
+		b.History().Tick()
 	}
 }
 
 // Len returns the number of beings in the population
 func (p *Population) Len() int {
-	return len(p.beings)
+	return len(p.Beings)
 }
 
 // Add adds a being to the population and returns whether it was actually added.
-func (p *Population) Add(b inhabitants.Populatable) bool {
+func (p *Population) Add(b *Being) bool {
 	p.mux.Lock()
-	_, found := p.beings[b]
-	p.beings[b] = struct{}{}
-	p.Chronology.Register(func(year int) {
-		b.Chronology.Tick()
+	_, found := p.Beings[b]
+	p.Beings[b] = struct{}{}
+	p.History().Register(func(year int) {
+		b.History().Tick()
 	})
 	p.mux.Unlock()
 	return !found
@@ -149,7 +146,7 @@ func (p *Population) Add(b inhabitants.Populatable) bool {
 // Get returns whether this being is in the Population
 func (p *Population) Get(b *Being) bool {
 	p.mux.Lock()
-	_, found := p.beings[b]
+	_, found := p.Beings[b]
 	p.mux.Unlock()
 	return found
 }
@@ -157,15 +154,15 @@ func (p *Population) Get(b *Being) bool {
 // Remove removes a being from the population
 func (p *Population) Remove(b *Being) bool {
 	p.mux.Lock()
-	_, found := p.beings[b]
-	delete(p.beings, b)
+	_, found := p.Beings[b]
+	delete(p.Beings, b)
 	p.mux.Unlock()
 	return found
 }
 
 func (p *Population) ByGender(g inhabitants.Gender) []*Being {
 	out := []*Being{}
-	for b := range p.beings {
+	for b := range p.Beings {
 		if b.Sex() == g {
 			out = append(out, b)
 		}
@@ -205,11 +202,8 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 
 // MaritalCandidates scans the population for potential candidates for marrying
 // one another.
-func (p *Population) MaritalCandidates() ([]*MaritalCandidate, error) {
+func (p *Population) MaritalCandidates(c inhabitants.Cultured) ([]*MaritalCandidate, error) {
 	mc := make(map[MaritalCandidate]bool)
-	if p.Culture == nil {
-		return nil, fmt.Errorf("no culture for population, cannot assess marital candidates")
-	}
 	males := p.ByGender(inhabitants.Male)
 	females := p.ByGender(inhabitants.Female)
 	// loop through the population, taking each member and looking for candidates
@@ -219,7 +213,7 @@ func (p *Population) MaritalCandidates() ([]*MaritalCandidate, error) {
 			if _, ok := mc[m]; ok {
 				continue
 			}
-			mc[m] = p.Culture.IsMaritalCandidate(a, b)
+			mc[m] = c.MaritalCandidate(a, b)
 		}
 	}
 	result := []*MaritalCandidate{}

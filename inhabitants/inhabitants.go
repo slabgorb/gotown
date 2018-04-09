@@ -39,6 +39,8 @@ type Populatable interface {
 	Sex() Gender
 	Age() int
 	History() *timeline.Chronology
+	GetName() *Name
+	Die(...string)
 }
 
 type Relatable interface {
@@ -63,10 +65,12 @@ type Specieser interface {
 }
 
 type Cultured interface {
-	RandomName(Gender) Namer
-	IsMaritalCandidate(Marriageable, Marriageable) bool
+	RandomName(Gender) *Name
+	MaritalCandidate(Marriageable, Marriageable) bool
 }
 
 type Namer interface {
-	Display() string
+	GetDisplay() string
+	GetGivenName() string
+	GetFamilyName() string
 }
