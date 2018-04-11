@@ -23,10 +23,22 @@ func TestJsonEncode(t *testing.T) {
 }
 
 func TestAddTo(t *testing.T) {
-	a1, _ := NewArea(Town, nil, nil, nil)
-	a2, _ := NewArea(Castle, nil, nil, nil)
-	a3, _ := NewArea(Town, nil, nil, nil)
-	a2.AttachTo(a1)
+	a1, err := NewArea(Town, nil, nil, nil)
+	if err != nil || a1 == nil {
+		t.Fail()
+	}
+	a2, err := NewArea(Castle, nil, nil, nil)
+	if err != nil || a2 == nil {
+		t.Fail()
+	}
+	a3, err := NewArea(Town, nil, nil, nil)
+	if err != nil || a3 == nil {
+		t.Fail()
+	}
+	ok := a2.AttachTo(a1)
+	if !ok {
+		t.Fail()
+	}
 	if !a1.Encloses(a2) {
 		t.Errorf("Encloses not registering added area")
 	}

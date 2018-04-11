@@ -88,6 +88,9 @@ func (a *Area) AttachTo(area *Area) bool {
 	// make sure we don't have circular relationship
 	loc := area
 	for {
+		if loc == nil {
+			break
+		}
 		loc = loc.Location
 		if loc == nil {
 			break

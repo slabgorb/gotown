@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/words"
 )
@@ -17,7 +17,7 @@ type tester interface {
 
 func TestMain(m *testing.M) {
 	persist.OpenTestDB()
-	inhabitants.Seed()
+	species.Seed()
 	words.Seed()
 	code := m.Run()
 	os.Exit(code)
