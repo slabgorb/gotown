@@ -203,7 +203,7 @@ func Seed() {
 	}
 }
 
-func List() ([]string, error) {
+func WordsList() ([]string, error) {
 	wds := []Words{}
 	if err := persist.DB.All(&wds); err != nil {
 		return nil, err

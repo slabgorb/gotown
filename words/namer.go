@@ -48,7 +48,15 @@ func (n *Namer) Delete() error {
 
 // Fetch implements persist.Persistable
 func (n *Namer) Read() error {
-	return persist.DB.One("Name", n.Name, n)
+	if err := persist.DB.One("Name", n.Name, n); err != nil {
+		return err
+	}
+	w := Words{Name: n.WordsName}
+	if err := w.Read(); err != nil {
+		return err
+	}
+	n.Words = &w
+	return nil
 }
 
 func (n *Namer) Reset() {
@@ -102,4 +110,16 @@ func NewNamer(patterns []string, words string, nameStrategy string) *Namer {
 		panic(err)
 	}
 	return &Namer{Patterns: ps, WordsName: words, Words: w, NameStrategy: nameStrategy}
+}
+
+func NamerList() ([]string, error) {
+	wds := []Namer{}
+	if err := persist.DB.All(&wds); err != nil {
+		return nil, err
+	}
+	names := []string{}
+	for _, w := range wds {
+		names = append(names, w.Name)
+	}
+	return names, nil
 }
