@@ -13,7 +13,6 @@ import (
 type Culture struct {
 	ID                int                                 `json:"id" storm:"id,increment"`
 	Name              string                              `json:"name" storm:"unique"`
-	NameStrategies    map[inhabitants.Gender]string       `json:"name_strategies"`
 	MaritalStrategies []string                            `json:"marital_strategies"`
 	Namers            map[inhabitants.Gender]*words.Namer `json:"names"`
 }
@@ -125,7 +124,6 @@ func (c *Culture) Read() error {
 func (c *Culture) Reset() {
 	c.ID = 0
 	c.Name = ""
-	c.NameStrategies = make(map[inhabitants.Gender]string)
 	c.MaritalStrategies = []string{}
 	c.Namers = make(map[inhabitants.Gender]*words.Namer)
 }
@@ -142,8 +140,8 @@ func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
 
 // GetName returns a name appropriate for the passed in Being
 func (c *Culture) GetName(b inhabitants.Nameable) *inhabitants.Name {
-	f := c.NameStrategies[b.Sex()]
-	return inhabitants.NameStrategies[f](b, c)
+	namer := c.Namers[b.Sex()]
+	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
 func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
@@ -151,8 +149,8 @@ func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
 }
 
 func (c *Culture) RandomName(sex inhabitants.Gender, b inhabitants.Nameable) *inhabitants.Name {
-	f := c.NameStrategies[sex]
-	return inhabitants.NameStrategies[f](b, c)
+	namer := c.Namers[b.Sex()]
+	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
 func Seed() error {

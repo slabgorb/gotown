@@ -3,6 +3,8 @@ package species
 import (
 	"sort"
 
+	"github.com/slabgorb/gotown/inhabitants/genetics"
+
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
@@ -18,15 +20,15 @@ func SetRandomizer(g random.Generator) {
 
 // Species represents a species or a race.
 type Species struct {
-	ID         int                   `json:"id" storm:"id,increment"`
-	Name       string                `json:"name" storm:"index,unique"`
-	Genders    []inhabitants.Gender  `json:"genders"`
-	Expression inhabitants.Expresser `json:"expression"`
-	Demography map[int]Demo          `json:"demography"`
+	ID         int                  `json:"id" storm:"id,increment"`
+	Name       string               `json:"name" storm:"index,unique"`
+	Genders    []inhabitants.Gender `json:"genders"`
+	Expression genetics.Expression  `json:"expression"`
+	Demography map[int]Demo         `json:"demography"`
 }
 
 // New creates and initializes a *Species
-func New(name string, genders []inhabitants.Gender, e inhabitants.Expresser, d map[int]Demo) *Species {
+func New(name string, genders []inhabitants.Gender, e genetics.Expression, d map[int]Demo) *Species {
 	return &Species{
 		Name:       name,
 		Genders:    genders,
@@ -50,7 +52,7 @@ func (s *Species) Reset() {
 	s.Name = ""
 	s.ID = 0
 	s.Genders = []inhabitants.Gender{}
-	s.Expression = nil
+	s.Expression = genetics.Expression{}
 	s.Demography = make(map[int]Demo)
 }
 

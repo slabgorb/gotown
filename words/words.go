@@ -1,6 +1,8 @@
 package words
 
 import (
+	"fmt"
+
 	"github.com/jinzhu/inflection"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
@@ -39,7 +41,10 @@ func (w *Words) Delete() error {
 
 // Fetch implements persist.Persistable
 func (w *Words) Read() error {
-	return persist.DB.One("Name", w.Name, w)
+	if err := persist.DB.One("Name", w.Name, w); err != nil {
+		return err
+	}
+	return w.loadBackup()
 }
 
 func (w *Words) Reset() {
@@ -94,15 +99,25 @@ func shortFilter(list []string) []string {
 }
 
 func (w *Words) loadBackup() error {
+	var backupWords Words
 	if w.BackupName == "" {
 		return nil
 	}
-	var backupWords Words
 	if err := persist.DB.One("Name", w.BackupName, &backupWords); err != nil {
 		return err
 	}
-	w.SetBackup(&backupWords)
+	if &backupWords == nil {
+		return fmt.Errorf("could not load backup words %s", w.BackupName)
+	}
+	w.backup = &backupWords
 	return nil
+}
+
+func (w *Words) GetBackup() *Words {
+	if w.backup == nil {
+		w.loadBackup()
+	}
+	return w.backup
 }
 
 func (w *Words) SetBackup(b *Words) {
@@ -112,9 +127,6 @@ func (w *Words) SetBackup(b *Words) {
 func (w *Words) withBackup(f func(w *Words) string) string {
 	if s := f(w); s != "" {
 		return s
-	}
-	if w.backup == nil {
-		w.loadBackup()
 	}
 	if w.backup != nil {
 		return w.backup.withBackup(f)

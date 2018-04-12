@@ -2,6 +2,7 @@ package words
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"regexp"
 	"strings"
@@ -25,6 +26,14 @@ func (n *Namer) PatternList() []string {
 		pl = append(pl, string(p))
 	}
 	return pl
+}
+
+func (n *Namer) UnmarshalJSON(data []byte) error {
+	temp := make(map[string]interface{})
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Save implements persist.Persistable

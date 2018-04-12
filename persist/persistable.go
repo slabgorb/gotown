@@ -39,14 +39,14 @@ func Close() error {
 }
 
 func OpenTestDB() {
-	err := Open("gotown_test.db")
+	err := Open("_gotown_test.db")
 	if err != nil {
 		panic(err)
 	}
 }
 
 func CloseTestDB() {
-	defer os.Remove("gotown_test.db")
+	defer os.Remove("_gotown_test.db")
 	DB.Close()
 }
 

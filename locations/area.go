@@ -1,6 +1,8 @@
 package locations
 
 import (
+	"fmt"
+
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/timeline"
@@ -22,19 +24,19 @@ type Area struct {
 }
 
 func NewArea(size AreaSize, culture inhabitants.Cultured, ruler Ruler, location *Area) (*Area, error) {
-	var n *words.Namer
+	var n words.Namer
 	if location != nil {
-		n = location.Namer
+		n = *location.Namer
 	} else {
-		if err := persist.DB.One("Name", "english towns", n); err != nil {
-			return nil, err
+		if err := persist.DB.One("Name", "english towns", &n); err != nil {
+			return nil, fmt.Errorf("error loading default words: %s", err)
 		}
 	}
 
 	a := &Area{Size: size, Ruler: ruler, Location: location}
 	a.Habitation = NewHabitation(timeline.NewChronology(), culture)
 	a.Enclosures = make(map[string]*Area)
-	a.SetNamer(n)
+	a.SetNamer(&n)
 	a.Name = a.Namer.CreateName()
 	return a, nil
 }

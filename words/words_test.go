@@ -15,9 +15,9 @@ func init() {
 
 func TestMain(m *testing.M) {
 	persist.OpenTestDB()
+	defer persist.CloseTestDB()
 	Seed()
 	code := m.Run()
-	persist.CloseTestDB()
 	os.Exit(code)
 }
 
@@ -32,8 +32,8 @@ func TestWords(t *testing.T) {
 			found = true
 		}
 	}
+	t.Log(list)
 	if !found {
-		t.Log(list)
 		t.Fatal("english town names not seeded")
 	}
 
@@ -41,29 +41,37 @@ func TestWords(t *testing.T) {
 	if err := w.Read(); err != nil {
 		t.Fatal(err)
 	}
+	noun := w.Noun()
+	if noun != "lard" {
+		t.Fail()
+	}
 
 }
 
-// type testRandomStringFunc func() string
+type testRandomStringFunc func(w *Words) string
 
-// var testRandomStringTable = []struct {
-// 	expected string
-// 	f        testRandomStringFunc
-// }{
-// 	{"lard", func() string { return BaseNamer.Noun() }},
-// 	{"living", func() string { return BaseNamer.Adjective() }},
-// 	{"lards", func() string { return BaseNamer.PluralNoun() }},
-// 	{"lard", func() string { return BaseNamer.StartNoun() }},
-// }
+var testRandomStringTable = []struct {
+	expected string
+	f        testRandomStringFunc
+}{
+	{"lard", func(w *Words) string { return w.Noun() }},
+	{"living", func(w *Words) string { return w.Adjective() }},
+	{"lards", func(w *Words) string { return w.PluralNoun() }},
+	{"lard", func(w *Words) string { return w.StartNoun() }},
+}
 
-// func TestStrings(t *testing.T) {
-// 	for _, ts := range testRandomStringTable {
-// 		test := ts.f()
-// 		if test != ts.expected {
-// 			t.Errorf("Got %s expected %s", test, ts.expected)
-// 		}
-// 	}
-// }
+func TestStrings(t *testing.T) {
+	w := &Words{Name: "english town names"}
+	if err := w.Read(); err != nil {
+		t.Fatal(err)
+	}
+	for _, ts := range testRandomStringTable {
+		test := ts.f(w)
+		if test != ts.expected {
+			t.Errorf("Got %s expected %s", test, ts.expected)
+		}
+	}
+}
 
 // func TestBackup(t *testing.T) {
 // 	newWords := NewWords()
@@ -82,22 +90,30 @@ func TestWords(t *testing.T) {
 // 	expected string
 // 	f        testRandomStringFunc
 // }{
-// 	{"Never-Lard of the Lards", func() string { return BaseNamer.Name() }},
+// 	{"Never-Lard of the Lards", func(w *Words) string { return w.Name() }},
 // }
 
 // func TestTemplating(t *testing.T) {
+// 	w := &Words{Name: "english town names"}
+// 	if err := w.Read(); err != nil {
+// 		t.Fatal(err)
+// 	}
 // 	for _, ts := range testTemplateTable {
-// 		test := ts.f()
+// 		test := ts.f(w)
 // 		if test != ts.expected {
 // 			t.Errorf("Got %s expected %s", test, ts.expected)
 // 		}
 // 	}
 // }
 
-// func TestNameWords(t *testing.T) {
-// 	w := NorseMaleNameWords
-// 	pt := w.Patronymic()
-// 	if pt != "son" {
-// 		t.Errorf("Expected 'son' for patronymic, got %s", pt)
-// 	}
-// }
+func TestNameWords(t *testing.T) {
+	w := &Words{Name: "viking male names"}
+	if err := w.Read(); err != nil {
+		t.Fail()
+	}
+	t.Log(w.Dictionary)
+	pt := w.Patronymic()
+	if pt != "son" {
+		t.Errorf("Expected 'son' for patronymic, got %s", pt)
+	}
+}
