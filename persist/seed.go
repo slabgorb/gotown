@@ -5,9 +5,9 @@ import (
 )
 
 var PersistBundle = gobundle.NewBuilder("persist").Add(
-    "cultures/italianate.json", []byte("{  \n   \"name\":\"italianate\",\n   \"species\":\"human\",\n   \"marital_strategies\":[  \n      \"heterosexual\",\n      \"monogamous\",\n      \"living\",\n      \"unrelated\",\n      \"close age male older\"\n   ],\n   \"namers\":{\n      \"male\":\"italian male names\",\n      \"female\": \"italian female names\"\n    }\n}\n"),
+    "cultures/italianate.json", []byte("{  \n   \"name\":\"italianate\",\n   \"species\":\"human\",\n   \"marital_strategies\":[  \n      \"heterosexual\",\n      \"monogamous\",\n      \"living\",\n      \"unrelated\",\n      \"close age male older\"\n   ],\n   \"namer_names\":{\n      \"male\":\"italian male names\",\n      \"female\": \"italian female names\"\n    }\n}\n"),
 ).Add(
-    "cultures/viking.json", []byte("{  \n   \"name\":\"viking\",\n   \"species\":\"human\",\n   \"marital_strategies\":[  \n      \"heterosexual\",\n      \"monogamous\"\n   ],\n   \"namers\":{  \n      \"male\":\"viking male names\",\n      \"female\": \"viking_female_names\"\n   }\n}"),
+    "cultures/viking.json", []byte("{  \n   \"name\":\"viking\",\n   \"species\":\"human\",\n   \"marital_strategies\":[  \n      \"heterosexual\",\n      \"monogamous\"\n   ],\n   \"namer_names\":{  \n      \"male\":\"viking male names\",\n      \"female\": \"viking_female_names\"\n   }\n}"),
 ).Add(
     "namers/english_towns.json", []byte("{\n  \"name\": \"english towns\",\n  \"words\": \"english town names\",\n  \"patterns\": [\"{{.Prefix}}{{.Suffix}}\",\n    \"{{.Prefix}} {{.Noun}}{{.Suffix}}\",\n    \"{{.ShortAdjective}}{{.ShortNoun}}{{.Suffix}}\",\n    \"{{.Prefix}} {{.ShortAdjective}}{{.ShortNoun}}\",\n    \"{{.Noun}}{{.Suffix}}\",\n    \"{{.Noun}}{{.Suffix}}\",\n    \"{{.Adjective}}{{.Suffix}}\",\n    \"{{.Adjective}}{{.Suffix}}\",\n    \"{{.Noun}}{{.Suffix}}\",\n    \"{{.Noun}}{{.Suffix}}\",\n    \"{{.Adjective}}{{.Suffix}}\",\n    \"{{.Adjective}}{{.Suffix}}\",\n    \"{{.ShortAdjective}}{{.Suffix}}\",\n    \"{{.ShortAdjective}}{{.Suffix}}\",\n    \"{{.Adjective}} {{.EndNoun}}\",\n    \"{{.Noun}} {{.EndNoun}}\",\n    \"{{.Adjective}} {{.EndNoun}}\"]\n}"),
 ).Add(

@@ -5,7 +5,7 @@ import "sync"
 type Callback func(year int)
 
 type Chronology struct {
-	CurrentYear int              `json:"current_year`
+	CurrentYear int              `json:"current_year"`
 	Callbacks   []Callback       `json:"-"`
 	Events      map[int][]*Event `json:"events"`
 	frozen      bool

@@ -11,11 +11,11 @@ import (
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
-	ID                int      `json:"id" storm:"id,increment"`
-	Name              string   `json:"name" storm:"unique"`
-	MaritalStrategies []string `json:"marital_strategies"`
-	namers            map[inhabitants.Gender]*words.Namer
-	NamerNames        map[inhabitants.Gender]string `json:"namers"`
+	ID                int                                 `json:"id" storm:"id,increment"`
+	Name              string                              `json:"name" storm:"unique"`
+	MaritalStrategies []string                            `json:"marital_strategies"`
+	Namers            map[inhabitants.Gender]*words.Namer `json:"namers"`
+	NamerNames        map[inhabitants.Gender]string       `json:"namer_names"`
 }
 
 // maritalStrategy is a function which indicates whether the two beings are
@@ -77,14 +77,14 @@ func (c *Culture) Read() error {
 	if err := persist.DB.One("Name", c.Name, c); err != nil {
 		return err
 	}
-	c.namers = make(map[inhabitants.Gender]*words.Namer)
+	c.Namers = make(map[inhabitants.Gender]*words.Namer)
 	for gender, namerName := range c.NamerNames {
 		fmt.Println(gender, namerName)
 		n := &words.Namer{Name: namerName}
 		if err := n.Read(); err != nil {
 			return err
 		}
-		c.namers[gender] = n
+		c.Namers[gender] = n
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func (c *Culture) Reset() {
 	c.ID = 0
 	c.Name = ""
 	c.MaritalStrategies = []string{}
-	c.namers = make(map[inhabitants.Gender]*words.Namer)
+	c.Namers = make(map[inhabitants.Gender]*words.Namer)
 	c.NamerNames = make(map[inhabitants.Gender]string)
 }
 
@@ -109,16 +109,16 @@ func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
 
 // GetName returns a name appropriate for the passed in Being
 func (c *Culture) GetName(b inhabitants.Nameable) *inhabitants.Name {
-	namer := c.namers[b.Sex()]
+	namer := c.Namers[b.Sex()]
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
 func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
-	return c.namers
+	return c.Namers
 }
 
 func (c *Culture) RandomName(sex inhabitants.Gender, b inhabitants.Nameable) *inhabitants.Name {
-	namer := c.namers[sex]
+	namer := c.Namers[sex]
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 

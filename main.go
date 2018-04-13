@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/inhabitants/species"
@@ -38,12 +37,16 @@ func main() {
 	api.GET("/cultures/:name", showCulturesHandler)
 	api.GET("/species", listSpeciesHandler)
 	api.GET("/species/:name", showSpeciesHandler)
+	api.GET("/namers", listNamersHandler)
+	api.GET("/namers/:name", showNamersHandler)
+	api.GET("/words", listWordsHandler)
+	api.GET("/wordsnamers/:name", showWordsHandler)
 	api.GET("/town/name", townNameHandler)
 	api.DELETE("/towns/:name", deleteAreaHandler)
 	api.GET("/towns", listAreasHandler)
 	api.GET("/towns/:name", showAreaHandler)
 	api.POST("/towns/create", townHandler)
-	api.GET("/being/:id", showBeingHandler)
+	//api.GET("/being/:id", showBeingHandler)
 	api.PUT("/seed", seedHandler)
 	//e.GET("/household", householdHandler)
 	api.GET("/random/chromosome", randomChromosomeHandler)
@@ -73,53 +76,36 @@ func seedHandler(c echo.Context) error {
 	return nil
 }
 
-func listCulturesHandler(c echo.Context) error {
-	all := []*culture.Culture{}
-	if err := persist.DB.All(&all); err != nil {
+func list(c echo.Context, f func() ([]string, error)) error {
+	names, err := f()
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	names := []string{}
-	for _, t := range all {
-		names = append(names, t.String())
 	}
 	return c.JSON(http.StatusOK, names)
 }
 
+func show(c echo.Context, item persist.Persistable) error {
+	if err := item.Read(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, item)
+}
+
+func listCulturesHandler(c echo.Context) error { return list(c, culture.List) }
 func showCulturesHandler(c echo.Context) error {
-	var item culture.Culture
-	if err := persist.DB.One("Name", c.Param("name"), &item); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return c.JSON(http.StatusOK, item)
+	return show(c, &culture.Culture{Name: c.Param("name")})
 }
 
-func listSpeciesHandler(c echo.Context) error {
-	all := []*species.Species{}
-	if err := persist.DB.All(&all); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	names := []string{}
-	for _, t := range all {
-		names = append(names, t.String())
-	}
-	return c.JSON(http.StatusOK, names)
-}
+func listSpeciesHandler(c echo.Context) error { return list(c, species.List) }
+func showSpeciesHandler(c echo.Context) error { return show(c, &species.Species{Name: c.Param("name")}) }
 
-func showSpeciesHandler(c echo.Context) error {
-	var item species.Species
-	if err := persist.DB.One("Name", c.Param("name"), &item); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return c.JSON(http.StatusOK, item)
-}
+func listNamersHandler(c echo.Context) error { return list(c, words.NamerList) }
+func showNamersHandler(c echo.Context) error { return show(c, &words.Namer{Name: c.Param("name")}) }
 
-func showBeingHandler(c echo.Context) error {
-	var item being.Being
-	if err := persist.DB.One("ID", c.Param("id"), &item); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return c.JSON(http.StatusOK, item)
-}
+func listWordsHandler(c echo.Context) error { return list(c, words.WordsList) }
+func showWordsHandler(c echo.Context) error { return show(c, &words.Words{Name: c.Param("name")}) }
+
+//func showBeingHandler(c echo.Context) error { return show(c, &being.Being{ID: c.Param("id")}) }
 
 type townHandlerRequest struct {
 	Culture string `json:"culture" form:"culture" query:"culture"`

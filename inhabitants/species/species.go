@@ -63,7 +63,7 @@ func (s *Species) Delete() error {
 
 // Fetch implements persist.Persistable
 func (s *Species) Read() error {
-	return persist.DB.One("ID", s.ID, s)
+	return persist.DB.One("Name", s.Name, s)
 }
 
 // GetGenders returns the genders appropriate for this species
@@ -95,4 +95,16 @@ func (s *Species) RandomAge(slot int) int {
 func Seed() error {
 	var s = &Species{}
 	return persist.SeedHelper("species", s)
+}
+
+func List() ([]string, error) {
+	species := []Species{}
+	if err := persist.DB.All(&species); err != nil {
+		return nil, err
+	}
+	names := []string{}
+	for _, c := range species {
+		names = append(names, c.Name)
+	}
+	return names, nil
 }

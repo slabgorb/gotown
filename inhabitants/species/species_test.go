@@ -24,10 +24,34 @@ var demog = map[int]Demo{
 
 func TestMain(m *testing.M) {
 	persist.OpenTestDB()
+	Seed()
 	SetRandomizer(random.NewMock())
 	code := m.Run()
 	persist.CloseTestDB()
 	os.Exit(code)
+}
+func TestSeed(t *testing.T) {
+	list, err := List()
+	if err != nil {
+		panic(err)
+	}
+
+	found := false
+	for _, v := range list {
+		if v == "human" {
+			found = true
+		}
+	}
+	t.Log(list)
+	if !found {
+		t.Fatal("human not seeded")
+	}
+
+	w := &Species{Name: "elf"}
+	if err := w.Read(); err != nil {
+		t.Fatal(err)
+	}
+
 }
 
 // func TestGenders(t *testing.T) {
