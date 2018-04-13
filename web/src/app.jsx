@@ -5,6 +5,7 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { SpeciesShow, SpeciesList } from './components/Species';
+import { WordsShow, WordsList } from './components/Words';
 import { CulturesShow, CulturesList } from './components/Culture';
 import { TownForm, AreaList, AreaShow } from './components/Area';
 import { App } from './components/App';
@@ -17,6 +18,8 @@ render(
     <Provider store={store}>
       <BrowserRouter>
         <App>
+          <Route path="/words" component={WordsList} />
+          <Route path="/words/:name" component={WordsShow} />
           <Route path="/species" component={SpeciesList} />
           <Route path="/species/:name" component={SpeciesShow} />
           <Route path="/cultures" component={CulturesList} />

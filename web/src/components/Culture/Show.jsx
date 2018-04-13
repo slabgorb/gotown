@@ -7,6 +7,8 @@ import inflection from 'inflection';
 import cultureApi from './api';
 import NameList from '../NameList';
 
+const _ = require('underscore');
+
 const styles = theme => ({
   root: {
     backgroundColor: theme.palette.background.paper,
@@ -23,8 +25,9 @@ class Culture extends React.Component {
     super(props);
     this.state = {
       name: props.match.params.name,
-      names: { family: [], genderNames: {} },
+      namers: [],
       loaded: false,
+      maritalStrategies: [],
     };
     this.get = this.get.bind(this);
   }
@@ -44,7 +47,8 @@ class Culture extends React.Component {
       .then((s) => {
         this.setState({
           name: s.name,
-          names: { family: s.family_names, genderNames: s.gender_names },
+          namers: s.namers,
+          maritalStrategies: s.marital_strategies,
           loaded: true,
         });
       });
@@ -63,8 +67,10 @@ class Culture extends React.Component {
             {inflection.titleize(this.state.name)}
           </Typography>
           <div className="flex-container">
-            { (this.state.names.family.length > 0) ? (<NameList title="family names" listItems={this.state.names.family} />) : null}
-            {this.state.names.genderNames.map(gn => (<NameList title={inflection.titleize(`${gn.gender} Names`)} listItems={gn.given_names} />))}
+            { _.map(this.state.namers, v => (<span>{inflection.titleize(v)}</span>)) }
+          </div>
+          <div className="flex-container">
+            { _.map(this.state.maritalStrategies, v => (<span>{inflection.titleize(v)}</span>)) }
           </div>
         </Paper>
       </div>
