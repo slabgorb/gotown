@@ -8,8 +8,10 @@ import (
 )
 
 type Habitation struct {
+	ID           int               `json:"id" storm:"id,increment"`
 	Residents    *being.Population `json:"population"`
 	Name         string            `json:"name"`
+	NamerName    string            `json:"namer"`
 	*words.Namer `json:"-"`
 }
 

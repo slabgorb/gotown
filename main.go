@@ -244,9 +244,9 @@ func townHandler(c echo.Context) error {
 }
 
 func townNameHandler(c echo.Context) error {
-	area, err := locations.NewArea(locations.Town, nil, nil, nil)
-	if err != nil {
+	namer := words.Namer{Name: "english towns"}
+	if err := namer.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, area.Name)
+	return c.JSON(http.StatusOK, namer.CreateName())
 }

@@ -1,0 +1,8 @@
+{
+  "name": "viking male names",
+  "patterns":[  
+    "{{.GivenName}} {{.FamilyName}}{{.Patronymic}}"
+ ],
+ "name_strategy":"patronymic",
+ "words":"viking male names"
+}

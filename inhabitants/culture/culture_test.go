@@ -68,45 +68,35 @@ func (ms *MarriageableStub) Age() int {
 	return ms.age
 }
 
-// func TestUnmarshal(t *testing.T) {
-// 	c := helperMockCulture(t, "italian")
-// 	if c.Name != "Italianate" {
-// 		t.Error("did not get name")
-// 	}
-// }
+func TestSeed(t *testing.T) {
+	list, err := List()
+	if err != nil {
+		panic(err)
+	}
 
-// func TestMarshal(t *testing.T) {
-// 	c := helperMockCulture(t, "viking")
-// 	bytes, err := json.Marshal(c)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	culture := &inhabitants.Culture{}
-// 	err = json.Unmarshal(bytes, culture)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	t.Logf("%#v", culture)
-// 	t.Logf(string(bytes))
-// 	if culture.Name != "viking" {
-// 		t.Fail()
-// 	}
-// 	expectedMS := []string{"heterosexual", "monogamous"}
-// 	if !reflect.DeepEqual(expectedMS, culture.MaritalStrategies) {
-// 		t.Fail()
-// 	}
-// 	expectedNS := map[inhabitants.Gender]string{"male": "patronymic", "female": "matronymic"}
-// 	if !reflect.DeepEqual(expectedNS, culture.NameStrategies) {
-// 		t.Errorf("expected %#v got %#v", expectedNS, culture.NameStrategies)
-// 	}
-// 	if culture.Namers[inhabitants.Female] == nil {
-// 		t.Errorf("did not get female namer")
+	found := false
+	for _, v := range list {
+		if v == "italianate" {
+			found = true
+		}
+	}
+	t.Log(list)
+	if !found {
+		t.Fatal("italianate not seeded")
+	}
 
-// 	}
-// 	if culture.Namers[inhabitants.Female].Words.Matronymic() != "dottir" {
-// 		t.Errorf("expected dottir got %s", culture.Namers[inhabitants.Female].Words.Matronymic())
-// 	}
-// }
+	w := &Culture{Name: "italianate"}
+	if err := w.Read(); err != nil {
+		t.Fatal(err)
+	}
+	t.Log(w.NamerNames)
+	namers := w.GetNamers()
+	_, ok := namers[inhabitants.Male]
+	if !ok {
+		t.Error("did not load male names")
+	}
+
+}
 
 func TestMaritalStrategy(t *testing.T) {
 	c := Culture{Name: "italianate"}

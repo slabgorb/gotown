@@ -5,22 +5,8 @@
       "heterosexual",
       "monogamous"
    ],
-   "names":{  
-      "male":{  
-         "patterns":[  
-            "{{.GivenName}} {{.FamilyName}}{{.Patronymic}}"
-         ],
-         "name_strategy":"patronymic",
-         "words_name":"viking male names"
-
-      },
-      "female":{  
-         "patterns":[  
-            "{{.GivenName}} {{.FamilyName}}{{.Matronymic}}"
-         ],
-         "words_name": "viking_female_names",
-         "name_strategy":"matronymic"
-
-      }
+   "namers":{  
+      "male":"viking male names",
+      "female": "viking_female_names"
    }
 }

@@ -1,0 +1,8 @@
+{
+  "name": "italian male names",
+  "name_strategy":"patrilineal",
+  "patterns":[  
+     "{{.GivenName}} {{.FamilyName}}"
+  ],
+  "words":"italian male names"
+}

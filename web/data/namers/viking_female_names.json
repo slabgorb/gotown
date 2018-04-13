@@ -1,0 +1,8 @@
+{
+  "name":"viking female names",
+  "patterns":[  
+    "{{.GivenName}} {{.FamilyName}}{{.Matronymic}}"
+ ],
+ "words": "viking_female_names",
+ "name_strategy":"matronymic"
+}

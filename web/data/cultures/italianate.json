@@ -8,21 +8,8 @@
       "unrelated",
       "close age male older"
    ],
-   "names":{  
-      "male":{  
-         "name_strategy":"patrilineal",
-         "patterns":[  
-            "{{.GivenName}} {{.FamilyName}}"
-         ],
-         "words_name":"italian male names"
-      },
-      "female":{  
-         "name_strategy":"patrilineal",
-         "patterns":[  
-            "{{.GivenName}} {{.FamilyName}}"
-         ],
-         "words_name":"italian_female_names"
-
-      }
-   }
+   "namers":{
+      "male":"italian male names",
+      "female": "italian female names"
+    }
 }

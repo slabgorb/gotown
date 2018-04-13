@@ -11,10 +11,11 @@ import (
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
-	ID                int                                 `json:"id" storm:"id,increment"`
-	Name              string                              `json:"name" storm:"unique"`
-	MaritalStrategies []string                            `json:"marital_strategies"`
-	Namers            map[inhabitants.Gender]*words.Namer `json:"names"`
+	ID                int      `json:"id" storm:"id,increment"`
+	Name              string   `json:"name" storm:"unique"`
+	MaritalStrategies []string `json:"marital_strategies"`
+	namers            map[inhabitants.Gender]*words.Namer
+	NamerNames        map[inhabitants.Gender]string `json:"namers"`
 }
 
 // maritalStrategy is a function which indicates whether the two beings are
@@ -61,51 +62,6 @@ func (c *Culture) String() string {
 	return fmt.Sprintf("%s", c.Name)
 }
 
-// UnmarshalJSON implements json.Unmarshaler
-// func (c *Culture) UnmarshalJSON(data []byte) error {
-// 	cl := &cultureSerializer{}
-// 	err := json.Unmarshal(data, cl)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	c.Name = cl.Name
-// 	c.MaritalStrategies = cl.MaritalStrategies
-// 	c.NameStrategies = make(map[Gender]string)
-// 	c.Namers = make(map[Gender]*words.Namer)
-// 	for _, gn := range cl.GenderNames {
-// 		w := words.NewWords()
-// 		w.AddList("patronymics", cl.Patronymics)
-// 		w.AddList("matronymics", cl.Matronymics)
-// 		w.AddList("givenNames", gn.GivenNames)
-// 		w.AddList("familyNames", cl.FamilyNames)
-// 		c.Namers[gn.Gender] = words.NewNamer(gn.Patterns, w, gn.NameStrategy)
-// 		c.NameStrategies[gn.Gender] = gn.NameStrategy
-// 	}
-
-// 	return nil
-// }
-
-// // MarshalJSON implements json.marshaler
-// func (c *Culture) MarshalJSON() ([]byte, error) {
-// 	cl := &cultureSerializer{}
-// 	cl.Name = c.Name
-// 	cl.MaritalStrategies = c.MaritalStrategies
-// 	cl.GenderNames = []genderNamesSerializer{}
-// 	for gender, gn := range c.Namers {
-// 		cl.Patronymics = gn.Dictionary["patronymics"]
-// 		cl.Matronymics = gn.Dictionary["matronymics"]
-// 		cl.FamilyNames = gn.Dictionary["familyNames"]
-// 		cl.GenderNames = append(cl.GenderNames, genderNamesSerializer{
-// 			Gender:       gender,
-// 			Patterns:     gn.PatternList(),
-// 			NameStrategy: c.NameStrategies[gender],
-// 			GivenNames:   gn.Dictionary["givenNames"],
-// 		})
-
-// 	}
-// 	return json.Marshal(cl)
-// }
-
 // Save implements persist.Persistable
 func (c *Culture) Save() error {
 	return persist.DB.Save(c)
@@ -118,14 +74,27 @@ func (c *Culture) Delete() error {
 
 // Fetch implements persist.Persistable
 func (c *Culture) Read() error {
-	return persist.DB.One("Name", c.Name, c)
+	if err := persist.DB.One("Name", c.Name, c); err != nil {
+		return err
+	}
+	c.namers = make(map[inhabitants.Gender]*words.Namer)
+	for gender, namerName := range c.NamerNames {
+		fmt.Println(gender, namerName)
+		n := &words.Namer{Name: namerName}
+		if err := n.Read(); err != nil {
+			return err
+		}
+		c.namers[gender] = n
+	}
+	return nil
 }
 
 func (c *Culture) Reset() {
 	c.ID = 0
 	c.Name = ""
 	c.MaritalStrategies = []string{}
-	c.Namers = make(map[inhabitants.Gender]*words.Namer)
+	c.namers = make(map[inhabitants.Gender]*words.Namer)
+	c.NamerNames = make(map[inhabitants.Gender]string)
 }
 
 // MaritalCandidate decides whether this pair of Beings is a valid candidate for
@@ -140,20 +109,32 @@ func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
 
 // GetName returns a name appropriate for the passed in Being
 func (c *Culture) GetName(b inhabitants.Nameable) *inhabitants.Name {
-	namer := c.Namers[b.Sex()]
+	namer := c.namers[b.Sex()]
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
 func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
-	return c.Namers
+	return c.namers
 }
 
 func (c *Culture) RandomName(sex inhabitants.Gender, b inhabitants.Nameable) *inhabitants.Name {
-	namer := c.Namers[b.Sex()]
+	namer := c.namers[sex]
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
 func Seed() error {
 	var culture = &Culture{}
 	return persist.SeedHelper("cultures", culture)
+}
+
+func List() ([]string, error) {
+	cultures := []Culture{}
+	if err := persist.DB.All(&cultures); err != nil {
+		return nil, err
+	}
+	names := []string{}
+	for _, c := range cultures {
+		names = append(names, c.Name)
+	}
+	return names, nil
 }

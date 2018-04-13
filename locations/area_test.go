@@ -1,26 +1,18 @@
 package locations_test
 
 import (
-	"encoding/json"
 	"testing"
 
 	. "github.com/slabgorb/gotown/locations"
-	"github.com/slabgorb/gotown/random"
-	"github.com/slabgorb/gotown/words"
 )
 
-func init() {
-	SetRandomizer(random.NewMock())
-	words.SetRandomizer(random.NewMock())
-}
-
-func TestJsonEncode(t *testing.T) {
-	area, _ := NewArea(Town, nil, nil, nil)
-	_, err := json.Marshal(area)
-	if err != nil {
-		t.Error(err)
-	}
-}
+// func TestJsonEncode(t *testing.T) {
+// 	area, _ := NewArea(Town, nil, nil, nil)
+// 	_, err := json.Marshal(area)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
 func TestAddTo(t *testing.T) {
 	a1, err := NewArea(Town, nil, nil, nil)

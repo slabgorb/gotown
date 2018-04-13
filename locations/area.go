@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/slabgorb/gotown/inhabitants"
-	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
@@ -28,11 +27,12 @@ func NewArea(size AreaSize, culture inhabitants.Cultured, ruler Ruler, location 
 	if location != nil {
 		n = *location.Namer
 	} else {
-		if err := persist.DB.One("Name", "english towns", &n); err != nil {
+		n := &words.Namer{Name: "english towns"}
+		if err := n.Read(); err != nil {
 			return nil, fmt.Errorf("error loading default words: %s", err)
 		}
 	}
-
+	fmt.Printf("%#v", n)
 	a := &Area{Size: size, Ruler: ruler, Location: location}
 	a.Habitation = NewHabitation(timeline.NewChronology(), culture)
 	a.Enclosures = make(map[string]*Area)
@@ -115,17 +115,3 @@ func (a *Area) AttachTo(area *Area) bool {
 func (a *Area) String() string {
 	return a.Name
 }
-
-// func (a *Area) String() string {
-// 	loc := ""
-// 	if a.Location != nil {
-// 		loc += fmt.Sprintf("%s, %s %s within %s", a.Name, a.Size.article(), a.Size, a.Location.Name)
-// 	} else {
-// 		loc += fmt.Sprintf("%s, %s %s", a.Name, a.Size.article(), a.Size)
-// 	}
-// 	if a.Ruler != nil {
-// 		loc += fmt.Sprintf(" ruled by %s", a.Ruler)
-// 	}
-// 	loc += "."
-// 	return loc
-// }
