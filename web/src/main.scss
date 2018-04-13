@@ -24,6 +24,14 @@ li:hover {
   background-color: $dove-gray;
 }
 
+.logo {
+  color: white;
+  text-decoration:none;
+  &:hover {
+    text-decoration:underline;
+  }
+}
+
 .key-value {
   @include flexbox;
   div {

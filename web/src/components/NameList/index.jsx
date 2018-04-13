@@ -5,6 +5,8 @@ import Card, { CardHeader, CardContent } from 'material-ui/Card';
 import { withStyles } from 'material-ui/styles';
 import inflection from 'inflection';
 
+const _ = require("underscore");
+
 const styles = theme => ({
   root: {
     width: '150',
@@ -41,7 +43,7 @@ const NameList = ({
     />
     <CardContent className={classes.cardContent}>
       <List className={classes.list} dense disablePadding>
-        { listItems.map(f => (<ListItem className={classes.listItem} key={f}>{f}</ListItem>))}
+        { _.uniq(listItems).map(f => (<ListItem className={classes.listItem} key={f}>{f}</ListItem>))}
       </List>
     </CardContent>
   </Card>

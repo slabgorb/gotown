@@ -91,7 +91,7 @@ class App extends React.Component {
               <AppBar position="fixed" className={classes.appBar}>
                 <Toolbar>
                   <Typography variant="title" color="inherit" className={classes.flex}>
-                    Gotown
+                    <a className="logo" href="/">Gotown</a>
                   </Typography>
                   <IconButton onClick={this.handleMenu}>
                     <MenuIcon />
@@ -106,6 +106,7 @@ class App extends React.Component {
                       horizontal: 'right',
                     }}
                   >
+                    <MenuItem onClick={() => this.handleMenuItem('words')}>Words</MenuItem>
                     <MenuItem onClick={() => this.handleMenuItem('species')}>Species</MenuItem>
                     <MenuItem onClick={() => this.handleMenuItem('cultures')}>Cultures</MenuItem>
                     <MenuItem onClick={() => this.handleMenuItem('towns')}>Towns</MenuItem>

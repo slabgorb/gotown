@@ -40,7 +40,7 @@ func main() {
 	api.GET("/namers", listNamersHandler)
 	api.GET("/namers/:name", showNamersHandler)
 	api.GET("/words", listWordsHandler)
-	api.GET("/wordsnamers/:name", showWordsHandler)
+	api.GET("/words/:name", showWordsHandler)
 	api.GET("/town/name", townNameHandler)
 	api.DELETE("/towns/:name", deleteAreaHandler)
 	api.GET("/towns", listAreasHandler)
