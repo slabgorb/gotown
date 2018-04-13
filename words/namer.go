@@ -2,7 +2,6 @@ package words
 
 import (
 	"bytes"
-	"encoding/json"
 	"log"
 	"regexp"
 	"strings"
@@ -26,14 +25,6 @@ func (n *Namer) PatternList() []string {
 		pl = append(pl, string(p))
 	}
 	return pl
-}
-
-func (n *Namer) UnmarshalJSON(data []byte) error {
-	temp := make(map[string]interface{})
-	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
-	}
-	return nil
 }
 
 // Save implements persist.Persistable
@@ -113,13 +104,13 @@ func NewNamer(patterns []string, words string, nameStrategy string) *Namer {
 }
 
 func NamerList() ([]string, error) {
-	wds := []Namer{}
-	if err := persist.DB.All(&wds); err != nil {
+	ns := []Namer{}
+	if err := persist.DB.All(&ns); err != nil {
 		return nil, err
 	}
 	names := []string{}
-	for _, w := range wds {
-		names = append(names, w.Name)
+	for _, n := range ns {
+		names = append(names, n.Name)
 	}
 	return names, nil
 }

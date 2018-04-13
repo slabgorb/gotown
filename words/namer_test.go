@@ -11,54 +11,37 @@ func TestSeed(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	t.Log(list)
-	t.Fail()
+	if len(list) == 0 {
+		t.Error("no namers seeded")
+	}
 }
 
-// func TestPatterns(t *testing.T) {
-// 	n := Namer{Name: "english towns"}
-// 	if err := n.Read(); err != nil {
-// 		t.Fail()
-// 	}
-// 	if len(n.Patterns) == 0 {
-// 		t.Fail()
-// 	}
-// 	t.Log(n.Words)
-// 	t.Log(n.Patterns)
-// 	t.Fail()
-// 	//n.Template()
-// }
-
-// func TestBackup(t *testing.T) {
-// 	n := Namer{Name: "english towns"}
-// 	if err := n.Read(); err != nil {
-// 		t.Fail()
-// 	}
-// 	name := n.CreateName()
-// 	if name == "" {
-// 		t.Errorf("Got empty string from n.Name(), got nothing from backup")
-// 	}
-// 	if name != "Livinglard" {
-// 		t.Errorf("Got wrong string, got %s expected %s", name, "Livinglard")
-// 	}
-// }
-
-var testTemplateTable = []struct {
-	expected string
-	f        func(w *Namer) string
-}{
-	{"Never-Lard of the Lards", func(w *Namer) string { return w.CreateName() }},
+func TestPatterns(t *testing.T) {
+	n := Namer{Name: "english towns"}
+	if err := n.Read(); err != nil {
+		t.Fail()
+	}
+	if len(n.Patterns) == 0 {
+		t.Fail()
+	}
+	expected := "{{.Noun}}{{.Suffix}}"
+	template := n.Template()
+	actual := template.Name()
+	if expected != actual {
+		t.Errorf("expected %s actual %s", expected, actual)
+	}
 }
 
-// func TestTemplating(t *testing.T) {
-// 	n := Namer{Name: "english towns"}
-// 	if err := n.Read(); err != nil {
-// 		t.Fail()
-// 	}
-// 	for _, ts := range testTemplateTable {
-// 		test := ts.f(&n)
-// 		if test != ts.expected {
-// 			t.Errorf("Got %s expected %s", test, ts.expected)
-// 		}
-// 	}
-// }
+func TestBackup(t *testing.T) {
+	n := Namer{Name: "english towns"}
+	if err := n.Read(); err != nil {
+		t.Fail()
+	}
+	name := n.CreateName()
+	if name == "" {
+		t.Errorf("Got empty string from n.Name(), got nothing from backup")
+	}
+	if name != "Lardkirk" {
+		t.Errorf("Got wrong string, got %s expected %s", name, "Lardkirk")
+	}
+}
