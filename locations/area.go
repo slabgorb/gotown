@@ -23,20 +23,21 @@ type Area struct {
 }
 
 func NewArea(size AreaSize, culture inhabitants.Cultured, ruler Ruler, location *Area) (*Area, error) {
-	var n words.Namer
+	var n *words.Namer
 	if location != nil {
-		n = *location.Namer
+		n = location.Namer
 	} else {
-		n := &words.Namer{Name: "english towns"}
+		n = &words.Namer{Name: "english towns"}
 		if err := n.Read(); err != nil {
 			return nil, fmt.Errorf("error loading default words: %s", err)
 		}
 	}
+	fmt.Println(words.NamerList())
 	fmt.Printf("%#v", n)
 	a := &Area{Size: size, Ruler: ruler, Location: location}
 	a.Habitation = NewHabitation(timeline.NewChronology(), culture)
 	a.Enclosures = make(map[string]*Area)
-	a.SetNamer(&n)
+	a.SetNamer(n)
 	a.Name = a.Namer.CreateName()
 	return a, nil
 }

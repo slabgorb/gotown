@@ -12,12 +12,6 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
-type tester interface {
-	Fail()
-	Error(args ...interface{})
-	Fatal(args ...interface{})
-}
-
 func TestMain(m *testing.M) {
 	SetRandomizer(random.NewMock())
 	words.SetRandomizer(random.NewMock())
