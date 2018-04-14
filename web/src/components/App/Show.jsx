@@ -107,6 +107,7 @@ class App extends React.Component {
                     }}
                   >
                     <MenuItem onClick={() => this.handleMenuItem('words')}>Words</MenuItem>
+                    <MenuItem onClick={() => this.handleMenuItem('namers')}>Namers</MenuItem>
                     <MenuItem onClick={() => this.handleMenuItem('species')}>Species</MenuItem>
                     <MenuItem onClick={() => this.handleMenuItem('cultures')}>Cultures</MenuItem>
                     <MenuItem onClick={() => this.handleMenuItem('towns')}>Towns</MenuItem>

@@ -6,6 +6,7 @@ import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { SpeciesShow, SpeciesList } from './components/Species';
 import { WordsShow, WordsList } from './components/Words';
+import { NamersShow, NamersList } from './components/Namer';
 import { CulturesShow, CulturesList } from './components/Culture';
 import { TownForm, AreaList, AreaShow } from './components/Area';
 import { App } from './components/App';
@@ -18,6 +19,8 @@ render(
     <Provider store={store}>
       <BrowserRouter>
         <App>
+          <Route path="/namers" component={NamersList} />
+          <Route path="/namers/:name" component={NamersShow} />
           <Route path="/words" component={WordsList} />
           <Route path="/words/:name" component={WordsShow} />
           <Route path="/species" component={SpeciesList} />

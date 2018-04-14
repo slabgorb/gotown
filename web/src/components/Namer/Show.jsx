@@ -1,13 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
+import Typography from 'material-ui/Typography';
 import inflection from 'inflection';
-import wordsApi from './api';
+import namerApi from './api';
+import { WordsShow } from '../Words';
 import NameList from '../NameList';
+import PatternChipper from './PatternChipper';
 
-const _ = require("underscore");
+const _ = require('underscore');
 
 const styles = theme => ({
   cardContent: {
@@ -28,12 +30,13 @@ const styles = theme => ({
   },
 });
 
-class Words extends React.Component {
+class Namer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       name: props.match.params.name,
-      dictionary: {},
+      wordsName: '',
+      patterns: [],
       loaded: false,
     };
     this.get = this.get.bind(this);
@@ -48,37 +51,45 @@ class Words extends React.Component {
       this.get(nextProps.match.params);
     }
   }
+
   get({ name }) {
-    wordsApi.get(name)
+    namerApi.get(name)
       .then((s) => {
         this.setState({
           name: s.name,
-          dictionary: _.pick(s.dictionary, d => d.length > 0),
+          wordsName: s.words,
+          patterns: s.patterns,
           loaded: true,
         });
       });
   }
+
 
   render() {
     const { classes } = this.props;
     if (!this.state.loaded) {
       return (<div>loading</div>);
     }
+    const patternChips = []
+    _.each(this.state.patterns, (p, i) => {
+      patternChips.push((<PatternChipper key={i} pattern={p} />));
+    });
     return (
-      <Paper>
+      <Paper elevation={4} className={classes.root}>;
         <Typography variant="headline" component="h1" className={classes.headline}>
           {inflection.titleize(this.state.name)}
         </Typography>
-        {
-          _.map(this.state.dictionary, (v, k) => (<NameList key={k} title={k} listItems={v} />))
-        }
+        {patternChips}
+        <WordsShow match={{ params: { name: this.state.wordsName } }} />
       </Paper>
     );
   }
 }
 
-Words.propTypes = {
+Namer.propTypes = {
   match: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
 };
-module.exports = withStyles(styles)(Words);
+
+
+module.exports = withStyles(styles)(Namer);

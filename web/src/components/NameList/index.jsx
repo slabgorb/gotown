@@ -5,11 +5,10 @@ import Card, { CardHeader, CardContent } from 'material-ui/Card';
 import { withStyles } from 'material-ui/styles';
 import inflection from 'inflection';
 
-const _ = require("underscore");
+const _ = require('underscore');
 
 const styles = theme => ({
   root: {
-    width: '150',
   },
   cardContent: {
     backgroundColor: theme.palette.background.paper,
@@ -38,7 +37,6 @@ const NameList = ({
   <Card className={classes.root}>
     <CardHeader
       title={inflection.titleize(title)}
-      subtitle={inflection.titleize(subtitle)}
       className={classes.cardHeader}
     />
     <CardContent className={classes.cardContent}>
@@ -50,13 +48,11 @@ const NameList = ({
 );
 
 NameList.propTypes = {
-  subtitle: PropTypes.string,
   title: PropTypes.string.isRequired,
   listItems: PropTypes.array.isRequired,
   classes: PropTypes.object.isRequired,
 };
 NameList.defaultProps = {
-  subtitle: '',
 };
 
 
