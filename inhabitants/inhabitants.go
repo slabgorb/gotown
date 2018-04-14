@@ -66,7 +66,7 @@ type Specieser interface {
 }
 
 type Cultured interface {
-	RandomName(Gender, Nameable) *Name
+	GetName(Nameable) *Name
 	MaritalCandidate(Marriageable, Marriageable) bool
 	GetNamers() map[Gender]*words.Namer
 }

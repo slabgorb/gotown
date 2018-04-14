@@ -9,6 +9,7 @@ type Chronology struct {
 	Callbacks   []Callback       `json:"-"`
 	Events      map[int][]*Event `json:"events"`
 	frozen      bool
+	mutex       sync.Mutex
 }
 
 // NewChronology returns a initialized Chronology
@@ -28,7 +29,9 @@ func (c *Chronology) SetYear(year int) {
 
 // AddCurrentEvent adds an event to the Chronology in the current year
 func (c *Chronology) AddCurrentEvent(description string) {
+	c.mutex.Lock()
 	c.AddEvent(&Event{Description: description, Year: c.CurrentYear})
+	c.mutex.Unlock()
 }
 
 func (c *Chronology) EventsForYear(year int) []*Event {

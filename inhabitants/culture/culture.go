@@ -89,6 +89,7 @@ func (c *Culture) Read() error {
 	return nil
 }
 
+// Reset sets the culture back to zero
 func (c *Culture) Reset() {
 	c.ID = 0
 	c.Name = ""
@@ -113,20 +114,24 @@ func (c *Culture) GetName(b inhabitants.Nameable) *inhabitants.Name {
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
+// GetNamers returns the namer objects for the culture
 func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
 	return c.Namers
 }
 
+// RandomName creates a random name based on the gender
 func (c *Culture) RandomName(sex inhabitants.Gender, b inhabitants.Nameable) *inhabitants.Name {
 	namer := c.Namers[sex]
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
+// Seed seeds the database with initial cultures.
 func Seed() error {
 	var culture = &Culture{}
 	return persist.SeedHelper("cultures", culture)
 }
 
+// List returns the names of the cultures already in tha database
 func List() ([]string, error) {
 	cultures := []Culture{}
 	if err := persist.DB.All(&cultures); err != nil {

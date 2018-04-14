@@ -71,6 +71,7 @@ func (b *Being) genderedParent(gender inhabitants.Gender) *Being {
 	return nil
 }
 
+// History returns the timeline.Chronology associated with the being
 func (b *Being) History() *timeline.Chronology {
 	return b.Chronology
 }
@@ -149,7 +150,7 @@ func (b *Being) RandomizeGender() {
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName(c inhabitants.Cultured) {
-	b.Name = c.RandomName(b.Sex(), b)
+	b.Name = c.GetName(b)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.

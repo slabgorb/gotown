@@ -15,8 +15,12 @@ type mockCulture struct {
 	name string
 }
 
-func (m *mockCulture) RandomName(sex inhabitants.Gender) *inhabitants.Name {
-	if sex == inhabitants.Female {
+func (m *mockCulture) GetNamers() map[inhabitants.Gender]*words.Namer {
+	panic("not implemented")
+}
+
+func (m *mockCulture) GetName(b inhabitants.Nameable) *inhabitants.Name {
+	if b.Sex() == inhabitants.Female {
 		return &inhabitants.Name{
 			GivenName:  "Arnulf",
 			FamilyName: "Arnulfdottir",
