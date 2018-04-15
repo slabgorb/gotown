@@ -9,8 +9,8 @@ import (
 
 func init() {
 	genetics.SetRandomizer(random.NewMock())
-
 }
+
 func TestGene(t *testing.T) {
 	g := genetics.RandomGene()
 	if len(g) != 6 {

@@ -3,31 +3,8 @@ package genetics
 import (
 	"fmt"
 	"math/rand"
-	"strconv"
 	"strings"
-
-	"github.com/slabgorb/gotown/inhabitants"
 )
-
-// Gene is part of a Chromosome, represented by a hexstring
-type Gene string
-
-// Int64 converts the hexstring of a Gene into an integer
-func (g Gene) Int64() int64 {
-	v, _ := strconv.ParseInt(string(g), 16, 64)
-	return v
-}
-
-// String implements fmt.Stringer
-func (g Gene) String() string {
-	return string(g)
-}
-
-// RandomGene creates a randomized gene
-func RandomGene() Gene {
-	r := randomizer.Intn(16777215)
-	return Gene(fmt.Sprintf("%06x", r))
-}
 
 // Chromosome represents a collection of genes
 type Chromosome struct {
@@ -84,7 +61,7 @@ func (c *Chromosome) Combine(other *Chromosome) (*Chromosome, error) {
 }
 
 // Express applies an Expression to the Chromosome
-func (c *Chromosome) Express(e inhabitants.Expresser) map[string]string {
+func (c *Chromosome) Express(e Expression) map[string]string {
 	set := c.String()
 	express := make(map[string]string)
 	for _, trait := range e.GetTraits() {

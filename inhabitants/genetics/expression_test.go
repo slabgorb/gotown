@@ -1,10 +1,10 @@
 package genetics_test
 
 import (
-	"strings"
+	"encoding/json"
 	"testing"
 
-	"github.com/slabgorb/gotown/inhabitants/genetics"
+	. "github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
 )
 
@@ -87,17 +87,19 @@ var expressionJSON = `
 `
 
 func init() {
-	genetics.SetRandomizer(random.NewMock())
+	SetRandomizer(random.NewMock())
 
 }
 
 func TestExpression(t *testing.T) {
-	exp, err := genetics.LoadExpression(strings.NewReader(expressionJSON))
+	exp := Expression{}
+	reader := []byte(expressionJSON)
+	err := json.Unmarshal(reader, &exp)
 	if err != nil {
 		t.Error(err)
 	}
 
-	c := genetics.RandomChromosome(40)
+	c := RandomChromosome(40)
 	e := c.Express(exp)
 	expected := "hazel"
 	if e["eye color"] != expected {

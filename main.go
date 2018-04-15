@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/inhabitants/species"
@@ -215,9 +216,9 @@ func townHandler(c echo.Context) error {
 	//cron := timeline.NewChronology()
 	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
-			//being := inhabitants.Being{Species: &species, Culture: &culture, Chronology: cron}
-			//being.Randomize()
-			//area.Add(&being)
+			being := being.Being{Species: &species, Culture: &culture, Chronology: cron}
+			being.Randomize()
+			area.Add(&being)
 			wg.Done()
 		}(&wg)
 	}

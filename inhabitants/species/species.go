@@ -20,21 +20,25 @@ func SetRandomizer(g random.Generator) {
 
 // Species represents a species or a race.
 type Species struct {
-	ID         int                  `json:"id" storm:"id,increment"`
-	Name       string               `json:"name" storm:"index,unique"`
-	Genders    []inhabitants.Gender `json:"genders"`
-	Expression genetics.Expression  `json:"expression"`
-	Demography map[int]Demo         `json:"demography"`
+	ID                int                  `json:"id" storm:"id,increment"`
+	Name              string               `json:"name" storm:"index,unique"`
+	Genders           []inhabitants.Gender `json:"genders"`
+	GeneticExpression genetics.Expression  `json:"expression"`
+	Demography        map[int]Demo         `json:"demography"`
 }
 
 // New creates and initializes a *Species
 func New(name string, genders []inhabitants.Gender, e genetics.Expression, d map[int]Demo) *Species {
 	return &Species{
-		Name:       name,
-		Genders:    genders,
-		Expression: e,
-		Demography: d,
+		Name:              name,
+		Genders:           genders,
+		GeneticExpression: e,
+		Demography:        d,
 	}
+}
+
+func (s *Species) Expression() inhabitants.Expresser {
+	return s.GeneticExpression
 }
 
 // String implements fmt.Stringer
@@ -52,7 +56,7 @@ func (s *Species) Reset() {
 	s.Name = ""
 	s.ID = 0
 	s.Genders = []inhabitants.Gender{}
-	s.Expression = genetics.Expression{}
+	s.GeneticExpression = genetics.Expression{}
 	s.Demography = make(map[int]Demo)
 }
 
