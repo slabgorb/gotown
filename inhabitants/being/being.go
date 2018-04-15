@@ -159,7 +159,7 @@ func (b *Being) RandomizeChromosome() {
 }
 
 // Express is the being's chromosome's expression
-func (b *Being) Express(e inhabitants.Expresser) map[string]string {
+func (b *Being) Express(e genetics.Expression) map[string]string {
 	return b.Chromosome.Express(e)
 }
 

@@ -1,6 +1,7 @@
 package inhabitants
 
 import (
+	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
@@ -62,7 +63,7 @@ type Specieser interface {
 	RandomAge(slot int) int
 	MaxAge(slot int) int
 	GetGenders() []Gender
-	Expression() Expresser
+	Expression() genetics.Expression
 }
 
 type Cultured interface {

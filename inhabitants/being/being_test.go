@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/slabgorb/gotown/inhabitants/genetics"
+
 	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/random"
@@ -55,7 +57,7 @@ func (m *mockSpecies) GetGenders() []inhabitants.Gender {
 	return []inhabitants.Gender{inhabitants.Male, inhabitants.Female}
 }
 
-func (m *mockSpecies) Expression() inhabitants.Expresser {
+func (m *mockSpecies) Expression() genetics.Expression {
 	panic("not implemented")
 }
 

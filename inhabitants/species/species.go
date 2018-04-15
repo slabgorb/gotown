@@ -37,7 +37,7 @@ func New(name string, genders []inhabitants.Gender, e genetics.Expression, d map
 	}
 }
 
-func (s *Species) Expression() inhabitants.Expresser {
+func (s *Species) Expression() genetics.Expression {
 	return s.GeneticExpression
 }
 
