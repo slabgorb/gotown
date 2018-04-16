@@ -216,9 +216,9 @@ func townHandler(c echo.Context) error {
 	//cron := timeline.NewChronology()
 	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
-			being := being.Being{Species: &species, Culture: &culture, Chronology: cron}
-			being.Randomize()
-			area.Add(&being)
+			being := being.New(&species)
+			being.Randomize(&culture)
+			area.Add(being)
 			wg.Done()
 		}(&wg)
 	}

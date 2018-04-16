@@ -96,6 +96,11 @@ func (s *Species) RandomAge(slot int) int {
 	return 0
 }
 
+func (s *Species) MaxAge(slot int) int {
+	dmo := s.Demography[slot]
+	return dmo.MaxAge
+}
+
 func Seed() error {
 	var s = &Species{}
 	return persist.SeedHelper("species", s)

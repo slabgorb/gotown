@@ -111,6 +111,7 @@ func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
 // GetName returns a name appropriate for the passed in Being
 func (c *Culture) GetName(b inhabitants.Nameable) *inhabitants.Name {
 	namer := c.Namers[b.Sex()]
+	fmt.Println(namer.NameStrategy)
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
