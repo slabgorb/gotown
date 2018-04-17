@@ -41,7 +41,7 @@ func TestBackup(t *testing.T) {
 	if name == "" {
 		t.Errorf("Got empty string from n.Name(), got nothing from backup")
 	}
-	if name != "Lardkirk" {
-		t.Errorf("Got wrong string, got %s expected %s", name, "Lardkirk")
+	if name != "Lanternkirk" {
+		t.Errorf("Got wrong string, got %s expected %s", name, "Lanternkirk")
 	}
 }

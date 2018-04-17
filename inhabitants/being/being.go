@@ -158,15 +158,10 @@ func (b *Being) RandomizeChromosome() {
 	b.Chromosome = genetics.RandomChromosome(20)
 }
 
-// Express is the being's chromosome's expression
-func (b *Being) Express(e genetics.Expression) map[string]string {
-	return b.Chromosome.Express(e)
-}
-
 // Expression returns the genetic expression of the being's chromosome in the
 // context of the being's species.
 func (b *Being) Expression() map[string]string {
-	return b.Express(b.Species.Expression())
+	return b.Chromosome.Express(b.Species.Expression())
 }
 
 // Marry marries two beings together. Marry does not check whether the beings

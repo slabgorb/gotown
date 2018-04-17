@@ -39,7 +39,7 @@ func TestWords(t *testing.T) {
 		t.Fatal(err)
 	}
 	noun := w.Noun()
-	if noun != "lard" {
+	if noun != "lantern" {
 		t.Fail()
 	}
 
@@ -51,10 +51,10 @@ var testRandomStringTable = []struct {
 	expected string
 	f        testRandomStringFunc
 }{
-	{"lard", func(w *Words) string { return w.Noun() }},
+	{"lantern", func(w *Words) string { return w.Noun() }},
 	{"living", func(w *Words) string { return w.Adjective() }},
-	{"lards", func(w *Words) string { return w.PluralNoun() }},
-	{"lard", func(w *Words) string { return w.StartNoun() }},
+	{"lanterns", func(w *Words) string { return w.PluralNoun() }},
+	{"lantern", func(w *Words) string { return w.StartNoun() }},
 }
 
 func TestStrings(t *testing.T) {
