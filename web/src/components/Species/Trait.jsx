@@ -10,11 +10,12 @@ import Variant from './Variant';
 
 const styles = theme => ({
   card: {
-    minWidth: 275,
     fontFamily: 'Montserrat',
   },
-  title: {
-    fontSize: 12,
+  cardHeader: {
+    root: { color: 'red' },
+    title: { fontSize: 12 },
+    subtitle: { fontSize: 10 },
   },
 
   expand: {
@@ -47,7 +48,11 @@ class Trait extends React.Component {
     const { name, variants, classes } = this.props;
     return (
       <Card className={classes.card}>
-        <CardHeader title={name} className={classes.title} />
+        <CardHeader title={name} classes={{ 
+          root: classes.cardHeader.root,
+          title: classes.cardHeader.title,
+          
+        }} />
         <CardActions className={classes.actions} disableActionSpacing>
           <IconButton
             className={classnames(classes.expand, {

@@ -10,6 +10,7 @@ import (
 	"github.com/slabgorb/gotown/persist"
 )
 
+// Namer 'names' things using an underlying Words struct and a set of template patterns.
 type Namer struct {
 	Words        *Words
 	ID           int       `json:"id" storm:"increment"`
@@ -19,6 +20,7 @@ type Namer struct {
 	NameStrategy string    `json:"name_strategy"`
 }
 
+// PatternList returns the set of patterns as a slice of string
 func (n *Namer) PatternList() []string {
 	pl := []string{}
 	for _, p := range n.Patterns {
@@ -50,6 +52,7 @@ func (n *Namer) Read() error {
 	return nil
 }
 
+// Reset implements persist.Persistable
 func (n *Namer) Reset() {
 	n.Words = nil
 	n.ID = 0
@@ -59,6 +62,7 @@ func (n *Namer) Reset() {
 	n.NameStrategy = ""
 }
 
+// Template chooses a random template pattern from the list of patterns
 func (n *Namer) Template() *template.Template {
 	randomChoice := n.Patterns[randomizer.Intn(len(n.Patterns))]
 	return randomChoice.Template()
@@ -76,6 +80,7 @@ func edgeCases(s string) string {
 	return re.ReplaceAllString(s, "y")
 }
 
+// Execute performs the template pattern using the underlying Words
 func (n *Namer) Execute(with interface{}) (string, error) {
 	tmpl := n.Template()
 	buf := bytes.NewBuffer([]byte(""))

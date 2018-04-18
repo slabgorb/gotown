@@ -21,18 +21,9 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-
 }
 
-func main() {
-	err := persist.Open("gotown.db")
-	if err != nil {
-		panic(err)
-	}
-
-	defer persist.Close()
-
-	e := echo.New()
+func defineAPIHandlers(e *echo.Echo) {
 	api := e.Group("/api")
 	api.GET("/cultures", listCulturesHandler)
 	api.GET("/cultures/:name", showCulturesHandler)
@@ -51,6 +42,10 @@ func main() {
 	api.PUT("/seed", seedHandler)
 	//e.GET("/household", householdHandler)
 	api.GET("/random/chromosome", randomChromosomeHandler)
+
+}
+
+func defineStaticHandlers(e *echo.Echo) {
 	e.Static("/fonts", "web/fonts")
 	e.Static("/styles", "web/styles")
 	e.Static("/scripts", "web/scripts")
@@ -58,10 +53,22 @@ func main() {
 	e.File("/manifest.json", "web/manifest.json")
 	e.File("/", "web")
 	e.File("/*", "web/index.html")
+}
+
+func main() {
+	err := persist.Open("gotown.db")
+	if err != nil {
+		panic(err)
+	}
+	defer persist.Close()
+
+	e := echo.New()
+	defineAPIHandlers(e)
+	defineStaticHandlers(e)
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE, echo.OPTIONS},
 	}))
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "${time_rfc3339} ${method} ${uri}\t=>\t${status}\t${latency_human}\n${query} ${form}",

@@ -6,3 +6,10 @@ const Expression = props =>
       {_.map(props.expression, expressionMap)}
     </div>
   );
+
+
+Expression.propTypes = {
+
+};
+
+export default Expression;
