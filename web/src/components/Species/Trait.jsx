@@ -12,10 +12,11 @@ const styles = theme => ({
   card: {
     fontFamily: 'Montserrat',
   },
-  cardHeader: {
-    root: { color: 'red' },
-    title: { fontSize: 12 },
-    subtitle: { fontSize: 10 },
+  cardHeaderRoot: { padding: 4 },
+  cardHeaderTitle: { fontSize: 14 },
+  cardActionRoot: {
+    marginTop: -37,
+    display: 'flex',
   },
 
   expand: {
@@ -27,9 +28,6 @@ const styles = theme => ({
   },
   expandOpen: {
     transform: 'rotate(180deg)',
-  },
-  actions: {
-    display: 'flex',
   },
 });
 
@@ -48,12 +46,14 @@ class Trait extends React.Component {
     const { name, variants, classes } = this.props;
     return (
       <Card className={classes.card}>
-        <CardHeader title={name} classes={{ 
-          root: classes.cardHeader.root,
-          title: classes.cardHeader.title,
-          
-        }} />
-        <CardActions className={classes.actions} disableActionSpacing>
+        <CardHeader
+          title={name}
+          classes={{
+                  root: classes.cardHeaderRoot,
+                  title: classes.cardHeaderTitle,
+                }}
+        />
+        <CardActions classes={{ root: classes.cardActionRoot }} disableActionSpacing>
           <IconButton
             className={classnames(classes.expand, {
                 [classes.expandOpen]: this.state.expanded,

@@ -2,6 +2,7 @@ import React from 'react';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
+import { ChromosomeShow } from '../Chromosome';
 import Genetics from './Genetics';
 import GeneticsMap from './GeneticsMap';
 import speciesApi from './api';
@@ -43,6 +44,7 @@ class Species extends React.Component {
           <Typography variant="headline" component="h1">
             {this.state.name}
           </Typography>
+          <ChromosomeShow />
           <Genetics traits={this.state.genetics.traits} />
           <GeneticsMap traits={this.state.genetics.traits} />
         </Paper>

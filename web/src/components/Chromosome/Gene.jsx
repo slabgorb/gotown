@@ -7,7 +7,7 @@ const styles = () => {
 
 };
 
-const Gene = ({value, onChange}) =>
+const Gene = ({ value, onChange }) =>
   (
     <TextField defaultValue={value} onChange={onChange} />
   );

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+
 const Variant = ({ name, match }) =>
   (
     <div className="key-value">

@@ -1,11 +1,12 @@
 import React from 'react';
-import Paper from 'material-ui/Paper';
+import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
-import TextField from 'material-ui/TextField';
 import AutoRenewIcon from 'material-ui-icons/Autorenew';
 import Gene from './Gene';
 import chromosomeApi from './api';
+
+const _ = require('underscore');
 
 const styles = () => ({
   textField: {},
@@ -36,13 +37,13 @@ class Show extends React.Component {
       });
     });
   }
-  render({ classes }) {
+  render() {
+    const { classes } = this.props;
     return (
       <div className="flex-container">
         { _.map(this.state.genes, (g, i) => (
           <Gene value={g} onChange={this.changeGene(i)} />
         ))}
-        <Gene value={this.state.value} className={classes.textField} onChange={this.handleChange('name')} />
         <IconButton className={classes.avatar} onClick={this.clickRandomChromosome}>
           <AutoRenewIcon />
         </IconButton>
@@ -50,5 +51,9 @@ class Show extends React.Component {
     );
   }
 }
+
+Show.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
 
 export default withStyles(styles)(Show);

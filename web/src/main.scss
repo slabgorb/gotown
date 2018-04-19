@@ -33,12 +33,15 @@ li:hover {
 }
 
 .key-value {
+  font-size: 14px;
   @include flexbox;
   div {
     @include flex;
   }
   div:first-child {
       font-weight: bold;
+      text-align: right;
+      margin-right: 5px;
   }
 
 }
