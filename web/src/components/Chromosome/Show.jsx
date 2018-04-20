@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
+import Button from 'material-ui/Button';
 import AutoRenewIcon from 'material-ui-icons/Autorenew';
 import { FormLabel, FormControl } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
@@ -30,10 +31,15 @@ class Show extends React.Component {
       genes: [],
       changing: false,
       expressionMap: {},
+      focusedGene: -1,
     };
     this.changeGene = this.changeGene.bind(this);
     this.clickRandomChromosome = this.clickRandomChromosome.bind(this);
     this.getExpression = this.getExpression.bind(this);
+  }
+
+  componentDidMount() {
+
   }
 
   getExpression() {
@@ -56,6 +62,12 @@ class Show extends React.Component {
       }), this.getExpression);
     };
     return f.bind(this);
+  }
+
+  clickGeneInMap(focusedGene) {
+    return () => {
+      this.setState({ focusedGene });
+    };
   }
 
   clickRandomChromosome() {
@@ -94,7 +106,8 @@ class Show extends React.Component {
               <div className="gene-table">
                 { this.state.genes.length > 0
                   ? this.state.genes.map((g, i) => (
-                    <div
+                    <Button
+                      onClick={this.clickGeneInMap(i)}
                       className="gene"
                       style={{
                         borderBottomColor: `#${g}`,
@@ -104,8 +117,7 @@ class Show extends React.Component {
                       key={g}
                     >
                       {g}
-                      {i % 4 === 0 ? (<br />) : '' }
-                    </div>))
+                    </Button>))
                   : ''
                 }
               </div>
@@ -116,7 +128,12 @@ class Show extends React.Component {
           <FormControl>
             <FormLabel label="check genetics" />
             { _.map(this.state.genes, (g, i) => (
-              <Gene value={g} key={i} onChange={this.changeGene(i)} />
+              <Gene
+                value={g}
+                key={i}
+                hasFocus={i === this.state.focusedGene}
+                onChange={this.changeGene(i)}
+              />
             ))}
           </FormControl>
         </Grid>

@@ -1,13 +1,19 @@
 import React from 'react';
-import Paper from 'material-ui/Paper';
+import { withStyles } from 'material-ui/styles';
 import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
-import Drawer from 'material-ui/Drawer';
-import Button from 'material-ui/Button';
+import Tabs, { Tab } from 'material-ui/Tabs';
+import AppBar from 'material-ui/AppBar';
 import { ChromosomeShow } from '../Chromosome';
 import Genetics from './Genetics';
 import GeneticsMap from './GeneticsMap';
 import speciesApi from './api';
+
+const styles = () => ({
+  tabs: {
+    
+  }
+});
 
 class Species extends React.Component {
   constructor(props) {
@@ -15,10 +21,10 @@ class Species extends React.Component {
     this.state = {
       name: props.match.params.name,
       genetics: { traits: [] },
-      chromosomeDrawerOpen: false,
+      value: 1,
     };
     this.get = this.get.bind(this);
-    this.toggleChromosomeDrawer = this.toggleChromosomeDrawer.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -38,33 +44,32 @@ class Species extends React.Component {
       });
   }
 
-  toggleChromosomeDrawer(chromosomeDrawerOpen) {
-    return () => this.setState({ chromosomeDrawerOpen });
+
+  handleChange(event, value) {
+    this.setState({ value });
   }
+
 
   render() {
     if (this.state.genetics.traits.length === 0) {
       return (<div />);
     }
+    const { value } = this.state;
     return (
       <div>
-        <Drawer
-          anchor="top"
-          open={this.state.chromosomeDrawerOpen}
-          onClose={this.toggleChromosomeDrawer(false)}
-          variant="persistant"
-        >
-          <Button onClick={this.toggleChromosomeDrawer(false)}>Close</Button>
-          <ChromosomeShow speciesName={this.state.name} />
-        </Drawer>
-        <Paper elevation={4}>
-          <Typography variant="headline" component="h1">
-            {this.state.name}
-          </Typography>
-          <Button onClick={this.toggleChromosomeDrawer(true)}>Chromosome Test</Button>
-          <Genetics traits={this.state.genetics.traits} />
-          <GeneticsMap traits={this.state.genetics.traits} />
-        </Paper>
+        <Typography variant="headline" component="h1">
+          {this.state.name}
+        </Typography>
+        <AppBar position="static" color="default">
+          <Tabs onChange={this.handleChange} centered>
+            <Tab label="example" />
+            <Tab label="expression" />
+            <Tab label="map" />
+          </Tabs>
+        </AppBar>
+        { value === 0 && (<ChromosomeShow speciesName={this.state.name} />) }
+        { value === 1 && (<Genetics traits={this.state.genetics.traits} />) }
+        { value === 2 && (<GeneticsMap traits={this.state.genetics.traits} />) }
       </div>
     );
   }
@@ -72,6 +77,7 @@ class Species extends React.Component {
 
 Species.propTypes = {
   match: PropTypes.object.isRequired,
+  // classes: PropTypes.object.isRequired,
 };
 
-module.exports = Species;
+module.exports = withStyles(styles)(Species);

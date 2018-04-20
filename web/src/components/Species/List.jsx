@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import { withRouter } from 'react-router-dom';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import inflection from 'inflection';
+
 import speciesApi from './api';
+import { MenuList } from '../App';
 
-const styles = () => {
-
-};
+const styles = () => ({
+  heading: {
+    fontSize: 14,
+  },
+});
 
 class SpeciesList extends React.Component {
   constructor(props) {
@@ -16,35 +17,25 @@ class SpeciesList extends React.Component {
     this.state = {
       list: [],
     };
-    this.handleClick = this.handleClick.bind(this);
+    //  this.handleClick = this.handleClick.bind(this);
   }
 
-  componentWillMount() { speciesApi.getAll().then(data => this.setState({ list: data })); }
-
-  handleClick(value) {
-    this.props.history.push(`/species/${value}`);
+  componentWillMount() { 
+    speciesApi.getAll().then(data => this.setState({ list: data }));
   }
-
 
   render() {
+    const { classes, handleClick } = this.props;
     if (this.state.list.length === 0) {
       return null;
     }
-    return (
-      <List component="nav">
-        {this.state.list.map(item => (
-          <ListItem button divider key={item} onClick={() => this.handleClick(item)}>
-            <ListItemText primary={inflection.titleize(item)} />
-          </ListItem>
-          ))}
-      </List>
-    );
+    return (<MenuList heading="Species" classes={classes} list={this.state.list} handleClick={v => handleClick(`species/${v}`)()} />); 
   }
 }
 
 SpeciesList.propTypes = {
-  history: PropTypes.object.isRequired,
-
+  handleClick: PropTypes.func.isRequired,
+  classes: PropTypes.object.isRequired,
 };
 
-export default withRouter(withStyles(styles)(SpeciesList));
+export default withStyles(styles)(SpeciesList);

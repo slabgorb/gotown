@@ -2,13 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import inflection from 'inflection';
+import { MenuList } from '../App';
 import cultureApi from './api';
 
-const styles = () => {
-
-};
+const styles = () => ({
+  heading: {
+    fontSize: 14,
+  },
+});
 
 class CultureList extends React.Component {
   constructor(props) {
@@ -16,36 +17,29 @@ class CultureList extends React.Component {
     this.state = {
       list: [],
     };
-    this.handleClick = this.handleClick.bind(this);
   }
 
   componentWillMount() {
     cultureApi.getAll().then(data => this.setState({ list: data }));
   }
 
-  handleClick(value) {
-    this.props.history.push(`/cultures/${value}`);
-  }
-
-
   render() {
     if (this.state.list.length === 0) {
       return null;
     }
-    return (
-      <List component="nav">
-        {this.state.list.map(item => (
-          <ListItem button divider key={item} onClick={() => this.handleClick(item)}>
-            <ListItemText primary={inflection.titleize(item)} />
-          </ListItem>
-          ))}
-      </List>
-    );
+    const { classes, handleClick } = this.props;
+    return (<MenuList
+      heading="Cultures"
+      classes={classes}
+      list={this.state.list}
+      handleClick={v => handleClick(`cultures/${v}`)()}
+    />);
   }
 }
 
 CultureList.propTypes = {
-  history: PropTypes.object.isRequired,
+  handleClick: PropTypes.func.isRequired,
+  classes: PropTypes.object.isRequired,
 
 };
 

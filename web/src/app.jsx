@@ -19,13 +19,9 @@ render(
     <Provider store={store}>
       <BrowserRouter>
         <App>
-          <Route path="/namers" component={NamersList} />
           <Route path="/namers/:name" component={NamersShow} />
-          <Route path="/words" component={WordsList} />
           <Route path="/words/:name" component={WordsShow} />
-          <Route path="/species" component={SpeciesList} />
           <Route path="/species/:name" component={SpeciesShow} />
-          <Route path="/cultures" component={CulturesList} />
           <Route path="/cultures/:name" component={CulturesShow} />
           <Route path="/towns" component={AreaList} />
           <Route path="/towns" component={TownForm} />
