@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,6 +30,7 @@ func defineAPIHandlers(e *echo.Echo) {
 	api.GET("/cultures/:name", showCulturesHandler)
 	api.GET("/species", listSpeciesHandler)
 	api.GET("/species/:name", showSpeciesHandler)
+	api.GET("/species/:name/expression", expressSpeciesHandler)
 	api.GET("/namers", listNamersHandler)
 	api.GET("/namers/:name", showNamersHandler)
 	api.GET("/words", listWordsHandler)
@@ -106,6 +108,22 @@ func showCulturesHandler(c echo.Context) error {
 
 func listSpeciesHandler(c echo.Context) error { return list(c, species.List) }
 func showSpeciesHandler(c echo.Context) error { return show(c, &species.Species{Name: c.Param("name")}) }
+
+func expressSpeciesHandler(c echo.Context) error {
+	item := &species.Species{Name: c.Param("name")}
+	if err := item.Read(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	geneString := strings.Split(c.Param("genes"), "|")
+	genes := []genetics.Gene{}
+	for _, s := range geneString {
+		genes = append(genes, genetics.Gene(s))
+	}
+
+	chromosome := genetics.Chromosome{Genes: genes}
+	e := chromosome.Express(item.GeneticExpression)
+	return c.JSON(http.StatusOK, e)
+}
 
 func listNamersHandler(c echo.Context) error { return list(c, words.NamerList) }
 func showNamersHandler(c echo.Context) error { return show(c, &words.Namer{Name: c.Param("name")}) }

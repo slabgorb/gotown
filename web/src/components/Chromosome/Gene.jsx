@@ -9,7 +9,24 @@ const styles = () => {
 
 const Gene = ({ value, onChange }) =>
   (
-    <TextField defaultValue={value} onChange={onChange} />
+    <div>
+      <TextField
+        maxLength={8}
+        value={value}
+        onChange={onChange} 
+        label={(     
+          <span
+            style={
+            {
+              display: 'inline-block',
+              backgroundColor: `#${value}`,
+              width: '20px',
+              height: '20px',
+            }}
+          />
+        )}
+      />
+    </div>
   );
 
 Gene.propTypes = {

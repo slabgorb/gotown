@@ -1,5 +1,6 @@
 import React from 'react';
 import Card, { CardContent } from 'material-ui/Card';
+import Expression from '../Chromosome';
 
 const _ = require('underscore');
 

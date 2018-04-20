@@ -65,6 +65,13 @@ li:hover {
   display: table-row;
 }
 
+.gene-table {
+  display: table;
+  .gene {
+    display: inline-table;
+  }
+}
+
 .tiny-box {
   display:table-cell;
   min-width: 30px;

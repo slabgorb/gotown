@@ -7,6 +7,9 @@ class speciesApi {
   static get(name) {
     return axios.get(`/api/species/${name}`).then(response => response.data).catch(error => error);
   }
+  static getExpression(name, genes) {
+    return axios.get(`/api/species/${name}/expression`, { params: { chromosome: genes.join('|') } }).then(response => response.data).catch(error => error);
+  }
 }
 
 export default speciesApi;
