@@ -3,14 +3,14 @@ import PropTypes from 'prop-types';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
-import inflection from 'inflection';
 import wordsApi from './api';
 import NameList from '../NameList';
+import { PageTitle, TabBar } from '../App';
 
-const _ = require("underscore");
+const _ = require('underscore');
 
 const styles = theme => ({
-  cardContent: {
+  root: {
     backgroundColor: theme.palette.background.paper,
   },
   cardHeader: {
@@ -35,8 +35,12 @@ class Words extends React.Component {
       name: props.match.params.name,
       dictionary: {},
       loaded: false,
+      value: 0,
     };
     this.get = this.get.bind(this);
+    this.getDictByValue = this.getDictByValue.bind(this);
+    this.getKeyByValue = this.getKeyByValue.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -48,6 +52,20 @@ class Words extends React.Component {
       this.get(nextProps.match.params);
     }
   }
+
+  getKeyByValue(value) {
+    const keys = _.keys(this.state.dictionary);
+    return keys[value];
+  }
+
+  getDictByValue(value) {
+    return this.state.dictionary[this.getKeyByValue[value]];
+  }
+
+  handleChange(value) {
+    this.setState({ value });
+  }
+
   get({ name }) {
     wordsApi.get(name)
       .then((s) => {
@@ -61,18 +79,35 @@ class Words extends React.Component {
 
   render() {
     const { classes } = this.props;
-    if (!this.state.loaded) {
+    const {
+      loaded,
+      value,
+      name,
+      dictionary,
+    } = this.state;
+    if (!loaded) {
       return (<div>loading</div>);
     }
     return (
-      <Paper>
-        <Typography variant="headline" component="h1" className={classes.headline}>
-          {inflection.titleize(this.state.name)}
-        </Typography>
-        {
-          _.map(this.state.dictionary, (v, k) => (<NameList key={k} title={k} listItems={v} />))
-        }
-      </Paper>
+      <div>
+        <PageTitle title={name} titleize /> 
+        <TabBar onChange={this.handleChange} tabs={_.keys(dictionary)} />
+        <Paper classes={{ root: classes.root }}>
+          { _.map(_.keys(dictionary), (k, i) => {
+              if (i === value) {
+                return (
+                  <NameList
+                    key={k}
+                    title={k}
+                    listItems={dictionary[k]}
+                  />
+                )
+              }
+              return '';
+            })
+          }
+        </Paper>
+      </div>
     );
   }
 }

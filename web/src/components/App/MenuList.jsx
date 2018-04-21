@@ -36,6 +36,6 @@ MenuList.propTypes = {
   heading: PropTypes.node.isRequired,
   list: PropTypes.array.isRequired,
   handleClick: PropTypes.func.isRequired,
-}
+};
 
 module.exports = MenuList;

@@ -1,11 +1,12 @@
 import React from 'react';
-import Paper from 'material-ui/Paper';
 import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
+import Tabs, { Tab } from 'material-ui/Tabs';
+import AppBar from 'material-ui/AppBar';
 import inflection from 'inflection';
 import cultureApi from './api';
-import NameList from '../NameList';
+import { NamersList } from '../Namer';
+import { PageTitle } from '../App';
 
 const _ = require('underscore');
 
@@ -28,8 +29,10 @@ class Culture extends React.Component {
       namers: [],
       loaded: false,
       maritalStrategies: [],
+      value: 0,
     };
     this.get = this.get.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -54,25 +57,33 @@ class Culture extends React.Component {
       });
   }
 
+  handleChange(event, value) {
+    this.setState({ value });
+  }
 
   render() {
     const { classes } = this.props;
+    const { value } = this.state;
     if (!this.state.loaded) {
       return (<div>loading</div>);
     }
     return (
       <div>
-        <Paper elevation={4} className={classes.root}>
-          <Typography variant="headline" component="h1" className={classes.headline}>
-            {inflection.titleize(this.state.name)}
-          </Typography>
+        <PageTitle title={this.state.name} titleize subtitle="Culture" />
+        <AppBar position="static" color="primary">
+          <Tabs onChange={this.handleChange} centered>
+            <Tab label="names" />
+            <Tab label="marriage" />
+          </Tabs>
+        </AppBar>
+        { value === 0 && (
           <div className="flex-container">
-            { _.map(this.state.namers, v => (<span>{inflection.titleize(v)}</span>)) }
-          </div>
+            <NamersList list={_.pluck(_.values(this.state.namers), 'name')} />
+          </div>) }
+        { value === 1 && (
           <div className="flex-container">
-            { _.map(this.state.maritalStrategies, v => (<span>{inflection.titleize(v)}</span>)) }
-          </div>
-        </Paper>
+            { _.map(this.state.maritalStrategies, v => (<span key={v}>{inflection.titleize(v)}</span>)) }
+          </div>) }
       </div>
     );
   }

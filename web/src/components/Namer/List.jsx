@@ -13,11 +13,12 @@ class NamersList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      list: [],
+      list: props.list,
     };
   }
 
   componentWillMount() {
+    if (this.state.list.length > 0) { return; }
     namerApi.getAll().then(data => this.setState({ list: data }));
   }
 
@@ -38,6 +39,11 @@ class NamersList extends React.Component {
 NamersList.propTypes = {
   handleClick: PropTypes.func.isRequired,
   classes: PropTypes.object.isRequired,
+  list: PropTypes.array,
+};
+
+NamersList.defaultProps = {
+  list: [],
 };
 
 export default withStyles(styles)(NamersList);

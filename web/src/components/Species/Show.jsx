@@ -1,18 +1,17 @@
 import React from 'react';
 import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
 import PropTypes from 'prop-types';
-import Tabs, { Tab } from 'material-ui/Tabs';
 import AppBar from 'material-ui/AppBar';
 import { ChromosomeShow } from '../Chromosome';
 import Genetics from './Genetics';
 import GeneticsMap from './GeneticsMap';
 import speciesApi from './api';
+import { PageTitle, TabBar } from '../App';
 
 const styles = () => ({
   tabs: {
-    
-  }
+    marginTop: 72,
+  },
 });
 
 class Species extends React.Component {
@@ -54,18 +53,13 @@ class Species extends React.Component {
     if (this.state.genetics.traits.length === 0) {
       return (<div />);
     }
-    const { value } = this.state;
+    const { value, name } = this.state;
+    const { classes } = this.props;
     return (
       <div>
-        <Typography variant="headline" component="h1">
-          {this.state.name}
-        </Typography>
-        <AppBar position="static" color="default">
-          <Tabs onChange={this.handleChange} centered>
-            <Tab label="example" />
-            <Tab label="expression" />
-            <Tab label="map" />
-          </Tabs>
+        <PageTitle title={name} capitalize subtitle="Species" />
+        <AppBar position="static" color="primary">
+          <TabBar onChange={this.handleChange} tabs={['example', 'expression', 'map']} />
         </AppBar>
         { value === 0 && (<ChromosomeShow speciesName={this.state.name} />) }
         { value === 1 && (<Genetics traits={this.state.genetics.traits} />) }
@@ -77,7 +71,7 @@ class Species extends React.Component {
 
 Species.propTypes = {
   match: PropTypes.object.isRequired,
-  // classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired,
 };
 
 module.exports = withStyles(styles)(Species);

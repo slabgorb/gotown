@@ -3,6 +3,6 @@
   "patterns":[  
     "{{.GivenName}} {{.FamilyName}}{{.Matronymic}}"
  ],
- "words": "viking_female_names",
+ "words": "viking female names",
  "name_strategy":"matronymic"
 }

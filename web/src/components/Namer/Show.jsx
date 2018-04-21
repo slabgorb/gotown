@@ -1,13 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Paper from 'material-ui/Paper';
 import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
-import inflection from 'inflection';
 import namerApi from './api';
 import { WordsShow } from '../Words';
-import NameList from '../NameList';
 import PatternChipper from './PatternChipper';
+import { PageTitle, TabBar } from '../App';
 
 const _ = require('underscore');
 
@@ -28,6 +25,7 @@ const styles = theme => ({
     fontFamily: 'Raleway',
     fontSize: '12',
   },
+  tabs: { marginTop: 72 },
 });
 
 class Namer extends React.Component {
@@ -38,8 +36,10 @@ class Namer extends React.Component {
       wordsName: '',
       patterns: [],
       loaded: false,
+      value: 1,
     };
     this.get = this.get.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -64,24 +64,32 @@ class Namer extends React.Component {
       });
   }
 
+  handleChange(value) { 
+    this.setState({ value });
+  }
 
   render() {
     const { classes } = this.props;
-    if (!this.state.loaded) {
+    const {
+      loaded,
+      patterns,
+      name,
+      value,
+    } = this.state;
+    if (!loaded) {
       return (<div>loading</div>);
     }
     const patternChips = []
-    _.each(this.state.patterns, (p, i) => {
+    _.each(patterns, (p, i) => {
       patternChips.push((<PatternChipper key={i} pattern={p} />));
     });
     return (
-      <Paper elevation={4} className={classes.root}>;
-        <Typography variant="headline" component="h1" className={classes.headline}>
-          {inflection.titleize(this.state.name)}
-        </Typography>
-        {patternChips}
-        <WordsShow match={{ params: { name: this.state.wordsName } }} />
-      </Paper>
+      <div>
+        <PageTitle title={name} titleize subtitle="Namer"/>
+        <TabBar onChange={this.handleChange} tabs={['patterns', 'words']} />
+        { value === 0 && patternChips}
+        { value === 1 && (<WordsShow match={{ params: { name: this.state.wordsName } }} />) }
+      </div>
     );
   }
 }

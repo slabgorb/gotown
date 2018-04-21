@@ -4,12 +4,12 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
-import { SpeciesShow, SpeciesList } from './components/Species';
-import { WordsShow, WordsList } from './components/Words';
-import { NamersShow, NamersList } from './components/Namer';
-import { CulturesShow, CulturesList } from './components/Culture';
-import { TownForm, AreaList, AreaShow } from './components/Area';
-import { App } from './components/App';
+import { SpeciesShow } from './components/Species';
+import { WordsShow } from './components/Words';
+import { NamersShow } from './components/Namer';
+import { CulturesShow } from './components/Culture';
+import { TownForm, AreaShow } from './components/Area';
+import { App, Home } from './components/App';
 import rootReducer from './reducers';
 import './main.scss';
 
@@ -19,11 +19,12 @@ render(
     <Provider store={store}>
       <BrowserRouter>
         <App>
+          <Route path="/home" component={Home} />
+          <Route path="/" component={Home} />
           <Route path="/namers/:name" component={NamersShow} />
           <Route path="/words/:name" component={WordsShow} />
           <Route path="/species/:name" component={SpeciesShow} />
           <Route path="/cultures/:name" component={CulturesShow} />
-          <Route path="/towns" component={AreaList} />
           <Route path="/towns" component={TownForm} />
           <Route path="/towns/:name" component={AreaShow} />
         </App>
