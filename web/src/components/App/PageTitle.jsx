@@ -24,7 +24,8 @@ const seed = () => axios.put('/api/seed');
 
 const style = theme => ({
   flex: { flex: '1 0' },
-  appBar: {},
+  pageRoot: { marginBottom: 64 },
+  appBar: {  },
   root: {
     transition: '0.3s all',
     backgroundColor: theme.palette.primary.main,
@@ -81,7 +82,7 @@ class PageTitle extends React.Component {
     if (capitalize) { endTitle = inflection.capitalize(title); }
     if (titleize) { endTitle = inflection.titleize(title); }
     return (
-      <div>
+      <div className={classes.pageRoot}>
         <Dialog open={dialogOpen}>
           <DialogTitle>Are you sure?</DialogTitle>
           <Typography>

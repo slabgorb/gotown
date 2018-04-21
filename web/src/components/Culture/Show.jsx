@@ -1,12 +1,10 @@
 import React from 'react';
 import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
-import Tabs, { Tab } from 'material-ui/Tabs';
-import AppBar from 'material-ui/AppBar';
 import inflection from 'inflection';
 import cultureApi from './api';
-import { NamersList } from '../Namer';
-import { PageTitle } from '../App';
+import { NamersList, NamersShow } from '../Namer';
+import { PageTitle, TabBar } from '../App';
 
 const _ = require('underscore');
 
@@ -14,10 +12,6 @@ const styles = theme => ({
   root: {
     backgroundColor: theme.palette.background.paper,
     fontFamily: 'Montserrat',
-  },
-  headline: {
-    fontFamily: 'Montserrat',
-    marginLeft: '20',
   },
 });
 
@@ -27,12 +21,14 @@ class Culture extends React.Component {
     this.state = {
       name: props.match.params.name,
       namers: [],
+      namerShown: 0,
       loaded: false,
       maritalStrategies: [],
       value: 0,
     };
     this.get = this.get.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.handleNamerClick = this.handleNamerClick.bind(this);
   }
 
   componentDidMount() {
@@ -57,28 +53,28 @@ class Culture extends React.Component {
       });
   }
 
-  handleChange(event, value) {
+  handleChange(value) {
     this.setState({ value });
+  }
+
+  handleNamerClick(namerShown) {
+    this.setState({ namerShown });
   }
 
   render() {
     const { classes } = this.props;
-    const { value } = this.state;
+    const { value, namers, namerShown } = this.state;
     if (!this.state.loaded) {
       return (<div>loading</div>);
     }
     return (
-      <div>
+      <div className={classes.root}>
         <PageTitle title={this.state.name} titleize subtitle="Culture" />
-        <AppBar position="static" color="primary">
-          <Tabs onChange={this.handleChange} centered>
-            <Tab label="names" />
-            <Tab label="marriage" />
-          </Tabs>
-        </AppBar>
+        <TabBar value={value} onChange={this.handleChange} tabs={['names', 'marriage']} />
         { value === 0 && (
-          <div className="flex-container">
-            <NamersList list={_.pluck(_.values(this.state.namers), 'name')} />
+          <div>
+            <TabBar value={namerShown} onChange={this.handleNamerClick} tabs={_.pluck(_.values(namers), 'name')} />
+            <NamersShow showAppBar={false} match={{ params: { name: _.values(namers)[namerShown].name } }} />
           </div>) }
         { value === 1 && (
           <div className="flex-container">

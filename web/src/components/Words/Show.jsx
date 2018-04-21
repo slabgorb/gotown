@@ -78,7 +78,7 @@ class Words extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, showAppBar } = this.props;
     const {
       loaded,
       value,
@@ -90,7 +90,7 @@ class Words extends React.Component {
     }
     return (
       <div>
-        <PageTitle title={name} titleize /> 
+        { showAppBar && (<PageTitle title={name} titleize />) }
         <TabBar onChange={this.handleChange} tabs={_.keys(dictionary)} />
         <Paper classes={{ root: classes.root }}>
           { _.map(_.keys(dictionary), (k, i) => {
@@ -115,5 +115,10 @@ class Words extends React.Component {
 Words.propTypes = {
   match: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
+  showAppBar: PropTypes.bool,
 };
+
+Words.defaultProps = {
+  showAppBar: true,
+}
 module.exports = withStyles(styles)(Words);

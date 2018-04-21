@@ -69,12 +69,13 @@ class Namer extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, showAppBar } = this.props;
     const {
       loaded,
       patterns,
       name,
       value,
+      wordsName,
     } = this.state;
     if (!loaded) {
       return (<div>loading</div>);
@@ -85,10 +86,10 @@ class Namer extends React.Component {
     });
     return (
       <div>
-        <PageTitle title={name} titleize subtitle="Namer"/>
+        { showAppBar && (<PageTitle title={name} titleize subtitle="Namer"/>) }
         <TabBar onChange={this.handleChange} tabs={['patterns', 'words']} />
         { value === 0 && patternChips}
-        { value === 1 && (<WordsShow match={{ params: { name: this.state.wordsName } }} />) }
+        { value === 1 && (<WordsShow showAppBar={false} match={{ params: { name: this.state.wordsName } }} />) }
       </div>
     );
   }
@@ -97,7 +98,11 @@ class Namer extends React.Component {
 Namer.propTypes = {
   match: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
+  showAppBar: PropTypes.bool,
 };
 
+Namer.defaultProps = {
+  showAppBar: true,
+}
 
 module.exports = withStyles(styles)(Namer);

@@ -9,14 +9,13 @@ const _ = require('underscore');
 
 const style = () => ({
   root: {
-    marginTop: 64,
   }
 });
 
 class TabBar extends React.Component {
   constructor(props) {
     super(props);
-    this.state = ({ value: 1 });
+    this.state = ({ value: props.value });
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -40,9 +39,14 @@ class TabBar extends React.Component {
 }
 
 TabBar.propTypes = {
+  value: PropTypes.number,
   tabs: PropTypes.array.isRequired,
   classes: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-}
+};
+
+TabBar.defaultProps = {
+  value: 1,
+};
 
 module.exports = withStyles(style)(TabBar);

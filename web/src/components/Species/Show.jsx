@@ -9,9 +9,7 @@ import speciesApi from './api';
 import { PageTitle, TabBar } from '../App';
 
 const styles = () => ({
-  tabs: {
-    marginTop: 72,
-  },
+  root: {},
 });
 
 class Species extends React.Component {
@@ -44,26 +42,24 @@ class Species extends React.Component {
   }
 
 
-  handleChange(event, value) {
+  handleChange(value) {
     this.setState({ value });
   }
 
 
   render() {
-    if (this.state.genetics.traits.length === 0) {
+    const { genetics, value, name } = this.state;
+    if (genetics.traits.length === 0) {
       return (<div />);
     }
-    const { value, name } = this.state;
     const { classes } = this.props;
     return (
-      <div>
+      <div className={classes.root}>
         <PageTitle title={name} capitalize subtitle="Species" />
-        <AppBar position="static" color="primary">
-          <TabBar onChange={this.handleChange} tabs={['example', 'expression', 'map']} />
-        </AppBar>
-        { value === 0 && (<ChromosomeShow speciesName={this.state.name} />) }
-        { value === 1 && (<Genetics traits={this.state.genetics.traits} />) }
-        { value === 2 && (<GeneticsMap traits={this.state.genetics.traits} />) }
+        <TabBar onChange={this.handleChange} tabs={['example', 'expression', 'map']} />
+        { value === 0 && (<ChromosomeShow speciesName={name} />) }
+        { value === 1 && (<Genetics traits={genetics.traits} />) }
+        { value === 2 && (<GeneticsMap traits={genetics.traits} />) }
       </div>
     );
   }
