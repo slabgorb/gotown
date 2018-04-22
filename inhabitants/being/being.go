@@ -54,11 +54,13 @@ type Being struct {
 // New initializes a being
 func New(s inhabitants.Specieser) *Being {
 	return &Being{
+		Name:       &inhabitants.Name{},
 		Species:    s,
 		Chronology: timeline.NewChronology(),
 		Chromosome: genetics.RandomChromosome(30),
-		Spouses:    make(Members, 1),
-		Children:   make(Members, 1),
+		Spouses:    Members{},
+		Children:   Members{},
+		Parents:    Members{},
 	}
 }
 

@@ -7,6 +7,11 @@ class namerApi {
   static get(name) {
     return axios.get(`/api/namers/${name}`).then(response => response.data);
   }
+
+  static random(namer) {
+    return axios.get(`/api/namers/${namer}/random`).then(response => response.data);
+  }
+
 }
 
 export default namerApi;

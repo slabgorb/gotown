@@ -33,6 +33,7 @@ class Words extends React.Component {
     super(props);
     this.state = {
       name: props.match.params.name,
+      backupName: props.backupName,
       dictionary: {},
       loaded: false,
       value: 0,
@@ -41,6 +42,7 @@ class Words extends React.Component {
     this.getDictByValue = this.getDictByValue.bind(this);
     this.getKeyByValue = this.getKeyByValue.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.getBackup = this.getBackup.bind(this);
   }
 
   componentDidMount() {
@@ -62,6 +64,15 @@ class Words extends React.Component {
     return this.state.dictionary[this.getKeyByValue[value]];
   }
 
+
+  getBackup({ backupName }) {
+    wordsApi.get(backupName)
+      .then((s) => {
+        const dictionary = Object.assign(s.dictionary, this.state.dictionary);
+        this.setState({ dictionary });
+      });
+  }
+
   handleChange(value) {
     this.setState({ value });
   }
@@ -71,10 +82,14 @@ class Words extends React.Component {
       .then((s) => {
         this.setState({
           name: s.name,
+          backupName: s.backup,
           dictionary: _.pick(s.dictionary, d => d.length > 0),
           loaded: true,
         });
-      });
+      })
+      .then(() =>
+        this.state.backupName !== '' && this.getBackup(this.state))
+      .then(() => this.setState({ loaded: true }));
   }
 
   render() {
@@ -116,9 +131,11 @@ Words.propTypes = {
   match: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
   showAppBar: PropTypes.bool,
+  backupName: PropTypes.string,
 };
 
 Words.defaultProps = {
   showAppBar: true,
-}
+  backupName: '',
+};
 module.exports = withStyles(styles)(Words);

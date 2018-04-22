@@ -33,6 +33,7 @@ func defineAPIHandlers(e *echo.Echo) {
 	api.GET("/species/:name/expression", expressSpeciesHandler)
 	api.GET("/namers", listNamersHandler)
 	api.GET("/namers/:name", showNamersHandler)
+	api.GET("/namers/:name/random", randomNameHandler)
 	api.GET("/words", listWordsHandler)
 	api.GET("/words/:name", showWordsHandler)
 	api.GET("/town/name", townNameHandler)
@@ -127,6 +128,14 @@ func expressSpeciesHandler(c echo.Context) error {
 
 func listNamersHandler(c echo.Context) error { return list(c, words.NamerList) }
 func showNamersHandler(c echo.Context) error { return show(c, &words.Namer{Name: c.Param("name")}) }
+
+func randomNameHandler(c echo.Context) error {
+	n := &words.Namer{Name: c.Param("name")}
+	if err := n.Read(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, n.CreateName())
+}
 
 func listWordsHandler(c echo.Context) error { return list(c, words.WordsList) }
 func showWordsHandler(c echo.Context) error { return show(c, &words.Words{Name: c.Param("name")}) }

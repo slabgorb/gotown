@@ -2,6 +2,7 @@ package words
 
 import (
 	"bytes"
+	"io"
 	"log"
 	"regexp"
 	"strings"
@@ -80,14 +81,25 @@ func edgeCases(s string) string {
 	return re.ReplaceAllString(s, "y")
 }
 
-// Execute performs the template pattern using the underlying Words
+// Execute performs interpolations on a random template pattern using the
+// underlying Words
 func (n *Namer) Execute(with interface{}) (string, error) {
-	tmpl := n.Template()
+	return n.ExecuteWithTemplate(with, n.Template())
+}
+
+// Executable abstracts templates
+type Exeutable interface {
+	Execute(io.Writer, interface{}) error
+}
+
+// ExecuteWithTemplate performs Execute with a selected template pattern
+func (n *Namer) ExecuteWithTemplate(with interface{}, tmpl Exeutable) (string, error) {
 	buf := bytes.NewBuffer([]byte(""))
 	err := tmpl.Execute(buf, with)
 	return edgeCases(lowercaseJoiners(strings.Title(buf.String()))), err
 }
 
+// CreateName makes a random name
 func (n *Namer) CreateName() string {
 	s, err := n.Execute(n.Words)
 	if err != nil {
@@ -96,7 +108,17 @@ func (n *Namer) CreateName() string {
 	return s
 }
 
-func NewNamer(patterns []string, words string, nameStrategy string) *Namer {
+// CreateNameWithPattern makes a random name with the specified pattern
+func (n *Namer) CreateNameWithPattern(tmpl Exeutable) string {
+	s, err := n.ExecuteWithTemplate(n.Words, tmpl)
+	if err != nil {
+		log.Println(err)
+	}
+	return s
+}
+
+// New returns an initialized Namer
+func New(patterns []string, words string, nameStrategy string) *Namer {
 	ps := []Pattern{}
 	for _, p := range patterns {
 		ps = append(ps, Pattern(p))
@@ -108,6 +130,7 @@ func NewNamer(patterns []string, words string, nameStrategy string) *Namer {
 	return &Namer{Patterns: ps, WordsName: words, Words: w, NameStrategy: nameStrategy}
 }
 
+// NamerList returns a list of namers (as []string)
 func NamerList() ([]string, error) {
 	ns := []Namer{}
 	if err := persist.DB.All(&ns); err != nil {

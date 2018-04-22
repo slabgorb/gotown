@@ -5,6 +5,7 @@ import namerApi from './api';
 import { WordsShow } from '../Words';
 import PatternChipper from './PatternChipper';
 import { PageTitle, TabBar } from '../App';
+import Random from './Random';
 
 const _ = require('underscore');
 
@@ -87,9 +88,10 @@ class Namer extends React.Component {
     return (
       <div>
         { showAppBar && (<PageTitle title={name} titleize subtitle="Namer"/>) }
-        <TabBar onChange={this.handleChange} tabs={['patterns', 'words']} />
+        <TabBar onChange={this.handleChange} tabs={['patterns', 'words', 'test']} />
         { value === 0 && patternChips}
         { value === 1 && (<WordsShow showAppBar={false} match={{ params: { name: this.state.wordsName } }} />) }
+        { value === 2 && (<Random namer={name} />)}
       </div>
     );
   }
