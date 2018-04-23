@@ -114,7 +114,7 @@ func (w *Words) loadBackup() error {
 }
 
 func (w *Words) GetBackup() *Words {
-	if w.backup == nil {
+	if w.backup == nil && w.BackupName != "" {
 		w.loadBackup()
 	}
 	return w.backup
@@ -166,12 +166,12 @@ func (w *Words) EndNoun() string {
 
 // GivenName returns a given name
 func (w *Words) GivenName() string {
-	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("givenNames")) })
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("given_names")) })
 }
 
 // FamilyName returns a family name
 func (w *Words) FamilyName() string {
-	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("familyNames")) })
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("family_names")) })
 }
 
 // Matronymic returns a matronymic name

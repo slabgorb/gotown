@@ -1,15 +1,7 @@
 {  
   "name":"viking female names",
+  "backup": "viking names",
   "dictionary":{  
-     "family_names":[  
-
-     ],
-     "patronymics":[  
-        "son"
-     ],
-     "matronymics":[  
-        "dottir"
-     ],
      "given_names":[  
         "Aadny",
         "Aafrid",
