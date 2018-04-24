@@ -1,0 +1,17 @@
+{
+  "name": "viking towns",
+  "words": "viking town names",
+  "patterns": ["{{.Prefix}}{{.Suffix}}",
+    "{{.Prefix}} {{.Noun}}{{.Suffix}}",
+    "{{.ShortNoun}}{{.ShortNoun}}{{.Suffix}}",
+    "{{.Prefix}} {{.ShortNoun}}{{.ShortNoun}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.ShortNoun}}{{.Suffix}}",
+    "{{.ShortNoun}}{{.Suffix}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.Noun}}{{.Suffix}}",
+    "{{.Noun}}{{.ShortNoun}}",
+    "{{.Noun}}{{.ShortNoun}}",
+    "{{.ShortNoun}}{{.Suffix}}"]
+}
