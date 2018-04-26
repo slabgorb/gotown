@@ -48,7 +48,7 @@ var NameStrategies = map[string]NameStrategy{
 			name.FamilyName = b.Mother().GetName().FamilyName
 			return name
 		}
-		name.FamilyName = namer.Words.GivenName()
+		name.FamilyName = namer.Words.FamilyName()
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
@@ -60,7 +60,7 @@ var NameStrategies = map[string]NameStrategy{
 			name.FamilyName = b.Father().GetName().FamilyName
 			return name
 		}
-		name.FamilyName = namer.Words.GivenName()
+		name.FamilyName = namer.Words.FamilyName()
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name
