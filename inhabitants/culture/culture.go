@@ -74,6 +74,9 @@ func (c *Culture) Delete() error {
 
 // Fetch implements persist.Persistable
 func (c *Culture) Read() error {
+	if c.Name == "" {
+		return fmt.Errorf("cannot read culture without name")
+	}
 	if err := persist.DB.One("Name", c.Name, c); err != nil {
 		return err
 	}
@@ -108,8 +111,8 @@ func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
 	return out
 }
 
-// GetName returns a name appropriate for the passed in Being
-func (c *Culture) GetName(b inhabitants.Nameable) *inhabitants.Name {
+// RandomName returns a name appropriate for the passed in Being
+func (c *Culture) RandomName(b inhabitants.Nameable) *inhabitants.Name {
 	namer := c.Namers[b.Sex()]
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
@@ -124,6 +127,8 @@ func (c *Culture) RandomName(sex inhabitants.Gender, b inhabitants.Nameable) *in
 	namer := c.Namers[sex]
 	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
+
+func (c *Culture) GetName() string { return c.Name }
 
 // Seed seeds the database with initial cultures.
 func Seed() error {

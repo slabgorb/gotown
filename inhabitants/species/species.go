@@ -75,6 +75,8 @@ func (s *Species) GetGenders() []inhabitants.Gender {
 	return s.Genders
 }
 
+func (s *Species) GetName() string { return s.Name }
+
 // RandomAge provides a random age within a 'slot', or a demography bucket. If th
 func (s *Species) RandomAge(slot int) int {
 	if slot == -1 || slot > int(inhabitants.MaxDemographyBucket) {

@@ -53,6 +53,10 @@ type Relatable interface {
 	GetChildren() []Relatable
 }
 
+type Named interface {
+	GetName() string
+}
+
 type Marriageable interface {
 	Relatable
 	Populatable
@@ -60,6 +64,7 @@ type Marriageable interface {
 }
 
 type Specieser interface {
+	Named
 	RandomAge(slot int) int
 	MaxAge(slot int) int
 	GetGenders() []Gender
@@ -67,6 +72,7 @@ type Specieser interface {
 }
 
 type Cultured interface {
+	Named
 	GetName(Nameable) *Name
 	MaritalCandidate(Marriageable, Marriageable) bool
 	GetNamers() map[Gender]*words.Namer
