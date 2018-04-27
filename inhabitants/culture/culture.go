@@ -18,41 +18,49 @@ type Culture struct {
 	NamerNames        map[inhabitants.Gender]string       `json:"namer_names"`
 }
 
+type Marriageable interface {
+	Unmarried() bool
+	GetAge() int
+	Alive() bool
+	Sex() inhabitants.Gender
+	IsCloseRelativeOf(with Marriageable) bool
+}
+
 // maritalStrategy is a function which indicates whether the two beings are
 // marriage candidates
-type maritalStrategy func(a, b inhabitants.Marriageable) bool
+type maritalStrategy func(a, b Marriageable) bool
 
 var maritalStrategies = map[string]maritalStrategy{
-	"living": func(a, b inhabitants.Marriageable) bool {
+	"living": func(a, b Marriageable) bool {
 		return a.Alive() && b.Alive()
 	},
-	"monogamous": func(a, b inhabitants.Marriageable) bool {
+	"monogamous": func(a, b Marriageable) bool {
 		return a.Unmarried() && b.Unmarried()
 	},
-	"heterosexual": func(a, b inhabitants.Marriageable) bool {
+	"heterosexual": func(a, b Marriageable) bool {
 		return a.Sex() != b.Sex()
 	},
-	"homosexual": func(a, b inhabitants.Marriageable) bool {
+	"homosexual": func(a, b Marriageable) bool {
 		return a.Sex() == b.Sex()
 	},
-	"close age male older": func(a, b inhabitants.Marriageable) bool {
+	"close age male older": func(a, b Marriageable) bool {
 		// divide by 2 add 7
 		if a.Sex() == inhabitants.Gender("male") {
-			return (a.Age()/2)+7 < b.Age() && a.Age() >= b.Age()
+			return (a.GetAge()/2)+7 < b.GetAge() && a.GetAge() >= b.GetAge()
 		}
-		return (b.Age()/2)+7 < a.Age() && b.Age() >= a.Age()
+		return (b.GetAge()/2)+7 < a.GetAge() && b.GetAge() >= a.GetAge()
 	},
-	"close age female older": func(a, b inhabitants.Marriageable) bool {
+	"close age female older": func(a, b Marriageable) bool {
 		// divide by 2 add 7
 		if a.Sex() == inhabitants.Gender("female") {
-			return (a.Age()/2)+7 < b.Age() && a.Age() >= b.Age()
+			return (a.GetAge()/2)+7 < b.GetAge() && a.GetAge() >= b.GetAge()
 		}
-		return (b.Age()/2)+7 < a.Age() && b.Age() >= a.Age()
+		return (b.GetAge()/2)+7 < a.GetAge() && b.GetAge() >= a.GetAge()
 	},
-	"close age": func(a, b inhabitants.Marriageable) bool {
-		return (a.Age()/2)+7 < b.Age() && (b.Age()/2)+7 < a.Age()
+	"close age": func(a, b Marriageable) bool {
+		return (a.GetAge()/2)+7 < b.GetAge() && (b.GetAge()/2)+7 < a.GetAge()
 	},
-	"unrelated": func(a, b inhabitants.Marriageable) bool {
+	"unrelated": func(a, b Marriageable) bool {
 		return !a.IsCloseRelativeOf(b)
 	},
 }
@@ -103,7 +111,7 @@ func (c *Culture) Reset() {
 
 // MaritalCandidate decides whether this pair of Beings is a valid candidate for
 // marriage, based on the culture's marital rules.
-func (c *Culture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
+func (c *Culture) MaritalCandidate(a, b Marriageable) bool {
 	out := true
 	for _, s := range c.MaritalStrategies {
 		out = out && maritalStrategies[s](a, b)
@@ -120,12 +128,6 @@ func (c *Culture) RandomName(b inhabitants.Nameable) *inhabitants.Name {
 // GetNamers returns the namer objects for the culture
 func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
 	return c.Namers
-}
-
-// RandomName creates a random name based on the gender
-func (c *Culture) RandomName(sex inhabitants.Gender, b inhabitants.Nameable) *inhabitants.Name {
-	namer := c.Namers[sex]
-	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
 }
 
 func (c *Culture) GetName() string { return c.Name }

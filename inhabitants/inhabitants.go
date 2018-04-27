@@ -5,7 +5,6 @@ import (
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/timeline"
-	"github.com/slabgorb/gotown/words"
 )
 
 var randomizer random.Generator = random.Random
@@ -46,24 +45,9 @@ type Populatable interface {
 	Die(...string)
 }
 
-type Relatable interface {
-	IsChildOf(Relatable) (bool, error)
-	IsParentOf(Relatable) (bool, error)
-	IsSiblingOf(Relatable) (bool, error)
-	IsCloseRelativeOf(Relatable) (bool, error)
-	GetChildren() ([]Relatable, error)
-}
-
 type Readable interface {
 	GetName() string
 	persist.Persistable
-}
-
-type Marriageable interface {
-	Relatable
-	Populatable
-	Unmarried() bool
-	GetAge() int
 }
 
 type Specieser interface {
@@ -72,13 +56,6 @@ type Specieser interface {
 	MaxAge(slot int) int
 	GetGenders() []Gender
 	Expression() genetics.Expression
-}
-
-type Cultured interface {
-	Readable
-	RandomName(Nameable) *Name
-	MaritalCandidate(Marriageable, Marriageable) bool
-	GetNamers() map[Gender]*words.Namer
 }
 
 type Nameable interface {

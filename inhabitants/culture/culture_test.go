@@ -1,6 +1,7 @@
 package culture_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -34,6 +35,13 @@ func (m *mockSpecies) RandomAge(slot int) int {
 func (m *mockSpecies) MaxAge(slot int) int {
 	return slot * 12
 }
+
+func (m *mockSpecies) Read() error   { return fmt.Errorf("not implemented") }
+func (m *mockSpecies) Save() error   { return fmt.Errorf("not implemented") }
+func (m *mockSpecies) Delete() error { return fmt.Errorf("not implemented") }
+func (m *mockSpecies) Reset()        { panic("not implemented") }
+
+func (m *mockSpecies) GetName() string { return m.name }
 
 func (m *mockSpecies) GetGenders() []inhabitants.Gender {
 	return []inhabitants.Gender{inhabitants.Male, inhabitants.Female}

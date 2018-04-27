@@ -6,9 +6,12 @@ import (
 	"strings"
 
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
+	"github.com/slabgorb/gotown/words"
 )
 
 var randomizer random.Generator = random.Random
@@ -19,25 +22,46 @@ func SetRandomizer(g random.Generator) {
 	randomizer = g
 }
 
+type Relatable interface {
+	IsChildOf(Relatable) (bool, error)
+	IsParentOf(Relatable) (bool, error)
+	IsSiblingOf(Relatable) (bool, error)
+	IsCloseRelativeOf(Relatable) (bool, error)
+	GetChildren() ([]Relatable, error)
+	GetID() int
+}
+type Marriageable interface {
+	Unmarried() bool
+	GetAge() int
+	Alive() bool
+}
+
+type Cultured interface {
+	inhabitants.Readable
+	RandomName(inhabitants.Nameable) *inhabitants.Name
+	MaritalCandidate(Marriageable, Marriageable) bool
+	GetNamers() map[inhabitants.Gender]*words.Namer
+}
+
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	ID          int                   `json:"id" storm:"id,increment"`
-	Name        *inhabitants.Name     `json:"name"`
-	SpeciesName string                `json:"species_name"`
-	CultureName string                `json:"culture_name"`
-	Parents     []int                 `json:"parents"`
-	Children    []int                 `json:"children"`
-	Spouses     []int                 `json:"spouses"`
-	Gender      inhabitants.Gender    `json:"gender"`
-	Dead        bool                  `json:"dead"`
-	Chromosome  *genetics.Chromosome  `json:"chromosome"`
-	Age         int                   `json:"age"`
-	Species     inhabitants.Specieser `json:"-"`
-	Culture     inhabitants.Cultured  `json:"-"`
+	ID          int                  `json:"id" storm:"id,increment"`
+	Name        *inhabitants.Name    `json:"name"`
+	SpeciesName string               `json:"species_name"`
+	CultureName string               `json:"culture_name"`
+	Parents     []int                `json:"parents"`
+	Children    []int                `json:"children"`
+	Spouses     []int                `json:"spouses"`
+	Gender      inhabitants.Gender   `json:"gender"`
+	Dead        bool                 `json:"dead"`
+	Chromosome  *genetics.Chromosome `json:"chromosome"`
+	Age         int                  `json:"age"`
+	Species     species.Species      `json:"-"`
+	Culture     culture.Culture      `json:"-"`
 }
 
 // New initializes a being
-func New(s inhabitants.Specieser, c inhabitants.Cultured) *Being {
+func New(s species.Species, c culture.Culture) *Being {
 	return &Being{
 		Name:        &inhabitants.Name{},
 		SpeciesName: s.GetName(),
@@ -70,6 +94,10 @@ func (b *Being) getChildren() ([]*Being, error) {
 
 func (b *Being) getSpouses() ([]*Being, error) {
 	return getBeingsFromIDS(b.Spouses)
+}
+
+func (b *Being) GetID() int {
+	return b.ID
 }
 
 func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
@@ -141,7 +169,7 @@ func (b *Being) Randomize() error {
 	}
 	b.RandomizeChromosome()
 	b.RandomizeGender()
-	b.RandomizeName(b.Culture)
+	b.RandomizeName()
 	b.RandomizeAge(-1)
 	return nil
 }
@@ -159,8 +187,8 @@ func (b *Being) RandomizeGender() {
 }
 
 // RandomizeName creates a new random name based on the being's culture.
-func (b *Being) RandomizeName(c inhabitants.Cultured) {
-	b.Name = c.RandomName(b)
+func (b *Being) RandomizeName() {
+	b.Name = b.Culture.RandomName(b)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.
@@ -183,9 +211,9 @@ func (b *Being) Marry(with *Being) {
 }
 
 // IsParentOf returns true of the receiver is the parent of the passed in being
-func (b *Being) IsParentOf(with *Being) bool {
+func (b *Being) IsParentOf(with Relatable) bool {
 	for _, id := range b.Children {
-		if id == with.ID {
+		if id == with.GetID() {
 			return true
 		}
 	}
@@ -194,9 +222,13 @@ func (b *Being) IsParentOf(with *Being) bool {
 
 // IsChildOf returns true if the receiver being is a child of the passed in
 // being
-func (b *Being) IsChildOf(with *Being) bool {
-	for _, id := range with.Children {
-		if id == b.ID {
+func (b *Being) IsChildOf(with Relatable) bool {
+	children, err := with.GetChildren()
+	if err != nil {
+		return false
+	}
+	for _, c := range children {
+		if c.GetID() == b.ID {
 			return true
 		}
 	}
@@ -237,7 +269,7 @@ func (b *Being) Siblings() (*Population, error) {
 
 // Piblings returns aunts and uncles of the receiver
 func (b *Being) Piblings() (*Population, error) {
-	parentSiblings := []int{}
+	parentSiblings := NewPopulation([]int{})
 	parents, err := b.getParents()
 	if err != nil {
 		return nil, err
@@ -247,37 +279,54 @@ func (b *Being) Piblings() (*Population, error) {
 		if err != nil {
 			return nil, err
 		}
-		parentSiblings = append(parentSiblings, siblings.IDS...)
+		parentSiblings.appendIds(siblings.getIds()...)
 	}
-	return NewPopulation(parentSiblings), nil
+	return parentSiblings, nil
 }
 
 // Cousins returns the beings who are cousins of this being
 func (b *Being) Cousins() (*Population, error) {
 	piblings, err := b.Piblings()
-	cousins := Members{}
-	for _, p := range piblings {
-		cousins = append(cousins, p.Children...)
+	if err != nil {
+		return nil, err
 	}
-	return cousins
+	cousins := NewPopulation([]int{})
+	pibBeings, err := piblings.Inhabitants()
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range pibBeings {
+		cousins.appendIds(p.Children...)
+	}
+	return cousins, nil
 
 }
 
 // Niblings returns nieces and nephews of the receiver
-func (b *Being) Niblings() Members {
-	siblings := b.Siblings()
-	niblings := Members{}
-	for _, s := range siblings {
-		niblings = append(niblings, s.Children...)
+func (b *Being) Niblings() (*Population, error) {
+	siblings, err := b.Siblings()
+	if err != nil {
+		return nil, err
 	}
-	return niblings
+	niblings := NewPopulation([]int{})
+	sibs, err := siblings.Inhabitants()
+	if err != nil {
+		return nil, err
+	}
+	for _, s := range sibs {
+		niblings.appendIds(s.Children...)
+	}
+	return niblings, nil
 }
 
 // IsSiblingOf checks to see if the receiver is a sibling of the passed in being
-func (b *Being) IsSiblingOf(with inhabitants.Relatable) bool {
-	siblings := b.Siblings()
-	for _, s := range siblings {
-		if s == with {
+func (b *Being) IsSiblingOf(with Relatable) bool {
+	siblings, err := b.Siblings()
+	if err != nil {
+		return false
+	}
+	for _, s := range siblings.getIds() {
+		if s == with.GetID() {
 			return true
 		}
 	}
@@ -286,7 +335,7 @@ func (b *Being) IsSiblingOf(with inhabitants.Relatable) bool {
 
 // IsCloseRelativeOf returns true if the receiver is a close relative of the
 // passed in being
-func (b *Being) IsCloseRelativeOf(with inhabitants.Relatable) bool {
+func (b *Being) IsCloseRelativeOf(with Relatable) bool {
 	close := false
 	close = close || b.IsChildOf(with)
 	close = close || b.IsParentOf(with)
@@ -301,16 +350,21 @@ func (b *Being) Reproduce(with *Being, c inhabitants.Cultured) ([]*Being, error)
 	}
 	child := &Being{Species: b.Species}
 	child.Parents = []int{b.ID, with.ID}
-	child.Randomize(c)
+	child.Randomize()
 	child.Save()
 	b.Children = append(b.Children, child.ID)
 	with.Children = append(with.Children, child.ID)
-	return b.Children, nil
+	return b.getChildren()
 }
 
-// Age returns the age of the being
+// GetAge returns the age of the being
 func (b *Being) GetAge() int {
 	return b.Age
+}
+
+// SetAge sets the age of the being
+func (b *Being) SetAge(age int) {
+	b.Age = age
 }
 
 // Die makes the being dead.

@@ -1,6 +1,10 @@
 package inhabitants
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/slabgorb/gotown/words"
+)
 
 // Name is the name of a being or other named thing, in theory
 type Name struct {
@@ -8,6 +12,12 @@ type Name struct {
 	FamilyName string   `json:"family_name"`
 	Other      []string `json:"other_name"`
 	Display    string   `json:"display_name"`
+}
+
+type Cultured interface {
+	Readable
+	RandomName(Nameable) *Name
+	GetNamers() map[Gender]*words.Namer
 }
 
 // OtherNames returns any other names a being may have as a space-separated list

@@ -4,64 +4,22 @@ import (
 	"os"
 	"testing"
 
-	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/persist"
+	"github.com/slabgorb/gotown/timeline"
 
 	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/being"
+	"github.com/slabgorb/gotown/inhabitants/culture"
+	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/random"
-	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
-type mockCulture struct {
-	name string
-}
-
-func (m *mockCulture) GetNamers() map[inhabitants.Gender]*words.Namer {
-	panic("not implemented")
-}
-
-func (m *mockCulture) GetName(b inhabitants.Nameable) *inhabitants.Name {
-	if b.Sex() == inhabitants.Female {
-		return &inhabitants.Name{
-			GivenName:  "Arnulf",
-			FamilyName: "Arnulfdottir",
-			Display:    "Arnulf Arnulfdottir",
-		}
-	}
-	return &inhabitants.Name{
-		GivenName:  "Arnulf",
-		FamilyName: "Arnulfson",
-		Display:    "Arnulf Arnulfson",
-	}
-}
-
-func (m *mockCulture) MaritalCandidate(a, b inhabitants.Marriageable) bool {
-	return (a.Alive() && b.Alive())
-	//return (a.Alive() && b.Alive()) && (a.Sex() != b.Sex()) && (a.Unmarried() && b.Unmarried())
-}
-
-type mockSpecies struct {
-	name string
-}
-
-func (m *mockSpecies) RandomAge(slot int) int {
-	return slot * 10
-}
-
-func (m *mockSpecies) MaxAge(slot int) int {
-	return slot * 12
-}
-
-func (m *mockSpecies) GetGenders() []inhabitants.Gender {
-	return []inhabitants.Gender{inhabitants.Male, inhabitants.Female}
-}
-
-func (m *mockSpecies) Expression() genetics.Expression {
-	panic("not implemented")
-}
-
 var beingFixtures = make(map[string]*Being)
+
+var testSpecies = species.Species{Name:"human"}
+var testCulture = culture.Culture{Name:"viking"}
+
 
 func TestMain(m *testing.M) {
 	type beingFixture struct {
@@ -70,6 +28,14 @@ func TestMain(m *testing.M) {
 		age   int
 		sex   string
 	}
+
+	persist.OpenTestDB()
+	words.Seed()
+	species.Seed()
+	culture.Seed()
+	code := m.Run()
+	persist.CloseTestDB()
+	os.Exit(code)
 
 	var beingFixtureRaw = []beingFixture{
 		{
@@ -115,13 +81,15 @@ func TestMain(m *testing.M) {
 			sex:   "female",
 		},
 	}
+	id := 1
 	for _, bf := range beingFixtureRaw {
 		b := &Being{
-			Gender:     inhabitants.Gender(bf.sex),
-			Name:       inhabitants.NewName(bf.name),
-			Chronology: timeline.NewChronology(),
-			Species:    &mockSpecies{},
+			Gender:  inhabitants.Gender(bf.sex),
+			Name:    inhabitants.NewName(bf.name),
+			Species: &Species{},
+			ID:      id,
 		}
+		id++
 		b.SetAge(bf.age)
 		beingFixtures[bf.label] = b
 
@@ -130,7 +98,10 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 func TestName(t *testing.T) {
-	species := &mockSpecies{}
+	s := species.Species{Name:"human"}
+	c := culture.Culture{Name:"viking"}
+	err := s.Read() if err != nil { panic(err) }
+	err := c.Read() if err != nil { panic(err) }
 	culture := &mockCulture{}
 	expected := "Arnulf Arnulfson"
 	being := &Being{Species: species, Gender: inhabitants.Male}
@@ -146,11 +117,11 @@ func TestName(t *testing.T) {
 func TestInheritedName(t *testing.T) {
 	species := &mockSpecies{}
 	culture := &mockCulture{}
-	m := &Being{Species: species, Gender: inhabitants.Female, Chronology: timeline.NewChronology()}
-	m.RandomizeName(culture)
-	f := &Being{Species: species, Gender: inhabitants.Male, Chronology: timeline.NewChronology()}
-	f.RandomizeName(culture)
-	children, err := f.Reproduce(m, culture)
+	m := &Being{Species: species, Gender: inhabitants.Female, Culture: culture}
+	m.RandomizeName()
+	f := &Being{Species: species, Gender: inhabitants.Male, Culture: culture}
+	f.RandomizeName()
+	children, err := f.Reproduce(m)
 	if err != nil {
 		t.Errorf("%s", err)
 	}

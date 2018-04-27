@@ -36,7 +36,8 @@ func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 
 // NewPopulation initializes a Population
 func NewPopulation(ids []int) *Population {
-	p := &Population{IDS: ids}
+	p := &Population{}
+	p.appendIds(ids...)
 	return p
 }
 
@@ -46,7 +47,7 @@ type populationSerializer struct {
 }
 
 func (p *Population) MarshalJSON() ([]byte, error) {
-	ps := &populationSerializer{ID: p.ID, IDS: p.IDS}
+	ps := &populationSerializer{ID: p.ID, IDS: p.getIds()}
 	return json.Marshal(ps)
 }
 
@@ -65,7 +66,7 @@ func (p *Population) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func marry(p *Population, c inhabitants.Cultured) timeline.Callback {
+func marry(p *Population, c Cultured) timeline.Callback {
 	return func(_ int) {
 		mc, _ := p.MaritalCandidates(c)
 		for _, m := range mc {
@@ -85,10 +86,12 @@ func reproduction(p *Population, c inhabitants.Cultured) timeline.Callback {
 				var with *Being
 				// if b is married, choose spouse?
 				if r.b.Spouses != nil && len(r.b.Spouses) > 0 {
-					with = r.b.Spouses[0]
+					withID := r.b.Spouses[0]
+					with := &Being{ID: withID}
+					with.Read()
 				} else {
 					// choose random guy for now, will work on the choice later
-					men := p.ByGender(inhabitants.Male)
+					men, _ := p.ByGender(inhabitants.Male)
 					with = men[randomizer.Intn(len(men))]
 				}
 				r.b.Reproduce(with, c)
@@ -100,7 +103,8 @@ func reproduction(p *Population, c inhabitants.Cultured) timeline.Callback {
 // Inhabitants returns the beings in the population
 func (p *Population) Inhabitants() ([]*Being, error) {
 	bs := make([]*Being, p.Len())
-	for i, id := range p.IDS {
+	i := 0
+	for id := range p.IDS {
 		b := &Being{ID: id}
 		if err := b.Read(); err != nil {
 			return nil, err
@@ -139,12 +143,27 @@ func (p *Population) Len() int {
 // Add adds a being to the population and returns whether it was actually added.
 func (p *Population) Add(b *Being) bool {
 	p.mux.Lock()
+	defer p.mux.Unlock()
 	_, found := p.IDS[b.ID]
 	if !found {
 		p.IDS[b.ID] = struct{}{}
 	}
-	p.mux.Unlock()
 	return !found
+}
+
+func (p *Population) getIds() []int {
+	out := []int{}
+	for id := range p.IDS {
+		out = append(out, id)
+	}
+	return out
+}
+
+func (p *Population) appendIds(ids ...int) {
+	for _, i := range ids {
+		b := &Being{ID: i}
+		p.Add(b)
+	}
 }
 
 // Get returns whether this being is in the Population
@@ -182,16 +201,16 @@ func (p *Population) ByGender(g inhabitants.Gender) ([]*Being, error) {
 // reproduction.
 func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 	candidates := []*ReproductionCandidate{}
-
-	for _, b := range p.ByGender(inhabitants.Female) {
+	females, _ := p.ByGender(inhabitants.Female)
+	for _, b := range females {
 		maxAge := b.Species.MaxAge(inhabitants.Adult)
 		minAge := b.Species.MaxAge(inhabitants.Child) + 1
-		if b.Age() > maxAge || b.Age() < minAge {
+		if b.GetAge() > maxAge || b.GetAge() < minAge {
 			continue
 		}
 		var score float64
 		r := float64(maxAge - minAge)
-		adjustedAge := float64(b.Age() - minAge)
+		adjustedAge := float64(b.GetAge() - minAge)
 		splits := []float64{r * 0.3, r * 0.6, r}
 		switch {
 		case adjustedAge < splits[1]:
@@ -210,10 +229,10 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 
 // MaritalCandidates scans the population for potential candidates for marrying
 // one another.
-func (p *Population) MaritalCandidates(c inhabitants.Cultured) ([]*MaritalCandidate, error) {
+func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) {
 	mc := make(map[MaritalCandidate]bool)
-	males := p.ByGender(inhabitants.Male)
-	females := p.ByGender(inhabitants.Female)
+	males, _ := p.ByGender(inhabitants.Male)
+	females, _ := p.ByGender(inhabitants.Female)
 	// loop through the population, taking each member and looking for candidates
 	for _, a := range males {
 		for _, b := range females {
