@@ -6,14 +6,15 @@ import (
 	"sync"
 
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/timeline"
 )
 
 // Population is a set of Being
 type Population struct {
-	mux        sync.Mutex
-	Beings     map[*Being]struct{}  `json:"inhabitants"`
-	Chronology *timeline.Chronology `json:"history"`
+	mux sync.Mutex
+	ID  int
+	IDS map[int]struct{}
 }
 
 type MaritalCandidate struct {
@@ -34,29 +35,18 @@ func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 }
 
 // NewPopulation initializes a Population
-func NewPopulation(beings []inhabitants.Populatable, chronology *timeline.Chronology, culture inhabitants.Cultured) *Population {
-	p := &Population{Chronology: chronology}
-	if chronology == nil {
-		p.Chronology = timeline.NewChronology()
-	}
-	p.Chronology.Register(reproduction(p, culture))
-	p.Chronology.Register(marry(p, culture))
-	p.Beings = make(map[*Being]struct{})
-	for _, b := range beings {
-		if being, ok := b.(*Being); ok {
-			p.Add(being)
-		}
-	}
+func NewPopulation(ids []int) *Population {
+	p := &Population{IDS: ids}
 	return p
 }
 
 type populationSerializer struct {
-	Inhabitants []*Being             `json:"inhabitants"`
-	History     *timeline.Chronology `json:"history"`
+	ID  int   `json:"id" storm:"id,increment"`
+	IDS []int `json:"ids"`
 }
 
 func (p *Population) MarshalJSON() ([]byte, error) {
-	ps := &populationSerializer{Inhabitants: p.Inhabitants(), History: p.Chronology}
+	ps := &populationSerializer{ID: p.ID, IDS: p.IDS}
 	return json.Marshal(ps)
 }
 
@@ -65,10 +55,13 @@ func (p *Population) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, ps); err != nil {
 		return err
 	}
-	for _, b := range ps.Inhabitants {
+	for id := range ps.IDS {
+		b := &Being{ID: id}
+		if err := b.Read(); err != nil {
+			return err
+		}
 		p.Add(b)
 	}
-	p.Chronology = ps.History
 	return nil
 }
 
@@ -82,10 +75,6 @@ func marry(p *Population, c inhabitants.Cultured) timeline.Callback {
 			}
 		}
 	}
-}
-
-func (p *Population) History() *timeline.Chronology {
-	return p.Chronology
 }
 
 func reproduction(p *Population, c inhabitants.Cultured) timeline.Callback {
@@ -109,36 +98,51 @@ func reproduction(p *Population, c inhabitants.Cultured) timeline.Callback {
 }
 
 // Inhabitants returns the beings in the population
-func (p *Population) Inhabitants() []*Being {
+func (p *Population) Inhabitants() ([]*Being, error) {
 	bs := make([]*Being, p.Len())
-	i := 0
-	for b := range p.Beings {
+	for i, id := range p.IDS {
+		b := &Being{ID: id}
+		if err := b.Read(); err != nil {
+			return nil, err
+		}
 		bs[i] = b
 		i++
 	}
-	return bs
+	return bs, nil
 }
 
-// Age ages all the beings in this population
-func (p *Population) Age() {
-	for b := range p.Beings {
-		b.History().Tick()
+func saveAll(beings []*Being) error {
+	ps := []persist.Persistable{}
+	for _, b := range beings {
+		ps = append(ps, b)
 	}
+	return persist.SaveAll(ps)
+}
+
+// Age ages all the beings in this population and saves the beings
+func (p *Population) Age() error {
+	beings, err := p.Inhabitants()
+	if err != nil {
+		return err
+	}
+	for _, b := range beings {
+		b.Age++
+	}
+	return saveAll(beings)
 }
 
 // Len returns the number of beings in the population
 func (p *Population) Len() int {
-	return len(p.Beings)
+	return len(p.IDS)
 }
 
 // Add adds a being to the population and returns whether it was actually added.
 func (p *Population) Add(b *Being) bool {
 	p.mux.Lock()
-	_, found := p.Beings[b]
-	p.Beings[b] = struct{}{}
-	p.History().Register(func(year int) {
-		b.History().Tick()
-	})
+	_, found := p.IDS[b.ID]
+	if !found {
+		p.IDS[b.ID] = struct{}{}
+	}
 	p.mux.Unlock()
 	return !found
 }
@@ -146,7 +150,7 @@ func (p *Population) Add(b *Being) bool {
 // Get returns whether this being is in the Population
 func (p *Population) Get(b *Being) bool {
 	p.mux.Lock()
-	_, found := p.Beings[b]
+	_, found := p.IDS[b.ID]
 	p.mux.Unlock()
 	return found
 }
@@ -154,20 +158,24 @@ func (p *Population) Get(b *Being) bool {
 // Remove removes a being from the population
 func (p *Population) Remove(b *Being) bool {
 	p.mux.Lock()
-	_, found := p.Beings[b]
-	delete(p.Beings, b)
+	_, found := p.IDS[b.ID]
+	delete(p.IDS, b.ID)
 	p.mux.Unlock()
 	return found
 }
 
-func (p *Population) ByGender(g inhabitants.Gender) []*Being {
+func (p *Population) ByGender(g inhabitants.Gender) ([]*Being, error) {
 	out := []*Being{}
-	for b := range p.Beings {
+	beings, err := p.Inhabitants()
+	if err != nil {
+		return nil, err
+	}
+	for _, b := range beings {
 		if b.Sex() == g {
 			out = append(out, b)
 		}
 	}
-	return out
+	return out, nil
 }
 
 // ReproductionCandidates scans the population for potential candidates for

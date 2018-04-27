@@ -44,8 +44,9 @@ var NameStrategies = map[string]NameStrategy{
 	"matrilineal": func(b Nameable, c Cultured) *Name {
 		namer := c.GetNamers()[b.Sex()]
 		name := &Name{GivenName: namer.Words.GivenName()}
-		if b.Mother() != nil {
-			name.FamilyName = b.Mother().GetName().FamilyName
+		parent, err := b.Mother()
+		if parent != nil && err == nil {
+			name.FamilyName = parent.GetName().FamilyName
 			return name
 		}
 		name.FamilyName = namer.Words.FamilyName()
@@ -56,8 +57,9 @@ var NameStrategies = map[string]NameStrategy{
 	"patrilineal": func(b Nameable, c Cultured) *Name {
 		namer := c.GetNamers()[b.Sex()]
 		name := &Name{GivenName: namer.Words.GivenName()}
-		if b.Father() != nil {
-			name.FamilyName = b.Father().GetName().FamilyName
+		parent, err := b.Father()
+		if parent != nil && err == nil {
+			name.FamilyName = parent.GetName().FamilyName
 			return name
 		}
 		name.FamilyName = namer.Words.FamilyName()
@@ -68,8 +70,9 @@ var NameStrategies = map[string]NameStrategy{
 	"matronymic": func(b Nameable, c Cultured) *Name {
 		namer := c.GetNamers()[b.Sex()]
 		name := &Name{GivenName: namer.Words.GivenName()}
-		if b.Mother() != nil {
-			name.FamilyName = b.Mother().GetName().GivenName + namer.Words.Matronymic()
+		parent, err := b.Mother()
+		if parent != nil && err == nil {
+			name.FamilyName = parent.GetName().GivenName + namer.Words.Matronymic()
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName() + namer.Words.Matronymic()
@@ -80,8 +83,9 @@ var NameStrategies = map[string]NameStrategy{
 	"patronymic": func(b Nameable, c Cultured) *Name {
 		namer := c.GetNamers()[b.Sex()]
 		name := &Name{GivenName: namer.Words.GivenName()}
-		if b.Father() != nil {
-			name.FamilyName = b.Father().GetName().GivenName + namer.Words.Patronymic()
+		parent, err := b.Father()
+		if parent != nil && err == nil {
+			name.FamilyName = parent.GetName().GivenName + namer.Words.Patronymic()
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName() + namer.Words.Patronymic()

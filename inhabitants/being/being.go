@@ -7,8 +7,8 @@ import (
 
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
-	"github.com/slabgorb/gotown/timeline"
 )
 
 var randomizer random.Generator = random.Random
@@ -19,121 +19,129 @@ func SetRandomizer(g random.Generator) {
 	randomizer = g
 }
 
-// Members is a set of Being
-type Members []*Being
-
-// Strings gets all the beings in the Members slice and maps them to their
-// string representation.
-func (m Members) Strings() []string {
-	var out []string
-	for _, b := range m {
-		out = append(out, b.String())
-	}
-	return out
-}
-
-// String returns the strings of all the Beings in the slice and joins them with
-// commas.
-func (m Members) String() string {
-	return strings.Join(m.Strings(), ", ")
-}
-
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	Name       *inhabitants.Name `json:"name"`
-	Species    inhabitants.Specieser
-	Parents    Members
-	Children   Members              `json:"children"`
-	Spouses    Members              `json:"spouses"`
-	Gender     inhabitants.Gender   `json:"gender"`
-	Dead       bool                 `json:"dead"`
-	Chromosome *genetics.Chromosome `json:"chromosome"`
-	Chronology *timeline.Chronology
+	ID          int                   `json:"id" storm:"id,increment"`
+	Name        *inhabitants.Name     `json:"name"`
+	SpeciesName string                `json:"species_name"`
+	CultureName string                `json:"culture_name"`
+	Parents     []int                 `json:"parents"`
+	Children    []int                 `json:"children"`
+	Spouses     []int                 `json:"spouses"`
+	Gender      inhabitants.Gender    `json:"gender"`
+	Dead        bool                  `json:"dead"`
+	Chromosome  *genetics.Chromosome  `json:"chromosome"`
+	Age         int                   `json:"age"`
+	Species     inhabitants.Specieser `json:"-"`
+	Culture     inhabitants.Cultured  `json:"-"`
 }
 
 // New initializes a being
-func New(s inhabitants.Specieser) *Being {
+func New(s inhabitants.Specieser, c inhabitants.Cultured) *Being {
 	return &Being{
-		Name:       &inhabitants.Name{},
-		Species:    s,
-		Chronology: timeline.NewChronology(),
-		Chromosome: genetics.RandomChromosome(30),
-		Spouses:    Members{},
-		Children:   Members{},
-		Parents:    Members{},
+		Name:        &inhabitants.Name{},
+		SpeciesName: s.GetName(),
+		CultureName: c.GetName(),
+		Species:     s,
+		Culture:     c,
+		Chromosome:  genetics.RandomChromosome(30),
 	}
 }
 
-func (b *Being) genderedParent(gender inhabitants.Gender) *Being {
-	for _, b := range b.Parents {
-		if b.Sex() == gender {
-			return b
+func getBeingsFromIDS(IDS []int) ([]*Being, error) {
+	beings := []*Being{}
+	for _, id := range IDS {
+		b := &Being{ID: id}
+		if err := b.Read(); err != nil {
+			return nil, err
 		}
+		beings = append(beings, b)
+	}
+	return beings, nil
+}
+
+func (b *Being) getParents() ([]*Being, error) {
+	return getBeingsFromIDS(b.Parents)
+}
+
+func (b *Being) getChildren() ([]*Being, error) {
+	return getBeingsFromIDS(b.Children)
+}
+
+func (b *Being) getSpouses() ([]*Being, error) {
+	return getBeingsFromIDS(b.Spouses)
+}
+
+func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
+	parents, err := b.getParents()
+	if err != nil {
+		return nil, err
+	}
+	for _, b := range parents {
+		if b.Sex() == gender {
+			return b, nil
+		}
+	}
+	return nil, nil
+}
+
+// Reset sets the culture back to zero
+func (b *Being) Reset() {
+	b.ID = 0
+	b.Name = &inhabitants.Name{}
+	b.SpeciesName = ""
+	b.CultureName = ""
+	b.Spouses = []int{}
+	b.Children = []int{}
+	b.Parents = []int{}
+	b.Chromosome = genetics.RandomChromosome(30)
+	b.Gender = inhabitants.Asexual
+}
+
+// Read implements persist.Persistable
+func (b *Being) Read() error {
+	if b.ID == 0 {
+		return fmt.Errorf("cannot read being without id")
+	}
+	if err := persist.DB.One("ID", b.ID, b); err != nil {
+		return err
 	}
 	return nil
 }
 
-// History returns the timeline.Chronology associated with the being
-func (b *Being) History() *timeline.Chronology {
-	return b.Chronology
+// Save implements persist.Persistable
+func (b *Being) Save() error {
+	return persist.DB.Save(b)
 }
 
-// MarshalJSON implements json.marshaler
-// func (b *Being) MarshalJSON() ([]byte, error) {
-// 	return json.Marshal(&struct {
-// 		Expression map[string]string         `json:"expression"`
-// 		Chromosome *genetics.Chromosome      `json:"chromosome"`
-// 		Age        int                       `json:"age"`
-// 		Sex        string                    `json:"sex"`
-// 		Species    string                    `json:"species"`
-// 		Parents    []string                  `json:"parents"`
-// 		Children   []string                  `json:"children"`
-// 		Spouses    []string                  `json:"spouses"`
-// 		Living     bool                      `json:"alive"`
-// 		Events     map[int][]*timeline.Event `json:"events"`
-// 		Culture    string                    `json:"culture"`
-// 		Name       *Name                     `json:"name"`
-// 	}{
-// 		Expression: b.Expression(),
-// 		Age:        b.Age(),
-// 		Sex:        b.Sex.String(),
-// 		Species:    b.Species.String(),
-// 		Parents:    b.Parents.Strings(),
-// 		Children:   b.Children.Strings(),
-// 		Spouses:    b.Spouses.Strings(),
-// 		Living:     !b.Dead,
-// 		Events:     b.Chronology.Events,
-// 		Culture:    b.Culture,
-// 		Name:       b.Name,
-// 	})
-// }
+// Delete implements persist.Persistable
+func (b *Being) Delete() error {
+	return persist.DB.DeleteStruct(b)
+}
 
+// GetName returns the name object
 func (b *Being) GetName() *inhabitants.Name {
 	return b.Name
 }
 
 // Father returns a male parent of the Being
-func (b *Being) Father() inhabitants.Nameable {
+func (b *Being) Father() (inhabitants.Nameable, error) {
 	return b.genderedParent(inhabitants.Male)
 }
 
 // Mother returns a female parent of the Being
-func (b *Being) Mother() inhabitants.Nameable {
+func (b *Being) Mother() (inhabitants.Nameable, error) {
 	return b.genderedParent(inhabitants.Female)
 }
 
-func (b *Being) SetAge(age int) {
-	b.Chronology.CurrentYear = age
-}
-
 // Randomize scrambles a Being randomly
-func (b *Being) Randomize(c inhabitants.Cultured) error {
-	if b.Species == nil {
+func (b *Being) Randomize() error {
+	if b.SpeciesName == "" {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
 	b.RandomizeChromosome()
 	b.RandomizeGender()
-	b.RandomizeName(c)
+	b.RandomizeName(b.Culture)
 	b.RandomizeAge(-1)
 	return nil
 }
@@ -141,7 +149,7 @@ func (b *Being) Randomize(c inhabitants.Cultured) error {
 // RandomizeAge sets the being age to a random number, based on the passed-in
 // demographic slot.
 func (b *Being) RandomizeAge(slot int) {
-	b.Chronology.CurrentYear = b.Species.RandomAge(slot)
+	b.Age = b.Species.RandomAge(slot)
 }
 
 // RandomizeGender randomizes the Being's gender based on the possible genders
@@ -152,7 +160,7 @@ func (b *Being) RandomizeGender() {
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName(c inhabitants.Cultured) {
-	b.Name = c.GetName(b)
+	b.Name = c.RandomName(b)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.
@@ -170,18 +178,14 @@ func (b *Being) Expression() map[string]string {
 // are compatible marriage partners based on cultural settings, it is up to the
 // caller to make sure they should be candidates.
 func (b *Being) Marry(with *Being) {
-	b.Spouses = append(b.Spouses, with)
-	with.Spouses = append(with.Spouses, b)
-	message := fmt.Sprintf("%s got married to %s", b.String(), with.String())
-	b.Chronology.AddCurrentEvent(message)
-	message = fmt.Sprintf("%s got married to %s", with.String(), b.String())
-	with.Chronology.AddCurrentEvent(message)
+	b.Spouses = append(b.Spouses, with.ID)
+	with.Spouses = append(with.Spouses, b.ID)
 }
 
 // IsParentOf returns true of the receiver is the parent of the passed in being
-func (b *Being) IsParentOf(with inhabitants.Relatable) bool {
-	for _, c := range b.Children {
-		if inhabitants.Relatable(c) == with {
+func (b *Being) IsParentOf(with *Being) bool {
+	for _, id := range b.Children {
+		if id == with.ID {
 			return true
 		}
 	}
@@ -190,9 +194,9 @@ func (b *Being) IsParentOf(with inhabitants.Relatable) bool {
 
 // IsChildOf returns true if the receiver being is a child of the passed in
 // being
-func (b *Being) IsChildOf(with inhabitants.Relatable) bool {
-	for _, c := range with.GetChildren() {
-		if c == b {
+func (b *Being) IsChildOf(with *Being) bool {
+	for _, id := range with.Children {
+		if id == b.ID {
 			return true
 		}
 	}
@@ -207,44 +211,50 @@ func (b *Being) Unmarried() bool {
 	return len(b.Spouses) == 0
 }
 
-func (b *Being) GetChildren() []inhabitants.Relatable {
-	relatables := []inhabitants.Relatable{}
-	for _, child := range b.Children {
-		relatables = append(relatables, child)
-
-	}
-	return relatables
-}
-
 // Siblings gets all siblings (half and full) of the receiver
-func (b *Being) Siblings() Members {
-	children := make(map[string]*Being)
-	sibs := Members{}
-	for _, p := range b.Parents {
+func (b *Being) Siblings() (*Population, error) {
+	children := make(map[int]struct{})
+	sibs := []int{}
+
+	parents, err := b.getParents()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range parents {
 		for _, c := range p.Children {
-			children[fmt.Sprintf("%p", c)] = c
+			children[c] = struct{}{}
 		}
 	}
-	for _, s := range children {
-		if s != b {
+
+	for s := range children {
+		if s != b.ID {
 			sibs = append(sibs, s)
 		}
 	}
-	return sibs
+	return NewPopulation(sibs), nil
 }
 
 // Piblings returns aunts and uncles of the receiver
-func (b *Being) Piblings() Members {
-	parentSiblings := Members{}
-	for _, p := range b.Parents {
-		parentSiblings = append(parentSiblings, p.Siblings()...)
+func (b *Being) Piblings() (*Population, error) {
+	parentSiblings := []int{}
+	parents, err := b.getParents()
+	if err != nil {
+		return nil, err
 	}
-	return parentSiblings
+	for _, p := range parents {
+		siblings, err := p.Siblings()
+		if err != nil {
+			return nil, err
+		}
+		parentSiblings = append(parentSiblings, siblings.IDS...)
+	}
+	return NewPopulation(parentSiblings), nil
 }
 
 // Cousins returns the beings who are cousins of this being
-func (b *Being) Cousins() Members {
-	piblings := b.Piblings()
+func (b *Being) Cousins() (*Population, error) {
+	piblings, err := b.Piblings()
 	cousins := Members{}
 	for _, p := range piblings {
 		cousins = append(cousins, p.Children...)
@@ -289,20 +299,18 @@ func (b *Being) Reproduce(with *Being, c inhabitants.Cultured) ([]*Being, error)
 	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	child := &Being{Species: b.Species, Chronology: timeline.NewChronology()}
-
-	child.Parents = Members{b, with}
+	child := &Being{Species: b.Species}
+	child.Parents = []int{b.ID, with.ID}
 	child.Randomize(c)
-	b.Children = append(b.Children, child)
-	with.Children = append(with.Children, child)
-	b.Chronology.AddCurrentEvent(fmt.Sprintf("%s had a child %s with %s", b, child, with))
-	with.Chronology.AddCurrentEvent(fmt.Sprintf("%s had a child %s with %s", with, child, b))
+	child.Save()
+	b.Children = append(b.Children, child.ID)
+	with.Children = append(with.Children, child.ID)
 	return b.Children, nil
 }
 
 // Age returns the age of the being
-func (b *Being) Age() int {
-	return b.Chronology.CurrentYear
+func (b *Being) GetAge() int {
+	return b.Age
 }
 
 // Die makes the being dead.
@@ -311,8 +319,6 @@ func (b *Being) Die(explanation ...string) {
 		explanation = append(explanation, "unknown causes")
 	}
 	b.Dead = true
-	b.Chronology.AddCurrentEvent(fmt.Sprintf("Died from %s", explanation[0]))
-	b.Chronology.Freeze()
 }
 
 // String returns the string representation of the being.

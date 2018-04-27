@@ -2,6 +2,7 @@ package inhabitants
 
 import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
@@ -46,25 +47,27 @@ type Populatable interface {
 }
 
 type Relatable interface {
-	IsChildOf(Relatable) bool
-	IsParentOf(Relatable) bool
-	IsSiblingOf(Relatable) bool
-	IsCloseRelativeOf(Relatable) bool
-	GetChildren() []Relatable
+	IsChildOf(Relatable) (bool, error)
+	IsParentOf(Relatable) (bool, error)
+	IsSiblingOf(Relatable) (bool, error)
+	IsCloseRelativeOf(Relatable) (bool, error)
+	GetChildren() ([]Relatable, error)
 }
 
-type Named interface {
+type Readable interface {
 	GetName() string
+	persist.Persistable
 }
 
 type Marriageable interface {
 	Relatable
 	Populatable
 	Unmarried() bool
+	GetAge() int
 }
 
 type Specieser interface {
-	Named
+	Readable
 	RandomAge(slot int) int
 	MaxAge(slot int) int
 	GetGenders() []Gender
@@ -72,15 +75,15 @@ type Specieser interface {
 }
 
 type Cultured interface {
-	Named
-	GetName(Nameable) *Name
+	Readable
+	RandomName(Nameable) *Name
 	MaritalCandidate(Marriageable, Marriageable) bool
 	GetNamers() map[Gender]*words.Namer
 }
 
 type Nameable interface {
-	Father() Nameable
-	Mother() Nameable
+	Father() (Nameable, error)
+	Mother() (Nameable, error)
 	//Culture() Cultured
 	GetName() *Name
 	Sex() Gender

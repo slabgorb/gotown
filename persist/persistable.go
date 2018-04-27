@@ -34,6 +34,20 @@ func Open(path string) error {
 	return nil
 }
 
+func SaveAll(items []Persistable) error {
+	tx, err := DB.Begin(true)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, i := range items {
+		if err := i.Save(); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
 func Close() error {
 	return DB.Close()
 }
