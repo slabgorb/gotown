@@ -12,6 +12,7 @@ func (e *Expression) Add(trait Trait) {
 	e.Traits = append(e.Traits, trait)
 }
 
+// GetTraits is a getter for the traits
 func (e *Expression) GetTraits() []Trait {
 	return e.Traits
 }

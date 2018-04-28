@@ -22,20 +22,24 @@ func SetRandomizer(g random.Generator) {
 	randomizer = g
 }
 
+// Relatable models relative
 type Relatable interface {
-	IsChildOf(Relatable) (bool, error)
-	IsParentOf(Relatable) (bool, error)
-	IsSiblingOf(Relatable) (bool, error)
-	IsCloseRelativeOf(Relatable) (bool, error)
-	GetChildren() ([]Relatable, error)
+	IsChildOf(Relatable) bool
+	IsParentOf(Relatable) bool
+	IsSiblingOf(Relatable) bool
+	IsCloseRelativeOf(Relatable) bool
+	GetChildren() ([]*Being, error)
 	GetID() int
 }
+
+// Marriageable abstracts the ability to marry
 type Marriageable interface {
 	Unmarried() bool
 	GetAge() int
 	Alive() bool
 }
 
+// Cultured abstracts cultures
 type Cultured interface {
 	inhabitants.Readable
 	RandomName(inhabitants.Nameable) *inhabitants.Name
@@ -56,12 +60,12 @@ type Being struct {
 	Dead        bool                 `json:"dead"`
 	Chromosome  *genetics.Chromosome `json:"chromosome"`
 	Age         int                  `json:"age"`
-	Species     species.Species      `json:"-"`
-	Culture     culture.Culture      `json:"-"`
+	Species     *species.Species     `json:"-"`
+	Culture     *culture.Culture     `json:"-"`
 }
 
 // New initializes a being
-func New(s species.Species, c culture.Culture) *Being {
+func New(s *species.Species, c *culture.Culture) *Being {
 	return &Being{
 		Name:        &inhabitants.Name{},
 		SpeciesName: s.GetName(),
@@ -69,6 +73,7 @@ func New(s species.Species, c culture.Culture) *Being {
 		Species:     s,
 		Culture:     c,
 		Chromosome:  genetics.RandomChromosome(30),
+		Gender:      inhabitants.Asexual,
 	}
 }
 
@@ -88,7 +93,8 @@ func (b *Being) getParents() ([]*Being, error) {
 	return getBeingsFromIDS(b.Parents)
 }
 
-func (b *Being) getChildren() ([]*Being, error) {
+// GetChildren returns the children of the being
+func (b *Being) GetChildren() ([]*Being, error) {
 	return getBeingsFromIDS(b.Children)
 }
 
@@ -96,6 +102,7 @@ func (b *Being) getSpouses() ([]*Being, error) {
 	return getBeingsFromIDS(b.Spouses)
 }
 
+// GetID returns the id
 func (b *Being) GetID() int {
 	return b.ID
 }
@@ -235,10 +242,12 @@ func (b *Being) IsChildOf(with Relatable) bool {
 	return false
 }
 
+// Sex returns the gender
 func (b *Being) Sex() inhabitants.Gender {
 	return b.Gender
 }
 
+// Unmarried returns whether this being has no spouses
 func (b *Being) Unmarried() bool {
 	return len(b.Spouses) == 0
 }
@@ -344,7 +353,7 @@ func (b *Being) IsCloseRelativeOf(with Relatable) bool {
 }
 
 // Reproduce creates new Being objects from the 'parent' beings
-func (b *Being) Reproduce(with *Being, c inhabitants.Cultured) ([]*Being, error) {
+func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
@@ -354,7 +363,7 @@ func (b *Being) Reproduce(with *Being, c inhabitants.Cultured) ([]*Being, error)
 	child.Save()
 	b.Children = append(b.Children, child.ID)
 	with.Children = append(with.Children, child.ID)
-	return b.getChildren()
+	return b.GetChildren()
 }
 
 // GetAge returns the age of the being

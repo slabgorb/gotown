@@ -8,21 +8,19 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
-type Ruler interface {
-}
-
+// Area represents a geographical area
 type Area struct {
 	ID   int    `json:"id" storm:"id,increment"`
 	Name string `storm:"index"`
 	*Habitation
-	Size  AreaSize `json:"size"`
-	Ruler `json:"ruler"`
+	Size AreaSize `json:"size"`
 	Graveyard
 	Location   *Area            `json:"location"`
 	Enclosures map[string]*Area `json:"enclosures"`
 }
 
-func NewArea(size AreaSize, culture inhabitants.Cultured, ruler Ruler, location *Area) (*Area, error) {
+// NewArea creates an area
+func NewArea(size AreaSize, culture inhabitants.Cultured, location *Area) (*Area, error) {
 	var n *words.Namer
 	if location != nil {
 		n = location.Namer
@@ -34,7 +32,7 @@ func NewArea(size AreaSize, culture inhabitants.Cultured, ruler Ruler, location 
 	}
 	fmt.Println(words.NamerList())
 	fmt.Printf("%#v", n)
-	a := &Area{Size: size, Ruler: ruler, Location: location}
+	a := &Area{Size: size, Location: location}
 	a.Habitation = NewHabitation(timeline.NewChronology(), culture)
 	a.Enclosures = make(map[string]*Area)
 	a.SetNamer(n)

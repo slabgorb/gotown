@@ -17,19 +17,23 @@ type Population struct {
 	IDS map[int]struct{}
 }
 
+// MaritalCandidate is a pair of being
 type MaritalCandidate struct {
 	male, female *Being
 }
 
+// ReproductionCandidate blah blah (maybe should be unexported)
 type ReproductionCandidate struct {
 	b     *Being
 	score float64
 }
 
+// String implements fmt.Stringer
 func (rc ReproductionCandidate) String() string {
 	return fmt.Sprintf("%s (score %f)", rc.b, rc.score)
 }
 
+// Pair returns the underlying beings of a marital candidate pair
 func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 	return mc.male, mc.female
 }
@@ -46,11 +50,13 @@ type populationSerializer struct {
 	IDS []int `json:"ids"`
 }
 
+// MarshalJSON implements json.Marshaler
 func (p *Population) MarshalJSON() ([]byte, error) {
 	ps := &populationSerializer{ID: p.ID, IDS: p.getIds()}
 	return json.Marshal(ps)
 }
 
+// UnmarshalJSON implements json.Unmarshaler
 func (p *Population) UnmarshalJSON(data []byte) error {
 	ps := &populationSerializer{}
 	if err := json.Unmarshal(data, ps); err != nil {
@@ -78,7 +84,7 @@ func marry(p *Population, c Cultured) timeline.Callback {
 	}
 }
 
-func reproduction(p *Population, c inhabitants.Cultured) timeline.Callback {
+func reproduction(p *Population) timeline.Callback {
 	return func(_ int) {
 		rc := p.ReproductionCandidates()
 		for _, r := range rc {
@@ -94,7 +100,7 @@ func reproduction(p *Population, c inhabitants.Cultured) timeline.Callback {
 					men, _ := p.ByGender(inhabitants.Male)
 					with = men[randomizer.Intn(len(men))]
 				}
-				r.b.Reproduce(with, c)
+				r.b.Reproduce(with)
 			}
 		}
 	}
@@ -166,8 +172,8 @@ func (p *Population) appendIds(ids ...int) {
 	}
 }
 
-// Get returns whether this being is in the Population
-func (p *Population) Get(b *Being) bool {
+// Exists returns whether this being is in the Population
+func (p *Population) Exists(b *Being) bool {
 	p.mux.Lock()
 	_, found := p.IDS[b.ID]
 	p.mux.Unlock()
@@ -183,6 +189,7 @@ func (p *Population) Remove(b *Being) bool {
 	return found
 }
 
+// ByGender returns the beings filtered by gender
 func (p *Population) ByGender(g inhabitants.Gender) ([]*Being, error) {
 	out := []*Being{}
 	beings, err := p.Inhabitants()

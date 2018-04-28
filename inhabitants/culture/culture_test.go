@@ -1,54 +1,31 @@
 package culture_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
-
-	"github.com/slabgorb/gotown/inhabitants/genetics"
 
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/inhabitants/being"
 	. "github.com/slabgorb/gotown/inhabitants/culture"
+	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/persist"
-	"github.com/slabgorb/gotown/timeline"
 	"github.com/slabgorb/gotown/words"
 )
 
+var testSpecies = &species.Species{Name: "human"}
+
 func TestMain(m *testing.M) {
 	persist.OpenTestDB()
+	defer persist.CloseTestDB()
 	words.Seed()
+	species.Seed()
 	Seed()
+	if err := testSpecies.Read(); err != nil {
+		panic(err)
+	}
 	code := m.Run()
-	persist.CloseTestDB()
+
 	os.Exit(code)
-}
-
-type mockSpecies struct {
-	name string
-}
-
-func (m *mockSpecies) RandomAge(slot int) int {
-	return slot * 10
-}
-
-func (m *mockSpecies) MaxAge(slot int) int {
-	return slot * 12
-}
-
-func (m *mockSpecies) Read() error   { return fmt.Errorf("not implemented") }
-func (m *mockSpecies) Save() error   { return fmt.Errorf("not implemented") }
-func (m *mockSpecies) Delete() error { return fmt.Errorf("not implemented") }
-func (m *mockSpecies) Reset()        { panic("not implemented") }
-
-func (m *mockSpecies) GetName() string { return m.name }
-
-func (m *mockSpecies) GetGenders() []inhabitants.Gender {
-	return []inhabitants.Gender{inhabitants.Male, inhabitants.Female}
-}
-
-func (m *mockSpecies) Expression() genetics.Expression {
-	panic("not implemented")
 }
 
 type MarriageableStub struct {
@@ -70,7 +47,7 @@ func (ms *MarriageableStub) Sex() inhabitants.Gender {
 	return ms.sex
 }
 
-func (ms *MarriageableStub) IsCloseRelativeOf(inhabitants.Marriageable) bool {
+func (ms *MarriageableStub) IsCloseRelativeOf(Marriageable) bool {
 	panic("not implemented")
 }
 
@@ -115,29 +92,30 @@ func TestMaritalStrategy(t *testing.T) {
 	}
 	t.Log(c.MaritalStrategies)
 	t.Log(c)
-	ms := &mockSpecies{}
+
 	testCases := []struct {
 		name     string
 		a        *being.Being
 		b        *being.Being
+		ages     []int
 		expected bool
 	}{
 		{
 			name:     "usual",
-			a:        &being.Being{Species: ms, Chronology: &timeline.Chronology{CurrentYear: 20}, Gender: inhabitants.Male},
-			b:        &being.Being{Species: ms, Chronology: &timeline.Chronology{CurrentYear: 19}, Gender: inhabitants.Female},
+			a:        &being.Being{Species: testSpecies, Age: 20, Gender: inhabitants.Male},
+			b:        &being.Being{Species: testSpecies, Age: 19, Gender: inhabitants.Female},
 			expected: true,
 		},
 		{
 			name:     "hetero only for this culture (yes, sorry)",
-			a:        &being.Being{Species: ms, Chronology: &timeline.Chronology{CurrentYear: 20}, Gender: inhabitants.Male},
-			b:        &being.Being{Species: ms, Chronology: &timeline.Chronology{CurrentYear: 19}, Gender: inhabitants.Male},
+			a:        &being.Being{Species: testSpecies, Age: 20, Gender: inhabitants.Male},
+			b:        &being.Being{Species: testSpecies, Age: 19, Gender: inhabitants.Male},
 			expected: false,
 		},
 		{
 			name:     "no bigamy",
-			a:        &being.Being{Species: ms, Chronology: &timeline.Chronology{CurrentYear: 20}, Gender: inhabitants.Male, Spouses: []*being.Being{&being.Being{}}},
-			b:        &being.Being{Species: ms, Chronology: &timeline.Chronology{CurrentYear: 29}, Gender: inhabitants.Female},
+			a:        &being.Being{Species: testSpecies, Age: 20, Gender: inhabitants.Male, Spouses: []int{0}},
+			b:        &being.Being{Species: testSpecies, Age: 19, Gender: inhabitants.Female},
 			expected: false,
 		},
 	}

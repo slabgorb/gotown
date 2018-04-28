@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/slabgorb/gotown/persist"
-	"github.com/slabgorb/gotown/timeline"
 
 	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/being"
@@ -17,27 +16,29 @@ import (
 
 var beingFixtures = make(map[string]*Being)
 
-var testSpecies = species.Species{Name:"human"}
-var testCulture = culture.Culture{Name:"viking"}
+var testSpecies = &species.Species{Name: "human"}
+var testCulture = &culture.Culture{Name: "viking"}
 
+type beingFixture struct {
+	label string
+	name  string
+	age   int
+	sex   string
+}
 
 func TestMain(m *testing.M) {
-	type beingFixture struct {
-		label string
-		name  string
-		age   int
-		sex   string
-	}
-
 	persist.OpenTestDB()
+	defer persist.CloseTestDB()
 	words.Seed()
 	species.Seed()
 	culture.Seed()
-	code := m.Run()
-	persist.CloseTestDB()
-	os.Exit(code)
-
-	var beingFixtureRaw = []beingFixture{
+	if err := testCulture.Read(); err != nil {
+		panic(err)
+	}
+	if err := testSpecies.Read(); err != nil {
+		panic(err)
+	}
+	beingFixtureRaw := []beingFixture{
 		{
 			label: "adam",
 			name:  "Adam Man",
@@ -86,7 +87,8 @@ func TestMain(m *testing.M) {
 		b := &Being{
 			Gender:  inhabitants.Gender(bf.sex),
 			Name:    inhabitants.NewName(bf.name),
-			Species: &Species{},
+			Species: testSpecies,
+			Culture: testCulture,
 			ID:      id,
 		}
 		id++
@@ -94,19 +96,15 @@ func TestMain(m *testing.M) {
 		beingFixtures[bf.label] = b
 
 	}
+
 	code := m.Run()
 	os.Exit(code)
 }
 func TestName(t *testing.T) {
-	s := species.Species{Name:"human"}
-	c := culture.Culture{Name:"viking"}
-	err := s.Read() if err != nil { panic(err) }
-	err := c.Read() if err != nil { panic(err) }
-	culture := &mockCulture{}
 	expected := "Arnulf Arnulfson"
-	being := &Being{Species: species, Gender: inhabitants.Male}
+	being := &Being{Species: testSpecies, Gender: inhabitants.Male}
 	words.SetRandomizer(random.NewMock())
-	being.RandomizeName(culture)
+	being.RandomizeName()
 	if being.Sex() != inhabitants.Male {
 		t.Errorf("Expected Male got %s", being.Sex())
 	}
@@ -115,11 +113,11 @@ func TestName(t *testing.T) {
 	}
 }
 func TestInheritedName(t *testing.T) {
-	species := &mockSpecies{}
-	culture := &mockCulture{}
-	m := &Being{Species: species, Gender: inhabitants.Female, Culture: culture}
+	m := New(testSpecies, testCulture)
+	m.Gender = inhabitants.Male
 	m.RandomizeName()
-	f := &Being{Species: species, Gender: inhabitants.Male, Culture: culture}
+	f := New(testSpecies, testCulture)
+	f.Gender = inhabitants.Female
 	f.RandomizeName()
 	children, err := f.Reproduce(m)
 	if err != nil {
@@ -143,14 +141,16 @@ func TestSiblings(t *testing.T) {
 	bf := beingFixtures
 	t.Log(bf)
 	bf["adam"].Marry(bf["eve"])
-	bf["adam"].Children = []*Being{bf["cain"], bf["abel"]}
-	bf["eve"].Children = []*Being{bf["cain"], bf["abel"]}
-	bf["cain"].Parents = []*Being{bf["adam"], bf["eve"]}
-	bf["abel"].Parents = []*Being{bf["adam"], bf["eve"]}
-	if bf["cain"].Siblings()[0] != bf["abel"] {
+	bf["adam"].Children = []int{bf["cain"].ID, bf["abel"].ID}
+	bf["eve"].Children = []int{bf["cain"].ID, bf["abel"].ID}
+	bf["cain"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	bf["abel"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	sibs, _ := bf["cain"].Siblings()
+	if !sibs.Exists(bf["abel"]) {
 		t.Errorf("expected cain to be abel's brother")
 	}
-	if bf["abel"].Siblings()[0] != bf["cain"] {
+	sibs, _ = bf["cain"].Siblings()
+	if !sibs.Exists(bf["cain"]) {
 		t.Errorf("expected cain to be abel's brother")
 	}
 	if !bf["abel"].IsSiblingOf(bf["cain"]) {
@@ -158,15 +158,12 @@ func TestSiblings(t *testing.T) {
 	}
 }
 func TestDeath(t *testing.T) {
-	adam := &Being{Chronology: timeline.NewChronology()}
+	adam := New(testSpecies, testCulture)
 	if !adam.Alive() {
 		t.Fail()
 	}
 	adam.Die()
 	if adam.Alive() {
-		t.Fail()
-	}
-	if len(adam.Chronology.Events) > 1 {
 		t.Fail()
 	}
 

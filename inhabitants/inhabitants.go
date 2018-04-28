@@ -23,6 +23,7 @@ type Expresser interface {
 	GetName() string
 }
 
+// demographic constants
 const (
 	Child int = iota
 	Teenager

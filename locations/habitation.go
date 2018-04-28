@@ -16,7 +16,7 @@ type Habitation struct {
 }
 
 func NewHabitation(chronology *timeline.Chronology, culture inhabitants.Cultured) *Habitation {
-	return &Habitation{Residents: being.NewPopulation([]inhabitants.Populatable{}, chronology, culture)}
+	return &Habitation{Residents: being.NewPopulation([]int{})}
 }
 
 func (h *Habitation) SetNamer(namer *words.Namer) {
@@ -36,5 +36,5 @@ func (h *Habitation) Population() int {
 }
 
 func (h *Habitation) Resident(b *being.Being) (found bool) {
-	return h.Residents.Get(b)
+	return h.Residents.Exists(b)
 }

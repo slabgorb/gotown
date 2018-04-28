@@ -18,6 +18,7 @@ type Culture struct {
 	NamerNames        map[inhabitants.Gender]string       `json:"namer_names"`
 }
 
+// Marriageable abstracts the ability to marry
 type Marriageable interface {
 	Unmarried() bool
 	GetAge() int
@@ -130,6 +131,7 @@ func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
 	return c.Namers
 }
 
+// GetName returns the name of the culture
 func (c *Culture) GetName() string { return c.Name }
 
 // Seed seeds the database with initial cultures.

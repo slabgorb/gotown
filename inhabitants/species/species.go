@@ -37,6 +37,7 @@ func New(name string, genders []inhabitants.Gender, e genetics.Expression, d map
 	}
 }
 
+// Expression returns the species' genetic expression
 func (s *Species) Expression() genetics.Expression {
 	return s.GeneticExpression
 }
@@ -75,6 +76,7 @@ func (s *Species) GetGenders() []inhabitants.Gender {
 	return s.Genders
 }
 
+// GetName returns the name of the specis
 func (s *Species) GetName() string { return s.Name }
 
 // RandomAge provides a random age within a 'slot', or a demography bucket. If th
@@ -98,16 +100,19 @@ func (s *Species) RandomAge(slot int) int {
 	return 0
 }
 
+// MaxAge returns the maximum age for the passed in demography slot
 func (s *Species) MaxAge(slot int) int {
 	dmo := s.Demography[slot]
 	return dmo.MaxAge
 }
 
+// Seed populates the database with samples
 func Seed() error {
 	var s = &Species{}
 	return persist.SeedHelper("species", s)
 }
 
+// List returns species names from the database
 func List() ([]string, error) {
 	species := []Species{}
 	if err := persist.DB.All(&species); err != nil {

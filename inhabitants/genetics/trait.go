@@ -12,6 +12,7 @@ type Trait struct {
 	Variants []*Variant `json:"variants"`
 }
 
+// GetName returns the name of the trait
 func (t *Trait) GetName() string {
 	return t.Name
 }

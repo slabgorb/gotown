@@ -12,7 +12,7 @@ import (
 )
 
 func TestSerialization(t *testing.T) {
-	p := NewPopulation([]inhabitants.Populatable{}, nil, &mockCulture{})
+	p := NewPopulation([]int{})
 	j, err := json.Marshal(p)
 	if err != nil {
 		t.Error(err)
@@ -22,21 +22,23 @@ func TestSerialization(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 }
 func TestAging(t *testing.T) {
-	p := NewPopulation([]inhabitants.Populatable{}, nil, nil)
+	p := NewPopulation([]int{})
 	count := 10
 	beings := make([]*Being, count)
 	for i := 0; i < count; i++ {
-		beings[i] = &Being{Species: &mockSpecies{}, Chronology: &timeline.Chronology{CurrentYear: i}}
+		beings[i] = New(testSpecies, testCulture)
 		p.Add(beings[i])
 	}
 	p.Age()
 	ages := []int{}
-	for _, b := range p.Inhabitants() {
-		ages = append(ages, b.Age())
-
+	beings, err := p.Inhabitants()
+	if err != nil {
+		t.Fatalf("fatal: %s", err)
+	}
+	for _, b := range beings {
+		ages = append(ages, b.GetAge())
 	}
 	sort.Ints(ages)
 	expectedAges := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -48,19 +50,19 @@ func TestAging(t *testing.T) {
 }
 
 func BenchmarkMaritalCandidates(b *testing.B) {
-	beings := []inhabitants.Populatable{}
-	c := &mockCulture{}
-
+	ids := []int{}
 	for i := 0; i < 100; i++ {
-		b := &Being{}
-		b.Randomize(c)
-		beings = append(beings, b)
+		bg := New(testSpecies, testCulture)
+		bg.Randomize()
+		if err := bg.Save(); err != nil {
+			b.Fatalf("could not save being:%s", err)
+		}
+		ids = append(ids, bg.ID)
 	}
-	chronology := timeline.NewChronology()
-	p := NewPopulation(beings, chronology, c)
+	p := NewPopulation(ids)
 	b.Run("mc benchmark", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_, _ = p.MaritalCandidates(c)
+			_, _ = p.MaritalCandidates(testCulture)
 		}
 	})
 }
