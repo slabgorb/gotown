@@ -4,6 +4,7 @@ import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
 import AutoRenewIcon from 'material-ui-icons/Autorenew';
 import IconButton from 'material-ui/IconButton';
+import Grid from 'material-ui/Grid';
 import api from './api';
 
 const style = () => ({
@@ -11,12 +12,17 @@ const style = () => ({
   avatar: {
     width: '100%',
   },
+  box: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 class Random extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
+    this.state = {
       namer: props.namer,
       name: props.name,
     };
@@ -36,7 +42,7 @@ class Random extends React.Component {
     const { name } = this.state;
     const { classes } = this.props;
     return (
-      <div>
+      <Grid container className={classes.box}>
         <Typography
           variant="display2"
           align="center"
@@ -50,12 +56,12 @@ class Random extends React.Component {
         >
           <AutoRenewIcon />
         </IconButton>
-      </div>
+      </Grid>
     );
   }
 }
 
-Random.propTypes = { 
+Random.propTypes = {
   namer: PropTypes.string.isRequired,
   name: PropTypes.string,
   classes: PropTypes.object.isRequired,
