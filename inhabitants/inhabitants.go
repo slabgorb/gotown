@@ -4,7 +4,6 @@ import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
-	"github.com/slabgorb/gotown/words"
 )
 
 var randomizer random.Generator = random.Random
@@ -42,7 +41,6 @@ type Populatable interface {
 	Alive() bool
 	Sex() Gender
 	GetAge() int
-	GetName() *Name
 	Die(...string)
 }
 
@@ -66,14 +64,4 @@ type Namer interface {
 	GetDisplay() string
 	GetGivenName() string
 	GetFamilyName() string
-}
-
-// Nameable abstracts...
-type Nameable interface {
-	Father() (Nameable, error)
-	Mother() (Nameable, error)
-	GetNamer() *words.Namer
-	//Culture() Cultured
-	GetName() *Name
-	Sex() Gender
 }

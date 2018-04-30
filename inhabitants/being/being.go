@@ -42,7 +42,6 @@ type Marriageable interface {
 // Cultured abstracts cultures
 type Cultured interface {
 	inhabitants.Readable
-	RandomName(inhabitants.Nameable) *inhabitants.Name
 	GetMaritalStrategies() []culture.MaritalStrategy
 	GetNamers() map[inhabitants.Gender]*words.Namer
 }
@@ -50,7 +49,7 @@ type Cultured interface {
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
 	ID          int                  `json:"id" storm:"id,increment"`
-	Name        *inhabitants.Name    `json:"name"`
+	Name        *Name                `json:"name"`
 	SpeciesName string               `json:"species_name"`
 	CultureName string               `json:"culture_name"`
 	Parents     []int                `json:"parents"`
@@ -67,7 +66,7 @@ type Being struct {
 // New initializes a being
 func New(s *species.Species, c *culture.Culture) *Being {
 	return &Being{
-		Name:        &inhabitants.Name{},
+		Name:        &Name{},
 		SpeciesName: s.GetName(),
 		CultureName: c.GetName(),
 		Species:     s,
@@ -108,7 +107,7 @@ func (b *Being) GetID() int {
 }
 
 func (b *Being) GetNamer() *words.Namer {
-	return b.Culture.GetNamers[b.Gender]
+	return b.Culture.GetNamers()[b.Gender]
 }
 
 func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
@@ -127,7 +126,7 @@ func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
 // Reset sets the culture back to zero
 func (b *Being) Reset() {
 	b.ID = 0
-	b.Name = &inhabitants.Name{}
+	b.Name = &Name{}
 	b.SpeciesName = ""
 	b.CultureName = ""
 	b.Spouses = []int{}
@@ -159,7 +158,7 @@ func (b *Being) Delete() error {
 }
 
 // GetName returns the name object
-func (b *Being) GetName() *inhabitants.Name {
+func (b *Being) GetName() *Name {
 	return b.Name
 }
 
@@ -199,7 +198,8 @@ func (b *Being) RandomizeGender() {
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName() {
-	b.Name = b.Culture.RandomName(b)
+	namer := b.Culture.GetNamers()[b.Sex()]
+	b.Name = NameStrategies[namer.NameStrategy](b)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.

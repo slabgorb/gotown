@@ -1,8 +1,11 @@
-package inhabitants
+package being
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/words"
 )
 
 // Name is the name of a being or other named thing, in theory
@@ -46,6 +49,15 @@ func NewName(fullName string) *Name {
 	return name
 }
 
+// Nameable abstracts...
+type Nameable interface {
+	Father() (*Being, error)
+	Mother() (*Being, error)
+	GetNamer() *words.Namer
+	GetName() *Name
+	Sex() inhabitants.Gender
+}
+
 // NameStrategy is a function which describes how children are named
 type NameStrategy func(b Nameable) *Name
 
@@ -68,7 +80,7 @@ var NameStrategies = map[string]NameStrategy{
 		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Father()
-		fmt.Printf("%#v %b", parent, parent != nil)
+		fmt.Printf("%#v %t", parent, parent != nil)
 		if parent != nil && err == nil {
 			name.FamilyName = parent.GetName().FamilyName
 			return name

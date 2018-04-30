@@ -88,7 +88,7 @@ func TestMain(m *testing.M) {
 	for _, bf := range beingFixtureRaw {
 		b := &Being{
 			Gender:  inhabitants.Gender(bf.sex),
-			Name:    inhabitants.NewName(bf.name),
+			Name:    NewName(bf.name),
 			Species: testSpecies,
 			Culture: testCulture,
 			ID:      id,
@@ -103,7 +103,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 func TestName(t *testing.T) {
-	expected := "Arnulf Arnulfson"
+	expected := "Leone Giovanelli"
 	being := &Being{Species: testSpecies, Culture: testCulture, Gender: inhabitants.Male}
 	words.SetRandomizer(random.NewMock())
 	being.RandomizeName()

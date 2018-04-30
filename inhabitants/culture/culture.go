@@ -120,12 +120,6 @@ func (c *Culture) GetMaritalStrategies() []MaritalStrategy {
 	return out
 }
 
-// RandomName returns a name appropriate for the passed in Being
-func (c *Culture) RandomName(b inhabitants.Nameable) *inhabitants.Name {
-	namer := c.Namers[b.Sex()]
-	return inhabitants.NameStrategies[namer.NameStrategy](b, c)
-}
-
 // GetNamers returns the namer objects for the culture
 func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
 	return c.Namers
