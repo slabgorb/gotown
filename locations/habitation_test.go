@@ -15,7 +15,7 @@ func TestPopulation(t *testing.T) {
 	if err := culture.Read(); err != nil {
 		panic(err)
 	}
-	h, _ := NewArea(Village, culture, nil, nil)
+	h, _ := NewArea(Village, nil)
 	if h.Population() != 0 {
 		t.Errorf("Expected 0 got %d", h.Population())
 	}

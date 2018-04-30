@@ -64,12 +64,33 @@ func (p *Population) UnmarshalJSON(data []byte) error {
 	}
 	for id := range ps.IDS {
 		b := &Being{ID: id}
-		if err := b.Read(); err != nil {
-			return err
-		}
 		p.Add(b)
 	}
 	return nil
+}
+
+// Reset implements persist.Persistable
+func (p *Population) Reset() {
+	p.ID = 0
+	p.IDS = make(map[int]struct{})
+}
+
+// Delete implements persist.Persistable
+func (p *Population) Delete() error {
+	return persist.DB.DeleteStruct(p)
+}
+
+// Save implements persist.Persistable
+func (p *Population) Save() error {
+	return persist.DB.Save(p)
+}
+
+// Read implements persist.Persistable
+func (p *Population) Read() error {
+	if p.ID == 0 {
+		return fmt.Errorf("need id for population")
+	}
+	return persist.DB.One("ID", p.ID, p)
 }
 
 func marry(p *Population, c Cultured) timeline.Callback {
@@ -234,6 +255,8 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 	return candidates
 }
 
+type maritalStrategy func(a, b Marriageable) bool
+
 // MaritalCandidates scans the population for potential candidates for marrying
 // one another.
 func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) {
@@ -241,13 +264,16 @@ func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) 
 	males, _ := p.ByGender(inhabitants.Male)
 	females, _ := p.ByGender(inhabitants.Female)
 	// loop through the population, taking each member and looking for candidates
+	maritalStrategies := c.GetMaritalStrategies()
 	for _, a := range males {
 		for _, b := range females {
 			m := MaritalCandidate{male: a, female: b}
 			if _, ok := mc[m]; ok {
 				continue
 			}
-			mc[m] = c.MaritalCandidate(a, b)
+			for _, f := range maritalStrategies {
+				mc[m] = mc[m] && f(a, b)
+			}
 		}
 	}
 	result := []*MaritalCandidate{}

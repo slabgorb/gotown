@@ -1,9 +1,8 @@
 package inhabitants
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/slabgorb/gotown/words"
 )
 
 // Name is the name of a being or other named thing, in theory
@@ -14,21 +13,22 @@ type Name struct {
 	Display    string   `json:"display_name"`
 }
 
-type Cultured interface {
-	Readable
-	RandomName(Nameable) *Name
-	GetNamers() map[Gender]*words.Namer
-}
-
 // OtherNames returns any other names a being may have as a space-separated list
 func (n *Name) OtherNames() string {
 	return strings.Join(n.Other, " ")
 }
 
-func (n *Name) GetGivenName() string    { return n.GivenName }
-func (n *Name) GetFamilyName() string   { return n.FamilyName }
+// GetGivenName is a getter
+func (n *Name) GetGivenName() string { return n.GivenName }
+
+// GetFamilyName is a getter
+func (n *Name) GetFamilyName() string { return n.FamilyName }
+
+// GetOtherNames is a getter
 func (n *Name) GetOtherNames() []string { return n.Other }
-func (n *Name) GetDisplay() string      { return n.Display }
+
+// GetDisplay is a getter
+func (n *Name) GetDisplay() string { return n.Display }
 
 // NewName tries valiantly to create a formal name from a string
 func NewName(fullName string) *Name {
@@ -47,12 +47,12 @@ func NewName(fullName string) *Name {
 }
 
 // NameStrategy is a function which describes how children are named
-type NameStrategy func(b Nameable, c Cultured) *Name
+type NameStrategy func(b Nameable) *Name
 
 // NameStrategies deliniates the various naming strategy functions
 var NameStrategies = map[string]NameStrategy{
-	"matrilineal": func(b Nameable, c Cultured) *Name {
-		namer := c.GetNamers()[b.Sex()]
+	"matrilineal": func(b Nameable) *Name {
+		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Mother()
 		if parent != nil && err == nil {
@@ -64,10 +64,11 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"patrilineal": func(b Nameable, c Cultured) *Name {
-		namer := c.GetNamers()[b.Sex()]
+	"patrilineal": func(b Nameable) *Name {
+		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Father()
+		fmt.Printf("%#v %b", parent, parent != nil)
 		if parent != nil && err == nil {
 			name.FamilyName = parent.GetName().FamilyName
 			return name
@@ -77,8 +78,8 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"matronymic": func(b Nameable, c Cultured) *Name {
-		namer := c.GetNamers()[b.Sex()]
+	"matronymic": func(b Nameable) *Name {
+		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Mother()
 		if parent != nil && err == nil {
@@ -90,8 +91,8 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"patronymic": func(b Nameable, c Cultured) *Name {
-		namer := c.GetNamers()[b.Sex()]
+	"patronymic": func(b Nameable) *Name {
+		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Father()
 		if parent != nil && err == nil {
@@ -103,8 +104,8 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"onename": func(b Nameable, c Cultured) *Name {
-		namer := c.GetNamers()[b.Sex()]
+	"onename": func(b Nameable) *Name {
+		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		display, _ := namer.Execute(name)
 		name.Display = display

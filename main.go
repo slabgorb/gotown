@@ -229,15 +229,15 @@ func townHandler(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	culture := &culture.Culture{Name: req.Culture}
-	if err := culture.Read(); err != nil {
+	cl := &culture.Culture{Name: req.Culture}
+	if err := cl.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	species := &species.Species{Name: req.Species}
-	if err := species.Read(); err != nil {
+	s := &species.Species{Name: req.Species}
+	if err := s.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	area, err := locations.NewArea(locations.Town, culture, nil, nil)
+	area, err := locations.NewArea(locations.Town, nil)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -250,8 +250,8 @@ func townHandler(c echo.Context) error {
 	//cron := timeline.NewChronology()
 	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
-			being := being.New(species)
-			being.Randomize(culture)
+			being := being.New(s, cl)
+			being.Randomize()
 			area.Add(being)
 			wg.Done()
 		}(&wg)

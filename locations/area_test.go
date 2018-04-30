@@ -8,7 +8,7 @@ import (
 )
 
 func TestJsonEncode(t *testing.T) {
-	area, _ := NewArea(Town, nil, nil, nil)
+	area, _ := NewArea(Town, nil)
 	_, err := json.Marshal(area)
 	if err != nil {
 		t.Error(err)
@@ -16,15 +16,15 @@ func TestJsonEncode(t *testing.T) {
 }
 
 func TestAddTo(t *testing.T) {
-	a1, err := NewArea(Town, nil, nil, nil)
+	a1, err := NewArea(Town, nil)
 	if err != nil || a1 == nil {
 		t.Fail()
 	}
-	a2, err := NewArea(Castle, nil, nil, nil)
+	a2, err := NewArea(Castle, nil)
 	if err != nil || a2 == nil {
 		t.Fail()
 	}
-	a3, err := NewArea(Town, nil, nil, nil)
+	a3, err := NewArea(Town, nil)
 	if err != nil || a3 == nil {
 		t.Fail()
 	}

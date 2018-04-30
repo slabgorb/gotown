@@ -24,14 +24,15 @@ type Marriageable interface {
 	GetAge() int
 	Alive() bool
 	Sex() inhabitants.Gender
-	IsCloseRelativeOf(with Marriageable) bool
+	IsCloseRelativeOf(with int) bool
+	GetID() int
 }
 
-// maritalStrategy is a function which indicates whether the two beings are
+// MaritalStrategy is a function which indicates whether the two beings are
 // marriage candidates
-type maritalStrategy func(a, b Marriageable) bool
+type MaritalStrategy func(a, b Marriageable) bool
 
-var maritalStrategies = map[string]maritalStrategy{
+var maritalStrategies = map[string]MaritalStrategy{
 	"living": func(a, b Marriageable) bool {
 		return a.Alive() && b.Alive()
 	},
@@ -62,7 +63,7 @@ var maritalStrategies = map[string]maritalStrategy{
 		return (a.GetAge()/2)+7 < b.GetAge() && (b.GetAge()/2)+7 < a.GetAge()
 	},
 	"unrelated": func(a, b Marriageable) bool {
-		return !a.IsCloseRelativeOf(b)
+		return !a.IsCloseRelativeOf(b.GetID())
 	},
 }
 
@@ -110,12 +111,11 @@ func (c *Culture) Reset() {
 	c.NamerNames = make(map[inhabitants.Gender]string)
 }
 
-// MaritalCandidate decides whether this pair of Beings is a valid candidate for
-// marriage, based on the culture's marital rules.
-func (c *Culture) MaritalCandidate(a, b Marriageable) bool {
-	out := true
+// GetMaritalStrategies returns the set of marital functions applicable to this culture
+func (c *Culture) GetMaritalStrategies() []MaritalStrategy {
+	out := []MaritalStrategy{}
 	for _, s := range c.MaritalStrategies {
-		out = out && maritalStrategies[s](a, b)
+		out = append(out, maritalStrategies[s])
 	}
 	return out
 }

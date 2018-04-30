@@ -1,6 +1,7 @@
 package being_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -17,7 +18,7 @@ import (
 var beingFixtures = make(map[string]*Being)
 
 var testSpecies = &species.Species{Name: "human"}
-var testCulture = &culture.Culture{Name: "viking"}
+var testCulture = &culture.Culture{Name: "italianate"}
 
 type beingFixture struct {
 	label string
@@ -33,10 +34,11 @@ func TestMain(m *testing.M) {
 	species.Seed()
 	culture.Seed()
 	if err := testCulture.Read(); err != nil {
-		panic(err)
+		list, _ := culture.List()
+		panic(fmt.Sprintf("could not load test culture %s, have %#v: %s", testCulture.Name, list, err))
 	}
 	if err := testSpecies.Read(); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("could not load test species: %s", err))
 	}
 	beingFixtureRaw := []beingFixture{
 		{
@@ -102,7 +104,7 @@ func TestMain(m *testing.M) {
 }
 func TestName(t *testing.T) {
 	expected := "Arnulf Arnulfson"
-	being := &Being{Species: testSpecies, Gender: inhabitants.Male}
+	being := &Being{Species: testSpecies, Culture: testCulture, Gender: inhabitants.Male}
 	words.SetRandomizer(random.NewMock())
 	being.RandomizeName()
 	if being.Sex() != inhabitants.Male {
@@ -153,7 +155,7 @@ func TestSiblings(t *testing.T) {
 	if !sibs.Exists(bf["cain"]) {
 		t.Errorf("expected cain to be abel's brother")
 	}
-	if !bf["abel"].IsSiblingOf(bf["cain"]) {
+	if !bf["abel"].IsSiblingOf(bf["cain"].ID) {
 		t.Errorf("expected cain to be abel's brother")
 	}
 }

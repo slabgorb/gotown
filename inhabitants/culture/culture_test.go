@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/slabgorb/gotown/inhabitants"
-	"github.com/slabgorb/gotown/inhabitants/being"
 	. "github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/persist"
@@ -83,46 +82,4 @@ func TestSeed(t *testing.T) {
 		t.Error("did not load male names")
 	}
 
-}
-
-func TestMaritalStrategy(t *testing.T) {
-	c := Culture{Name: "italianate"}
-	if err := c.Read(); err != nil {
-		t.Fail()
-	}
-	t.Log(c.MaritalStrategies)
-	t.Log(c)
-
-	testCases := []struct {
-		name     string
-		a        *being.Being
-		b        *being.Being
-		ages     []int
-		expected bool
-	}{
-		{
-			name:     "usual",
-			a:        &being.Being{Species: testSpecies, Age: 20, Gender: inhabitants.Male},
-			b:        &being.Being{Species: testSpecies, Age: 19, Gender: inhabitants.Female},
-			expected: true,
-		},
-		{
-			name:     "hetero only for this culture (yes, sorry)",
-			a:        &being.Being{Species: testSpecies, Age: 20, Gender: inhabitants.Male},
-			b:        &being.Being{Species: testSpecies, Age: 19, Gender: inhabitants.Male},
-			expected: false,
-		},
-		{
-			name:     "no bigamy",
-			a:        &being.Being{Species: testSpecies, Age: 20, Gender: inhabitants.Male, Spouses: []int{0}},
-			b:        &being.Being{Species: testSpecies, Age: 19, Gender: inhabitants.Female},
-			expected: false,
-		},
-	}
-	for _, tc := range testCases {
-		actual := c.MaritalCandidate(tc.a, tc.b)
-		if tc.expected != actual {
-			t.Errorf("%s expected %t got %t", tc.name, tc.expected, actual)
-		}
-	}
 }

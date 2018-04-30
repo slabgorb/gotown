@@ -8,7 +8,6 @@ import (
 
 	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/being"
-	"github.com/slabgorb/gotown/timeline"
 )
 
 func TestSerialization(t *testing.T) {
@@ -68,15 +67,13 @@ func BenchmarkMaritalCandidates(b *testing.B) {
 }
 
 func TestReproductionCandidates(t *testing.T) {
-	culture := &mockCulture{}
-	chronology := timeline.NewChronology()
-	beings := []inhabitants.Populatable{
-		beingFixtures["adam"],
-		beingFixtures["eve"],
-		beingFixtures["martha"],
+	ids := []int{
+		beingFixtures["adam"].ID,
+		beingFixtures["eve"].ID,
+		beingFixtures["martha"].ID,
 	}
 	beingFixtures["eve"].Marry(beingFixtures["adam"])
-	p := NewPopulation(beings, chronology, culture)
+	p := NewPopulation(ids)
 	candidates := p.ReproductionCandidates()
 	if len(candidates) != 2 {
 		t.Fail()
@@ -85,14 +82,12 @@ func TestReproductionCandidates(t *testing.T) {
 }
 
 func TestMaritalCandidates(t *testing.T) {
-	culture := &mockCulture{name: "italian"}
-	chronology := timeline.NewChronology()
-	beings := []inhabitants.Populatable{
-		beingFixtures["adam"],
-		beingFixtures["eve"],
+	ids := []int{
+		beingFixtures["adam"].ID,
+		beingFixtures["eve"].ID,
 	}
-	p := NewPopulation(beings, chronology, culture)
-	candidates, err := p.MaritalCandidates(culture)
+	p := NewPopulation(ids)
+	candidates, err := p.MaritalCandidates(testCulture)
 	if err != nil {
 		t.Error(err)
 	}
@@ -100,66 +95,89 @@ func TestMaritalCandidates(t *testing.T) {
 		t.Log(candidates)
 		t.Errorf("expected a candidate pair")
 	}
+	beings, _ := p.Inhabitants()
 	a, b := candidates[0].Pair()
 	if !(a == beings[0] || b == beings[0]) || !(a == beings[1] || b == beings[1]) {
 		t.Errorf("expected adam and eve")
 	}
 	beings[1].Die()
-	candidates, _ = p.MaritalCandidates(culture)
+	candidates, _ = p.MaritalCandidates(testCulture)
 	if len(candidates) > 0 {
 		t.Errorf("Did not expect adam and dead eve")
 	}
-	beings = []inhabitants.Populatable{
-		beingFixtures["adam"],
-		beingFixtures["steve"],
+	ids = []int{
+		beingFixtures["adam"].ID,
+		beingFixtures["steve"].ID,
 	}
-	p = NewPopulation(beings, chronology, culture)
-	candidates, _ = p.MaritalCandidates(culture)
+	p = NewPopulation(ids)
+	candidates, _ = p.MaritalCandidates(testCulture)
 	if len(candidates) > 0 {
 		t.Errorf("Did not expect adam and steve")
 	}
 }
 
 func TestAddAndRemove(t *testing.T) {
-	b := &Being{Species: &mockSpecies{}}
-	p := NewPopulation([]inhabitants.Populatable{b}, nil, nil)
+	b := &Being{ID: 0, Species: testSpecies}
+	p := NewPopulation([]int{})
 	p.Remove(b)
-	if p.Get(b) {
+	if p.Exists(b) {
 		t.Fail()
 	}
 	p.Add(b)
-	if !p.Get(b) {
+	if !p.Exists(b) {
 		t.Fail()
 	}
 }
 
-func TestReproductionCandidatesScore(t *testing.T) {
-	chronology := timeline.NewChronology()
-	pop := []inhabitants.Populatable{}
-	for _, v := range beingFixtures {
-		pop = append(pop, v)
-	}
-	p := NewPopulation(pop, chronology, &mockCulture{})
-	rcs := p.ReproductionCandidates()
-	for _, rc := range rcs {
-		fmt.Println(rc)
-	}
-
-}
-
 func TestAdamEve(t *testing.T) {
-	chronology := timeline.NewChronology()
-	pop := []inhabitants.Populatable{}
+	pop := []int{}
 	for _, v := range beingFixtures {
-		pop = append(pop, v)
+		pop = append(pop, v.ID)
 	}
-	p := NewPopulation(pop, chronology, &mockCulture{})
-	for i := 0; i < 100; i++ {
-		chronology.Tick()
-		fmt.Println(p.Chronology.EventsForYear(i))
-	}
-	for _, b := range p.Inhabitants() {
+	p := NewPopulation(pop)
+	beings, _ := p.Inhabitants()
+	for _, b := range beings {
 		fmt.Println(b)
 	}
+}
 
+func TestMaritalStrategy(t *testing.T) {
+	testCases := []struct {
+		name     string
+		a        *Being
+		b        *Being
+		ages     []int
+		expected bool
+	}{
+		{
+			name:     "usual",
+			b:        &Being{Culture: testCulture, Species: testSpecies, Age: 19, Gender: inhabitants.Female},
+			a:        &Being{Culture: testCulture, Species: testSpecies, Age: 20, Gender: inhabitants.Male},
+			expected: true,
+		},
+		{
+			name:     "hetero only for this culture (yes, sorry)",
+			a:        &Being{Culture: testCulture, Species: testSpecies, Age: 20, Gender: inhabitants.Male},
+			b:        &Being{Culture: testCulture, Species: testSpecies, Age: 19, Gender: inhabitants.Male},
+			expected: false,
+		},
+		{
+			name:     "no bigamy",
+			a:        &Being{Culture: testCulture, Species: testSpecies, Age: 20, Gender: inhabitants.Male, Spouses: []int{0}},
+			b:        &Being{Culture: testCulture, Species: testSpecies, Age: 19, Gender: inhabitants.Female},
+			expected: false,
+		},
+	}
+	i := 1
+	for _, tc := range testCases {
+		tc.a.ID = i
+		tc.b.ID = i + 1
+		i += 2
+		p := NewPopulation([]int{tc.a.ID, tc.b.ID})
+		candidates, _ := p.MaritalCandidates(testCulture)
+		actual := len(candidates) > 0
+		if tc.expected != actual {
+			t.Errorf("%s expected %t got %t", tc.name, tc.expected, actual)
+		}
+	}
 }

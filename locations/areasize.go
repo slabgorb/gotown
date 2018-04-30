@@ -2,8 +2,10 @@ package locations
 
 import "strings"
 
+// AreaSize is an enum
 type AreaSize int
 
+// enum for AreaSize
 const (
 	Hut AreaSize = iota
 	Cottage

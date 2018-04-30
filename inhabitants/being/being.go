@@ -24,10 +24,10 @@ func SetRandomizer(g random.Generator) {
 
 // Relatable models relative
 type Relatable interface {
-	IsChildOf(Relatable) bool
-	IsParentOf(Relatable) bool
-	IsSiblingOf(Relatable) bool
-	IsCloseRelativeOf(Relatable) bool
+	IsChildOf(int) bool
+	IsParentOf(int) bool
+	IsSiblingOf(int) bool
+	IsCloseRelativeOf(int) bool
 	GetChildren() ([]*Being, error)
 	GetID() int
 }
@@ -43,7 +43,7 @@ type Marriageable interface {
 type Cultured interface {
 	inhabitants.Readable
 	RandomName(inhabitants.Nameable) *inhabitants.Name
-	MaritalCandidate(Marriageable, Marriageable) bool
+	GetMaritalStrategies() []culture.MaritalStrategy
 	GetNamers() map[inhabitants.Gender]*words.Namer
 }
 
@@ -107,6 +107,10 @@ func (b *Being) GetID() int {
 	return b.ID
 }
 
+func (b *Being) GetNamer() *words.Namer {
+	return b.Culture.GetNamers[b.Gender]
+}
+
 func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
 	parents, err := b.getParents()
 	if err != nil {
@@ -160,12 +164,12 @@ func (b *Being) GetName() *inhabitants.Name {
 }
 
 // Father returns a male parent of the Being
-func (b *Being) Father() (inhabitants.Nameable, error) {
+func (b *Being) Father() (*Being, error) {
 	return b.genderedParent(inhabitants.Male)
 }
 
 // Mother returns a female parent of the Being
-func (b *Being) Mother() (inhabitants.Nameable, error) {
+func (b *Being) Mother() (*Being, error) {
 	return b.genderedParent(inhabitants.Female)
 }
 
@@ -218,9 +222,9 @@ func (b *Being) Marry(with *Being) {
 }
 
 // IsParentOf returns true of the receiver is the parent of the passed in being
-func (b *Being) IsParentOf(with Relatable) bool {
+func (b *Being) IsParentOf(with int) bool {
 	for _, id := range b.Children {
-		if id == with.GetID() {
+		if id == with {
 			return true
 		}
 	}
@@ -229,13 +233,13 @@ func (b *Being) IsParentOf(with Relatable) bool {
 
 // IsChildOf returns true if the receiver being is a child of the passed in
 // being
-func (b *Being) IsChildOf(with Relatable) bool {
-	children, err := with.GetChildren()
+func (b *Being) IsChildOf(with int) bool {
+	parents, err := b.getParents()
 	if err != nil {
 		return false
 	}
-	for _, c := range children {
-		if c.GetID() == b.ID {
+	for _, p := range parents {
+		if p.GetID() == with {
 			return true
 		}
 	}
@@ -329,13 +333,13 @@ func (b *Being) Niblings() (*Population, error) {
 }
 
 // IsSiblingOf checks to see if the receiver is a sibling of the passed in being
-func (b *Being) IsSiblingOf(with Relatable) bool {
+func (b *Being) IsSiblingOf(with int) bool {
 	siblings, err := b.Siblings()
 	if err != nil {
 		return false
 	}
 	for _, s := range siblings.getIds() {
-		if s == with.GetID() {
+		if s == with {
 			return true
 		}
 	}
@@ -344,7 +348,7 @@ func (b *Being) IsSiblingOf(with Relatable) bool {
 
 // IsCloseRelativeOf returns true if the receiver is a close relative of the
 // passed in being
-func (b *Being) IsCloseRelativeOf(with Relatable) bool {
+func (b *Being) IsCloseRelativeOf(with int) bool {
 	close := false
 	close = close || b.IsChildOf(with)
 	close = close || b.IsParentOf(with)

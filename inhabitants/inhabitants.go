@@ -4,7 +4,7 @@ import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
-	"github.com/slabgorb/gotown/timeline"
+	"github.com/slabgorb/gotown/words"
 )
 
 var randomizer random.Generator = random.Random
@@ -37,20 +37,22 @@ const (
 	MaxDemographyBucket
 )
 
+// Populatable abstracts...
 type Populatable interface {
 	Alive() bool
 	Sex() Gender
-	Age() int
-	History() *timeline.Chronology
+	GetAge() int
 	GetName() *Name
 	Die(...string)
 }
 
+// Readable abstracts the ability to read from a database
 type Readable interface {
 	GetName() string
 	persist.Persistable
 }
 
+// Specieser abstracts...
 type Specieser interface {
 	Readable
 	RandomAge(slot int) int
@@ -59,15 +61,19 @@ type Specieser interface {
 	Expression() genetics.Expression
 }
 
-type Nameable interface {
-	Father() (Nameable, error)
-	Mother() (Nameable, error)
-	//Culture() Cultured
-	GetName() *Name
-	Sex() Gender
-}
+// Namer abstracts ...
 type Namer interface {
 	GetDisplay() string
 	GetGivenName() string
 	GetFamilyName() string
+}
+
+// Nameable abstracts...
+type Nameable interface {
+	Father() (Nameable, error)
+	Mother() (Nameable, error)
+	GetNamer() *words.Namer
+	//Culture() Cultured
+	GetName() *Name
+	Sex() Gender
 }

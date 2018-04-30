@@ -1,40 +1,57 @@
 package locations
 
 import (
-	"github.com/slabgorb/gotown/inhabitants"
+	"fmt"
+
 	"github.com/slabgorb/gotown/inhabitants/being"
-	"github.com/slabgorb/gotown/timeline"
+	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/words"
 )
 
+// Habitation represents somewhere people live
 type Habitation struct {
-	ID           int               `json:"id" storm:"id,increment"`
-	Residents    *being.Population `json:"population"`
-	Name         string            `json:"name"`
-	NamerName    string            `json:"namer"`
-	*words.Namer `json:"-"`
+	ID                int `json:"id" storm:"id,increment"`
+	*being.Population `json:"population"`
+	Name              string `json:"name"`
+	NamerName         string `json:"namer"`
+	*words.Namer      `json:"-"`
 }
 
-func NewHabitation(chronology *timeline.Chronology, culture inhabitants.Cultured) *Habitation {
-	return &Habitation{Residents: being.NewPopulation([]int{})}
+// NewHabitation initializes a habitation
+func NewHabitation() *Habitation {
+	return &Habitation{Population: being.NewPopulation([]int{})}
 }
 
+// SetNamer sets the namer for this habiation
 func (h *Habitation) SetNamer(namer *words.Namer) {
 	h.Namer = namer
 }
 
-func (h *Habitation) Add(b *being.Being) (ok bool) {
-	return h.Residents.Add(b)
+// Read implements persist.Persistable
+func (h *Habitation) Read() error {
+	if h.ID == 0 {
+		return fmt.Errorf("cannot read habitation without id")
+	}
+	if err := persist.DB.One("ID", h.ID, h); err != nil {
+		return fmt.Errorf("could not read habitation %d: %s", h.ID, err)
+	}
+	h.Namer = &words.Namer{Name: h.NamerName}
+	return h.Namer.Read()
 }
 
-func (h *Habitation) Remove(b *being.Being) (ok bool) {
-	return h.Residents.Remove(b)
+// Save implements persist.Persistable
+func (h *Habitation) Save() error {
+	return persist.DB.Save(h)
 }
 
-func (h *Habitation) Population() int {
-	return h.Residents.Len()
+// Delete implements persist.Persistable
+func (h *Habitation) Delete() error {
+	return persist.DB.DeleteStruct(h)
 }
 
-func (h *Habitation) Resident(b *being.Being) (found bool) {
-	return h.Residents.Exists(b)
+// Reset implements persist.Persistable
+func (h *Habitation) Reset() {
+	h.ID = 0
+	h.Population = being.NewPopulation([]int{})
+
 }
