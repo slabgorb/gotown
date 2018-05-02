@@ -92,7 +92,6 @@ func (c *Culture) Read() error {
 	}
 	c.Namers = make(map[inhabitants.Gender]*words.Namer)
 	for gender, namerName := range c.NamerNames {
-		fmt.Println(gender, namerName)
 		n := &words.Namer{Name: namerName}
 		if err := n.Read(); err != nil {
 			return err

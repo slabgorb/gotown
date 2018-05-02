@@ -1,7 +1,6 @@
 package being
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/slabgorb/gotown/inhabitants"
@@ -80,7 +79,6 @@ var NameStrategies = map[string]NameStrategy{
 		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Father()
-		fmt.Printf("%#v %t", parent, parent != nil)
 		if parent != nil && err == nil {
 			name.FamilyName = parent.GetName().FamilyName
 			return name

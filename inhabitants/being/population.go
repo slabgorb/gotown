@@ -40,7 +40,7 @@ func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 
 // NewPopulation initializes a Population
 func NewPopulation(ids []int) *Population {
-	p := &Population{}
+	p := &Population{IDS: make(map[int]struct{})}
 	p.appendIds(ids...)
 	return p
 }
@@ -62,10 +62,7 @@ func (p *Population) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, ps); err != nil {
 		return err
 	}
-	for id := range ps.IDS {
-		b := &Being{ID: id}
-		p.Add(b)
-	}
+	p.appendIds(ps.IDS...)
 	return nil
 }
 
@@ -142,8 +139,13 @@ func (p *Population) Inhabitants() ([]*Being, error) {
 	return bs, nil
 }
 
-func saveAll(beings []*Being) error {
+func (p *Population) saveAll() error {
 	ps := []persist.Persistable{}
+	fmt.Println("saving all")
+	beings, err := p.Inhabitants()
+	if err != nil {
+		return err
+	}
 	for _, b := range beings {
 		ps = append(ps, b)
 	}
@@ -159,7 +161,7 @@ func (p *Population) Age() error {
 	for _, b := range beings {
 		b.Age++
 	}
-	return saveAll(beings)
+	return p.saveAll()
 }
 
 // Len returns the number of beings in the population
@@ -167,15 +169,19 @@ func (p *Population) Len() int {
 	return len(p.IDS)
 }
 
-// Add adds a being to the population and returns whether it was actually added.
-func (p *Population) Add(b *Being) bool {
+func (p *Population) addID(id int) bool {
 	p.mux.Lock()
 	defer p.mux.Unlock()
-	_, found := p.IDS[b.ID]
+	_, found := p.IDS[id]
 	if !found {
-		p.IDS[b.ID] = struct{}{}
+		p.IDS[id] = struct{}{}
 	}
 	return !found
+}
+
+// Add adds a being to the population and returns whether it was actually added.
+func (p *Population) Add(b *Being) bool {
+	return p.addID(b.ID)
 }
 
 func (p *Population) getIds() []int {
@@ -188,8 +194,7 @@ func (p *Population) getIds() []int {
 
 func (p *Population) appendIds(ids ...int) {
 	for _, i := range ids {
-		b := &Being{ID: i}
-		p.Add(b)
+		p.addID(i)
 	}
 }
 

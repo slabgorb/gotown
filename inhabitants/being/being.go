@@ -144,11 +144,21 @@ func (b *Being) Read() error {
 	if err := persist.DB.One("ID", b.ID, b); err != nil {
 		return err
 	}
+	b.Species = &species.Species{}
+	if err := persist.DB.One("Name", b.SpeciesName, b.Species); err != nil {
+		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesName, b.ID, err)
+	}
+	b.Culture = &culture.Culture{}
+	if err := persist.DB.One("Name", b.CultureName, b.Culture); err != nil {
+		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureName, b.ID, err)
+	}
 	return nil
 }
 
 // Save implements persist.Persistable
 func (b *Being) Save() error {
+	b.CultureName = b.Culture.GetName()
+	b.SpeciesName = b.Species.GetName()
 	return persist.DB.Save(b)
 }
 
@@ -361,10 +371,12 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	child := &Being{Species: b.Species}
+	child := New(b.Species, b.Culture)
 	child.Parents = []int{b.ID, with.ID}
 	child.Randomize()
-	child.Save()
+	if err := child.Save(); err != nil {
+		return nil, fmt.Errorf("could not save new child: %s", err)
+	}
 	b.Children = append(b.Children, child.ID)
 	with.Children = append(with.Children, child.ID)
 	return b.GetChildren()

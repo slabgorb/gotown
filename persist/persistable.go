@@ -26,7 +26,7 @@ type Persistable interface {
 }
 
 func Open(path string) error {
-	session, err := storm.Open(path)
+	session, err := storm.Open(path, storm.Batch())
 	if err != nil {
 		return err
 	}
@@ -39,13 +39,39 @@ func SaveAll(items []Persistable) error {
 	if err != nil {
 		return err
 	}
+	quit := make(chan struct{})
+	errs := make(chan error)
+	done := make(chan error)
 	defer tx.Rollback()
 	for _, i := range items {
-		if err := i.Save(); err != nil {
+		go func(i Persistable) {
+			err := error(nil)
+			ch := done
+			if err = i.Save(); err != nil {
+				ch = errs
+			}
+			select {
+			case ch <- err:
+				return
+			case <-quit:
+				return
+			}
+		}(i)
+	}
+	count := 0
+	for {
+		select {
+		case err := <-errs:
+			tx.Rollback()
+			close(quit)
 			return err
+		case <-done:
+			count++
+			if count == len(items) {
+				return tx.Commit()
+			}
 		}
 	}
-	return tx.Commit()
 }
 
 func Close() error {
