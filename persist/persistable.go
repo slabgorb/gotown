@@ -28,7 +28,7 @@ type Persistable interface {
 func Open(path string) error {
 	session, err := storm.Open(path, storm.Batch())
 	if err != nil {
-		return err
+		return fmt.Errorf("could not open database at %s: %s", path, err)
 	}
 	SetDB(session)
 	return nil

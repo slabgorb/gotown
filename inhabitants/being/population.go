@@ -139,19 +139,6 @@ func (p *Population) Inhabitants() ([]*Being, error) {
 	return bs, nil
 }
 
-func (p *Population) saveAll() error {
-	ps := []persist.Persistable{}
-	fmt.Println("saving all")
-	beings, err := p.Inhabitants()
-	if err != nil {
-		return err
-	}
-	for _, b := range beings {
-		ps = append(ps, b)
-	}
-	return persist.SaveAll(ps)
-}
-
 // Age ages all the beings in this population and saves the beings
 func (p *Population) Age() error {
 	beings, err := p.Inhabitants()
@@ -159,9 +146,9 @@ func (p *Population) Age() error {
 		return err
 	}
 	for _, b := range beings {
-		b.Age++
+		b.Age = b.Age + 1
 	}
-	return p.saveAll()
+	return saveAll(beings)
 }
 
 // Len returns the number of beings in the population

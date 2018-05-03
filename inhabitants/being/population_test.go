@@ -2,7 +2,6 @@ package being_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"sort"
 	"sync"
 	"testing"
@@ -70,7 +69,6 @@ func TestNew(t *testing.T) {
 }
 
 func TestAging(t *testing.T) {
-	fmt.Println("aging")
 	p, beings := makePop(t, 10)
 	originalAges := []int{}
 	for _, b := range beings {
@@ -83,6 +81,7 @@ func TestAging(t *testing.T) {
 		expectedAges = append(expectedAges, v+1)
 	}
 	actualAges := []int{}
+	beings, _ = p.Inhabitants()
 	for _, b := range beings {
 		actualAges = append(actualAges, b.Age)
 	}
@@ -122,7 +121,7 @@ func TestAging(t *testing.T) {
 // 	p := NewPopulation(ids)
 // 	candidates := p.ReproductionCandidates()
 // 	if len(candidates) != 2 {
-// 		t.Fail()
+// 		t.Errorf("expected 2 candidates, got %d: %#v", len(candidates), candidates)
 // 	}
 
 // }

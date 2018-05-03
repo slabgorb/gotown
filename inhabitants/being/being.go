@@ -88,7 +88,7 @@ func getBeingsFromIDS(IDS []int) ([]*Being, error) {
 	return beings, nil
 }
 
-func (b *Being) getParents() ([]*Being, error) {
+func (b *Being) GetParents() ([]*Being, error) {
 	return getBeingsFromIDS(b.Parents)
 }
 
@@ -111,7 +111,7 @@ func (b *Being) GetNamer() *words.Namer {
 }
 
 func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
-	parents, err := b.getParents()
+	parents, err := b.GetParents()
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (b *Being) Read() error {
 		return fmt.Errorf("cannot read being without id")
 	}
 	if err := persist.DB.One("ID", b.ID, b); err != nil {
-		return err
+		return fmt.Errorf("could not load being %d: %s", b.ID, err)
 	}
 	b.Species = &species.Species{}
 	if err := persist.DB.One("Name", b.SpeciesName, b.Species); err != nil {
@@ -244,7 +244,7 @@ func (b *Being) IsParentOf(with int) bool {
 // IsChildOf returns true if the receiver being is a child of the passed in
 // being
 func (b *Being) IsChildOf(with int) bool {
-	parents, err := b.getParents()
+	parents, err := b.GetParents()
 	if err != nil {
 		return false
 	}
@@ -271,18 +271,19 @@ func (b *Being) Siblings() (*Population, error) {
 	children := make(map[int]struct{})
 	sibs := []int{}
 
-	parents, err := b.getParents()
+	parents, err := b.GetParents()
 	if err != nil {
 		return nil, err
 	}
 
 	for _, p := range parents {
+		fmt.Printf("%#v\n", p)
 		for _, c := range p.Children {
 			children[c] = struct{}{}
 		}
 	}
-
 	for s := range children {
+		fmt.Println(s)
 		if s != b.ID {
 			sibs = append(sibs, s)
 		}
@@ -293,7 +294,7 @@ func (b *Being) Siblings() (*Population, error) {
 // Piblings returns aunts and uncles of the receiver
 func (b *Being) Piblings() (*Population, error) {
 	parentSiblings := NewPopulation([]int{})
-	parents, err := b.getParents()
+	parents, err := b.GetParents()
 	if err != nil {
 		return nil, err
 	}
@@ -408,4 +409,12 @@ func (b *Being) String() string {
 // Alive returns whether this being is currently alive
 func (b *Being) Alive() bool {
 	return !b.Dead
+}
+
+func saveAll(beings []*Being) error {
+	ps := []persist.Persistable{}
+	for _, b := range beings {
+		ps = append(ps, b)
+	}
+	return persist.SaveAll(ps)
 }

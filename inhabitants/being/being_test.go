@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/slabgorb/gotown/persist"
+	"github.com/slabgorb/gotown/random"
 
 	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/being"
@@ -83,17 +84,17 @@ func testMainWrapped(m *testing.M) int {
 			sex:   "female",
 		},
 	}
-	id := 1
 	for _, bf := range beingFixtureRaw {
 		b := &Being{
 			Gender:  inhabitants.Gender(bf.sex),
 			Name:    NewName(bf.name),
 			Species: testSpecies,
 			Culture: testCulture,
-			ID:      id,
 		}
-		id++
 		b.SetAge(bf.age)
+		if err := b.Save(); err != nil {
+			panic(err)
+		}
 		beingFixtures[bf.label] = b
 
 	}
@@ -106,18 +107,19 @@ func TestMain(m *testing.M) {
 	os.Exit(testMainWrapped(m))
 }
 
-// func TestName(t *testing.T) {
-// 	expected := "Leone Giovanelli"
-// 	being := &Being{Species: testSpecies, Culture: testCulture, Gender: inhabitants.Male}
-// 	words.SetRandomizer(random.NewMock())
-// 	being.RandomizeName()
-// 	if being.Sex() != inhabitants.Male {
-// 		t.Errorf("Expected Male got %s", being.Sex())
-// 	}
-// 	if being.String() != expected {
-// 		t.Errorf("Expected %s got %s", expected, being.String())
-// 	}
-// }
+func TestName(t *testing.T) {
+	expected := "Leone Giovanelli"
+	being := &Being{Species: testSpecies, Culture: testCulture, Gender: inhabitants.Male}
+	words.SetRandomizer(random.NewMock())
+	being.RandomizeName()
+	if being.Sex() != inhabitants.Male {
+		t.Errorf("Expected Male got %s", being.Sex())
+	}
+	if being.String() != expected {
+		t.Errorf("Expected %s got %s", expected, being.String())
+	}
+}
+
 // func TestInheritedName(t *testing.T) {
 // 	m := New(testSpecies, testCulture)
 // 	m.Gender = inhabitants.Male
@@ -152,34 +154,75 @@ func TestMain(m *testing.M) {
 // 	}
 // }
 
-// func TestSiblings(t *testing.T) {
-// 	bf := beingFixtures
-// 	bf["adam"].Marry(bf["eve"])
-// 	bf["adam"].Children = []int{bf["cain"].ID, bf["abel"].ID}
-// 	bf["eve"].Children = []int{bf["cain"].ID, bf["abel"].ID}
-// 	bf["cain"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
-// 	bf["abel"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
-// 	sibs, _ := bf["cain"].Siblings()
-// 	t.Log(sibs)
-// 	if !sibs.Exists(bf["abel"]) {
-// 		t.Errorf("expected cain to be abel's brother")
-// 	}
-// 	sibs, _ = bf["cain"].Siblings()
-// 	if !sibs.Exists(bf["cain"]) {
-// 		t.Errorf("expected cain to be abel's brother")
-// 	}
-// 	if !bf["abel"].IsSiblingOf(bf["cain"].ID) {
-// 		t.Errorf("expected cain to be abel's brother")
-// 	}
-// }
-// func TestDeath(t *testing.T) {
-// 	adam := New(testSpecies, testCulture)
-// 	if !adam.Alive() {
-// 		t.Fail()
-// 	}
-// 	adam.Die()
-// 	if adam.Alive() {
-// 		t.Fail()
-// 	}
+func TestSiblings(t *testing.T) {
+	bf := beingFixtures
+	bf["adam"].Marry(bf["eve"])
+	bf["adam"].Children = []int{bf["cain"].ID, bf["abel"].ID}
+	bf["eve"].Children = []int{bf["cain"].ID, bf["abel"].ID}
+	bf["cain"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	bf["abel"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	for _, b := range bf {
+		b.Save()
+	}
+	sibs, err := bf["cain"].Siblings()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Logf("%#v", sibs)
+	t.Log(bf["eve"].Children)
+	t.Log(bf["adam"].Children)
+	if !sibs.Exists(bf["abel"]) {
+		t.Errorf("expected cain to be abel's brother")
+	}
+	sibs, _ = bf["cain"].Siblings()
+	if !sibs.Exists(bf["cain"]) {
+		t.Errorf("expected cain to be abel's brother")
+	}
+	if !bf["abel"].IsSiblingOf(bf["cain"].ID) {
+		t.Errorf("expected cain to be abel's brother")
+	}
+}
 
-// }
+func TestParents(t *testing.T) {
+	bf := beingFixtures
+	bf["adam"].Marry(bf["eve"])
+	bf["adam"].Children = []int{bf["cain"].ID, bf["abel"].ID}
+	bf["eve"].Children = []int{bf["cain"].ID, bf["abel"].ID}
+	bf["cain"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	bf["abel"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	beings, err := bf["abel"].GetParents()
+	if err != nil {
+		t.Fail()
+	}
+	if beings[0].ID != bf["adam"].ID && beings[1].ID != bf["adam"].ID {
+		t.Errorf("expected parent to be adam")
+	}
+	if beings[0].ID != bf["eve"].ID && beings[1].ID != bf["eve"].ID {
+		t.Errorf("expected parent to be eve")
+	}
+	mother, err := bf["abel"].Mother()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mother.ID != bf["eve"].ID {
+		t.Errorf("expected eve to be abel's mom")
+	}
+	father, err := bf["abel"].Father()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if father.ID != bf["adam"].ID {
+		t.Errorf("expected eve to be abel's mom")
+	}
+}
+func TestDeath(t *testing.T) {
+	adam := New(testSpecies, testCulture)
+	if !adam.Alive() {
+		t.Fail()
+	}
+	adam.Die()
+	if adam.Alive() {
+		t.Fail()
+	}
+
+}
