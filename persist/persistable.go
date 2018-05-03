@@ -35,14 +35,9 @@ func Open(path string) error {
 }
 
 func SaveAll(items []Persistable) error {
-	tx, err := DB.Begin(true)
-	if err != nil {
-		return err
-	}
 	quit := make(chan struct{})
 	errs := make(chan error)
 	done := make(chan error)
-	defer tx.Rollback()
 	for _, i := range items {
 		go func(i Persistable) {
 			err := error(nil)
@@ -62,13 +57,12 @@ func SaveAll(items []Persistable) error {
 	for {
 		select {
 		case err := <-errs:
-			tx.Rollback()
 			close(quit)
 			return err
 		case <-done:
 			count++
 			if count == len(items) {
-				return tx.Commit()
+				return nil
 			}
 		}
 	}

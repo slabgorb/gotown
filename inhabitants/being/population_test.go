@@ -71,18 +71,25 @@ func TestNew(t *testing.T) {
 
 func TestAging(t *testing.T) {
 	fmt.Println("aging")
-	_, beings := makePop(t, 10)
-	expectedAges := []int{}
+	p, beings := makePop(t, 10)
+	originalAges := []int{}
 	for _, b := range beings {
-		expectedAges = append(expectedAges, b.GetAge())
+		originalAges = append(originalAges, b.Age)
 	}
-	//p.Age()
-
-	sort.Ints(ages)
-	expectedAges := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	sort.Ints(originalAges)
+	p.Age()
+	expectedAges := []int{}
+	for _, v := range originalAges {
+		expectedAges = append(expectedAges, v+1)
+	}
+	actualAges := []int{}
+	for _, b := range beings {
+		actualAges = append(actualAges, b.Age)
+	}
+	sort.Ints(actualAges)
 	for i, v := range expectedAges {
-		if v != ages[i] {
-			t.Errorf("Expected %d got %d", v, ages[i])
+		if actualAges[i] != v {
+			t.Errorf("Expected %d got %d", v, actualAges[i])
 		}
 	}
 }
@@ -155,19 +162,18 @@ func TestAging(t *testing.T) {
 // 	}
 // }
 
-// func TestAddAndRemove(t *testing.T) {
-// 	b := New(testSpecies, testCulture)
-
-// 	p := NewPopulation([]int{})
-// 	p.Remove(b)
-// 	if p.Exists(b) {
-// 		t.Fail()
-// 	}
-// 	p.Add(b)
-// 	if !p.Exists(b) {
-// 		t.Fail()
-// 	}
-// }
+func TestAddAndRemove(t *testing.T) {
+	p, beings := makePop(t, 1)
+	b := beings[0]
+	p.Remove(b)
+	if p.Exists(b) {
+		t.Fail()
+	}
+	p.Add(b)
+	if !p.Exists(b) {
+		t.Fail()
+	}
+}
 
 // func TestAdamEve(t *testing.T) {
 // 	pop := []int{}
