@@ -242,15 +242,13 @@ func townHandler(c echo.Context) error {
 	if err := s.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load species %s: %s", req.Species, err))
 	}
-	area, err := locations.NewArea(locations.Town, nil)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create new area: %s", err))
-	}
 
-	namer := &words.Namer{Name: "english town names"}
+	namer := &words.Namer{Name: "english towns"}
 	if err := namer.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load namer %s: %s", namer.Name, err))
 	}
+
+	area := locations.NewArea(locations.Town, nil, namer)
 
 	if req.Name != "" {
 		area.Name = req.Name
@@ -269,8 +267,7 @@ func townHandler(c echo.Context) error {
 		}(&wg)
 	}
 	wg.Wait()
-	a := *area
-	if err := a.Save(); err != nil {
+	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}
 	return c.JSON(http.StatusOK, area)
