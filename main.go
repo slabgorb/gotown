@@ -270,6 +270,7 @@ func townHandler(c echo.Context) error {
 	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}
+	c.Logger().Debug(area.Residents)
 	return c.JSON(http.StatusOK, area)
 }
 

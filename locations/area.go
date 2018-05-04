@@ -23,12 +23,37 @@ type Area struct {
 	Enclosures   map[int]*Area     `json:"-"`
 }
 
+type AreaAPI struct {
+	ID        int               `json:"id"`
+	Name      string            `json:"name"`
+	Residents *being.Population `json:"residents"`
+	Size      string            `json:"size"`
+}
+
+func (a *Area) API() *AreaAPI {
+	return &AreaAPI{
+		ID:        a.ID,
+		Name:      a.Name,
+		Residents: a.Residents,
+		Size:      a.Size.String(),
+	}
+}
+
+// Add adds a being to the area
 func (a *Area) Add(b *being.Being) {
 	a.Residents.Add(b)
 }
 
 // Save implements persist.Persistable
 func (a *Area) Save() error {
+	if err := a.Residents.Save(); err != nil {
+		return err
+	}
+	a.PopulationID = a.Residents.ID
+	if err := a.Graveyard.Save(); err != nil {
+		return err
+	}
+	a.GraveyardID = a.Graveyard.ID
 	return persist.DB.Save(a)
 }
 
@@ -67,6 +92,9 @@ func NewArea(size AreaSize, location *Area, namer *words.Namer) *Area {
 
 // Population returns the total population of the enclosed area
 func (a *Area) Population() int {
+	if a.Residents == nil {
+		a.readResidents()
+	}
 	pop := a.Residents.Len()
 	for _, area := range a.Enclosures {
 		pop = pop + area.Population()
