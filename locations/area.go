@@ -1,7 +1,6 @@
 package locations
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/slabgorb/gotown/inhabitants/being"
@@ -11,63 +10,21 @@ import (
 
 // Area represents a geographical area
 type Area struct {
-	ID   int
-	Name string
-	*Habitation
-	Size       AreaSize
-	Graveyard  *being.Population
-	Location   *Area
-	Enclosures map[string]*Area
+	ID           int               `json:"id" storm:"id,increment"`
+	Name         string            `json:"name" storm:"index"`
+	PopulationID int               `json:"population_id"`
+	Size         AreaSize          `json:"size"`
+	GraveyardID  int               `json:"graveyard_id"`
+	LocationID   int               `json:"location_id"`
+	EnclosureIDS []int             `json:"enclosure_ids"`
+	Residents    *being.Population `json:"-"`
+	Graveyard    *being.Population `json:"-"`
+	Location     *Area             `json:"-"`
+	Enclosures   map[int]*Area     `json:"-"`
 }
 
-type serializeArea struct {
-	ID           int      `json:"id" storm:"id,increment"`
-	Name         string   `storm:"index"`
-	HabitationID int      `json:"habitation_id"`
-	Size         AreaSize `json:"size"`
-	LocationID   int      `json:"location_id"`
-	GraveyardID  int      `json:"graveyard_id"`
-	EnclosureIDS []int    `json:"enclosure_ids"`
-}
-
-// MarshalJSON implements json.Marshaler
-func (a *Area) MarshalJSON() ([]byte, error) {
-	eids := []int{}
-	for _, e := range a.Enclosures {
-		eids = append(eids, e.ID)
-	}
-	s := &serializeArea{
-		Name:         a.Name,
-		HabitationID: a.Habitation.ID,
-		Size:         a.Size,
-		LocationID:   a.Location.ID,
-		GraveyardID:  a.Graveyard.ID,
-		EnclosureIDS: eids,
-	}
-	return json.Marshal(s)
-}
-
-// UnmarshalJSON implements json.Unmarshaler
-func (a *Area) UnmarshalJSON(data []byte) error {
-	s := &serializeArea{}
-	if err := json.Unmarshal(data, s); err != nil {
-		return fmt.Errorf("could not unmarshal area: %s", err)
-	}
-	a.ID = s.ID
-	a.Habitation = &Habitation{ID: s.HabitationID}
-	if err := a.Habitation.Read(); err != nil {
-		return fmt.Errorf("could not load habitation %d: %s", a.Habitation.ID, err)
-	}
-	a.Size = s.Size
-	a.Location = &Area{ID: s.LocationID}
-	if err := a.Location.Read(); err != nil {
-		return fmt.Errorf("could not load location %d: %s", a.Location.ID, err)
-	}
-	a.Graveyard = &being.Population{ID: s.GraveyardID}
-	if err := a.Graveyard.Read(); err != nil {
-		return fmt.Errorf("could not read graveyard(population) %d: %s", a.Graveyard.ID, err)
-	}
-	return nil
+func (a *Area) Add(b *being.Being) {
+	a.Residents.Add(b)
 }
 
 // Save implements persist.Persistable
@@ -80,7 +37,16 @@ func (a *Area) Read() error {
 	if a.ID == 0 {
 		return fmt.Errorf("need id for area")
 	}
-	return persist.DB.One("ID", a.ID, a)
+	if err := persist.DB.One("ID", a.ID, a); err != nil {
+		return err
+	}
+	if err := a.readGraveyard(); err != nil {
+		return fmt.Errorf("could not read graveyard %d for area %d: %s", a.GraveyardID, a.ID, err)
+	}
+	if err := a.readResidents(); err != nil {
+		return fmt.Errorf("could not read population %d for area %d: %s", a.PopulationID, a.ID, err)
+	}
+	return nil
 }
 
 // Delete implements persist.Persistable
@@ -89,29 +55,21 @@ func (a *Area) Delete() error {
 }
 
 // NewArea creates an area
-func NewArea(size AreaSize, location *Area) (*Area, error) {
-	var n *words.Namer
-	if location != nil {
-		n = location.Namer
-	} else {
-		n = &words.Namer{Name: "english towns"}
-		if err := n.Read(); err != nil {
-			return nil, fmt.Errorf("error loading default words: %s", err)
-		}
-	}
+func NewArea(size AreaSize, location *Area, namer *words.Namer) *Area {
 	a := &Area{Size: size, Location: location}
-	a.Habitation = NewHabitation()
-	a.Enclosures = make(map[string]*Area)
-	a.SetNamer(n)
-	a.Name = a.Namer.CreateName()
-	return a, nil
+	a.Graveyard = being.NewPopulation([]int{})
+	a.Residents = being.NewPopulation([]int{})
+	a.EnclosureIDS = []int{}
+	a.Enclosures = make(map[int]*Area)
+	a.Name = namer.CreateName()
+	return a
 }
 
 // Population returns the total population of the enclosed area
 func (a *Area) Population() int {
-	pop := a.Habitation.Len()
+	pop := a.Residents.Len()
 	for _, area := range a.Enclosures {
-		pop += area.Population()
+		pop = pop + area.Population()
 	}
 	return pop
 }
@@ -153,7 +111,7 @@ func (a *Area) Detach() {
 
 // DetachFrom removes the passed in area from the receiver
 func (a *Area) DetachFrom(area *Area) {
-	delete(area.Enclosures, a.Name)
+	delete(area.Enclosures, a.ID)
 	a.Location = nil
 }
 
@@ -177,14 +135,29 @@ func (a *Area) AttachTo(area *Area) bool {
 		a.DetachFrom(a.Location)
 	}
 	if area.Enclosures == nil {
-		area.Enclosures = make(map[string]*Area)
+		area.Enclosures = make(map[int]*Area)
 	}
-	area.Enclosures[a.Name] = a
+	area.EnclosureIDS = append(area.EnclosureIDS, a.ID)
+	area.Enclosures[a.ID] = a
 	a.Location = area
+	a.LocationID = area.ID
 	return true
 }
 
 // String implements fmt.Stringer
 func (a *Area) String() string {
 	return a.Name
+}
+
+func (a *Area) readResidents() error {
+	p := being.Population{ID: a.PopulationID}
+	return p.Read()
+}
+func (a *Area) readGraveyard() error {
+	p := being.Population{ID: a.GraveyardID}
+	return p.Read()
+}
+
+func (a *Area) readEnclosures() error {
+	return nil
 }

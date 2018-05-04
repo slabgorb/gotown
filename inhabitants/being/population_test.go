@@ -46,6 +46,11 @@ func TestNew(t *testing.T) {
 	if p.Len() != count {
 		t.Errorf("expected %d count for generated pop got %d", count, p.Len())
 	}
+
+	if err := p.Save(); err != nil {
+		t.Fatal(err)
+	}
+
 	j, err := json.Marshal(p)
 	if err != nil {
 		t.Error(err)

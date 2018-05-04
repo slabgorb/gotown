@@ -12,6 +12,8 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
+var testNamer = &words.Namer{Name: "english towns"}
+
 func TestMain(m *testing.M) {
 	SetRandomizer(random.NewMock())
 	words.SetRandomizer(random.NewMock())
@@ -19,6 +21,9 @@ func TestMain(m *testing.M) {
 	species.Seed()
 	culture.Seed()
 	words.Seed()
+	if err := testNamer.Read(); err != nil {
+		panic(err)
+	}
 	code := m.Run()
 	os.Exit(code)
 }

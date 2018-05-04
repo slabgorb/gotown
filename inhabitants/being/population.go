@@ -1,7 +1,6 @@
 package being
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -13,8 +12,8 @@ import (
 // Population is a set of Being
 type Population struct {
 	mux sync.Mutex
-	ID  int
-	IDS map[int]struct{}
+	ID  int              `json:"id" storm:"id,increment"`
+	IDS map[int]struct{} `json:"ids"`
 }
 
 // MaritalCandidate is a pair of being
@@ -45,26 +44,26 @@ func NewPopulation(ids []int) *Population {
 	return p
 }
 
-type populationSerializer struct {
-	ID  int   `json:"id" storm:"id,increment"`
-	IDS []int `json:"ids"`
-}
+// type populationSerializer struct {
+// 	ID  int   `json:"id" storm:"id,increment"`
+// 	IDS []int `json:"ids"`
+// }
 
-// MarshalJSON implements json.Marshaler
-func (p *Population) MarshalJSON() ([]byte, error) {
-	ps := &populationSerializer{ID: p.ID, IDS: p.getIds()}
-	return json.Marshal(ps)
-}
+// // MarshalJSON implements json.Marshaler
+// func (p *Population) MarshalJSON() ([]byte, error) {
+// 	ps := &populationSerializer{ID: p.ID, IDS: p.getIds()}
+// 	return json.Marshal(ps)
+// }
 
-// UnmarshalJSON implements json.Unmarshaler
-func (p *Population) UnmarshalJSON(data []byte) error {
-	ps := &populationSerializer{}
-	if err := json.Unmarshal(data, ps); err != nil {
-		return err
-	}
-	p.appendIds(ps.IDS...)
-	return nil
-}
+// // UnmarshalJSON implements json.Unmarshaler
+// func (p *Population) UnmarshalJSON(data []byte) error {
+// 	ps := &populationSerializer{}
+// 	if err := json.Unmarshal(data, ps); err != nil {
+// 		return err
+// 	}
+// 	p.appendIds(ps.IDS...)
+// 	return nil
+// }
 
 // Reset implements persist.Persistable
 func (p *Population) Reset() {

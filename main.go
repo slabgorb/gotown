@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -68,7 +69,10 @@ func main() {
 	e := echo.New()
 	defineAPIHandlers(e)
 	defineStaticHandlers(e)
-	e.Use(middleware.Recover())
+
+	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		StackSize: 6 << 10,
+	}))
 	e.Use(middleware.Secure())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -232,16 +236,22 @@ func townHandler(c echo.Context) error {
 	}
 	cl := &culture.Culture{Name: req.Culture}
 	if err := cl.Read(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load culture %s: %s", req.Culture, err))
 	}
 	s := &species.Species{Name: req.Species}
 	if err := s.Read(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load species %s: %s", req.Species, err))
 	}
 	area, err := locations.NewArea(locations.Town, nil)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create new area: %s", err))
 	}
+
+	namer := &words.Namer{Name: "english town names"}
+	if err := namer.Read(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load namer %s: %s", namer.Name, err))
+	}
+
 	if req.Name != "" {
 		area.Name = req.Name
 	}
@@ -253,14 +263,15 @@ func townHandler(c echo.Context) error {
 		go func(wg *sync.WaitGroup) {
 			being := being.New(s, cl)
 			being.Randomize()
+			being.Save()
 			area.Add(being)
 			wg.Done()
 		}(&wg)
 	}
 	wg.Wait()
 	a := *area
-	if err := persist.DB.Save(&a); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if err := a.Save(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}
 	return c.JSON(http.StatusOK, area)
 }
