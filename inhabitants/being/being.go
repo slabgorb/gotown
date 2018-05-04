@@ -275,15 +275,12 @@ func (b *Being) Siblings() (*Population, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	for _, p := range parents {
-		fmt.Printf("%#v\n", p)
 		for _, c := range p.Children {
 			children[c] = struct{}{}
 		}
 	}
 	for s := range children {
-		fmt.Println(s)
 		if s != b.ID {
 			sibs = append(sibs, s)
 		}
@@ -409,6 +406,10 @@ func (b *Being) String() string {
 // Alive returns whether this being is currently alive
 func (b *Being) Alive() bool {
 	return !b.Dead
+}
+
+func (b *Being) AddChildren(ids ...int) {
+
 }
 
 func saveAll(beings []*Being) error {

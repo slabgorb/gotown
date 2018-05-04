@@ -15,12 +15,26 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
-var beingFixtures = make(map[string]*Being)
+type beingFixture map[string]*Being
+
+func (bf beingFixture) iterate() map[string]*Being {
+	return bf
+}
+
+func (bf beingFixture) beings() []*Being {
+	bgs := []*Being{}
+	for _, b := range bf.iterate() {
+		bgs = append(bgs, b)
+	}
+	return bgs
+}
+
+var beingFixtures = make(beingFixture)
 
 var testSpecies = &species.Species{Name: "human"}
 var testCulture = &culture.Culture{Name: "italianate"}
 
-type beingFixture struct {
+type rawBeingFixture struct {
 	label string
 	name  string
 	age   int
@@ -40,7 +54,7 @@ func testMainWrapped(m *testing.M) int {
 	if err := testSpecies.Read(); err != nil {
 		panic(fmt.Sprintf("could not load test species: %s", err))
 	}
-	beingFixtureRaw := []beingFixture{
+	beingFixtureRaw := []rawBeingFixture{
 		{
 			label: "adam",
 			name:  "Adam Man",
@@ -120,39 +134,28 @@ func TestName(t *testing.T) {
 	}
 }
 
-// func TestInheritedName(t *testing.T) {
-// 	m := New(testSpecies, testCulture)
-// 	m.Gender = inhabitants.Male
-// 	m.RandomizeName()
-// 	if err := m.Save(); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	f := New(testSpecies, testCulture)
-// 	f.Gender = inhabitants.Female
-// 	f.RandomizeName()
-// 	if err := f.Save(); err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	children, err := f.Reproduce(m)
-// 	if err != nil {
-// 		t.Errorf("%s", err)
-// 	}
-
-// 	child := children[0]
-// 	t.Logf("%#v", child.Species)
-// 	t.Logf("%#v", child)
-// 	if child.Sex() == inhabitants.Male {
-// 		if child.Name.GetFamilyName() != f.Name.GetGivenName()+"son" {
-// 			t.Errorf("expected %s got %s", f.Name.GetGivenName()+"son", child.Name.GetFamilyName())
-// 		}
-// 	} else {
-
-// 		if child.Name.GetFamilyName() != m.Name.GetGivenName()+"dottir" {
-// 			t.Errorf("expected %s got %s", m.Name.GetGivenName()+"dottir", child.Name.GetFamilyName())
-// 		}
-// 	}
-// }
+func TestInheritedName(t *testing.T) {
+	m := New(testSpecies, testCulture)
+	m.Gender = inhabitants.Male
+	m.RandomizeName()
+	if err := m.Save(); err != nil {
+		t.Fatal(err)
+	}
+	f := New(testSpecies, testCulture)
+	f.Gender = inhabitants.Female
+	f.RandomizeName()
+	if err := f.Save(); err != nil {
+		t.Fatal(err)
+	}
+	children, err := f.Reproduce(m)
+	if err != nil {
+		t.Errorf("%s", err)
+	}
+	child := children[0]
+	if child.Name.GetFamilyName() != f.Name.GetFamilyName() {
+		t.Errorf("expected %s got %s", f.Name.GetFamilyName(), child.Name.GetFamilyName())
+	}
+}
 
 func TestSiblings(t *testing.T) {
 	bf := beingFixtures
@@ -164,22 +167,19 @@ func TestSiblings(t *testing.T) {
 	for _, b := range bf {
 		b.Save()
 	}
-	sibs, err := bf["cain"].Siblings()
-	if err != nil {
-		t.Error(err)
-	}
-	t.Logf("%#v", sibs)
-	t.Log(bf["eve"].Children)
-	t.Log(bf["adam"].Children)
+	sibs, _ := bf["cain"].Siblings()
 	if !sibs.Exists(bf["abel"]) {
 		t.Errorf("expected cain to be abel's brother")
 	}
-	sibs, _ = bf["cain"].Siblings()
+	sibs, _ = bf["abel"].Siblings()
 	if !sibs.Exists(bf["cain"]) {
-		t.Errorf("expected cain to be abel's brother")
+		t.Errorf("expected abel to be cain's brother")
 	}
 	if !bf["abel"].IsSiblingOf(bf["cain"].ID) {
 		t.Errorf("expected cain to be abel's brother")
+	}
+	if !bf["cain"].IsSiblingOf(bf["abel"].ID) {
+		t.Errorf("expected abel to be cain's brother")
 	}
 }
 
