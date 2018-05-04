@@ -88,13 +88,13 @@ func (c *Culture) Read() error {
 		return fmt.Errorf("cannot read culture without name")
 	}
 	if err := persist.DB.One("Name", c.Name, c); err != nil {
-		return err
+		return fmt.Errorf("could not load culture %s: %s", c.Name, err)
 	}
 	c.Namers = make(map[inhabitants.Gender]*words.Namer)
 	for gender, namerName := range c.NamerNames {
 		n := &words.Namer{Name: namerName}
 		if err := n.Read(); err != nil {
-			return err
+			return fmt.Errorf("could not load namer %s: %s", n.Name, err)
 		}
 		c.Namers[gender] = n
 	}
