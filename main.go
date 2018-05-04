@@ -271,7 +271,11 @@ func townHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}
 	c.Logger().Debug(area.Residents)
-	return c.JSON(http.StatusOK, area)
+	api, err := area.API()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create area api for %d", area.ID))
+	}
+	return c.JSON(http.StatusOK, api)
 }
 
 func townNameHandler(c echo.Context) error {

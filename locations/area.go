@@ -24,19 +24,24 @@ type Area struct {
 }
 
 type AreaAPI struct {
-	ID        int               `json:"id"`
-	Name      string            `json:"name"`
-	Residents *being.Population `json:"residents"`
-	Size      string            `json:"size"`
+	ID        int            `json:"id"`
+	Name      string         `json:"name"`
+	Residents []*being.Being `json:"residents"`
+	Size      string         `json:"size"`
 }
 
-func (a *Area) API() *AreaAPI {
-	return &AreaAPI{
+func (a *Area) API() (*AreaAPI, error) {
+	beings, err := a.Residents.Inhabitants()
+	if err != nil {
+		return nil, err
+	}
+	api := &AreaAPI{
 		ID:        a.ID,
 		Name:      a.Name,
-		Residents: a.Residents,
+		Residents: beings,
 		Size:      a.Size.String(),
 	}
+	return api, nil
 }
 
 // Add adds a being to the area
