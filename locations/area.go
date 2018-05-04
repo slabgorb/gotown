@@ -24,10 +24,10 @@ type Area struct {
 }
 
 type AreaAPI struct {
-	ID        int            `json:"id"`
-	Name      string         `json:"name"`
-	Residents []*being.Being `json:"residents"`
-	Size      string         `json:"size"`
+	ID        int          `json:"id"`
+	Name      string       `json:"name"`
+	Residents []*being.API `json:"residents"`
+	Size      string       `json:"size"`
 }
 
 func (a *Area) API() (*AreaAPI, error) {
@@ -35,10 +35,15 @@ func (a *Area) API() (*AreaAPI, error) {
 	if err != nil {
 		return nil, err
 	}
+	beingsApi, err := being.APIList(beings)
+	if err != nil {
+		return nil, err
+	}
+
 	api := &AreaAPI{
 		ID:        a.ID,
 		Name:      a.Name,
-		Residents: beings,
+		Residents: beingsApi,
 		Size:      a.Size.String(),
 	}
 	return api, nil
