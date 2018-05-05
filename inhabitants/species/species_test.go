@@ -23,12 +23,16 @@ var demog = map[int]Demo{
 }
 
 func TestMain(m *testing.M) {
+	os.Exit(testMainWrapped(m))
+}
+
+func testMainWrapped(m *testing.M) int {
 	persist.OpenTestDB()
+	defer persist.CloseTestDB()
 	Seed()
 	SetRandomizer(random.NewMock())
-	code := m.Run()
-	persist.CloseTestDB()
-	os.Exit(code)
+	return m.Run()
+
 }
 func TestSeed(t *testing.T) {
 	list, err := List()

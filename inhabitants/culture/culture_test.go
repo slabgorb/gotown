@@ -14,6 +14,10 @@ import (
 var testSpecies = &species.Species{Name: "human"}
 
 func TestMain(m *testing.M) {
+	os.Exit(testMainWrapped(m))
+}
+
+func testMainWrapped(m *testing.M) int {
 	persist.OpenTestDB()
 	defer persist.CloseTestDB()
 	words.Seed()
@@ -22,9 +26,7 @@ func TestMain(m *testing.M) {
 	if err := testSpecies.Read(); err != nil {
 		panic(err)
 	}
-	code := m.Run()
-
-	os.Exit(code)
+	return m.Run()
 }
 
 type MarriageableStub struct {
