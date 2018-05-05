@@ -11,6 +11,7 @@ import AutoRenewIcon from 'material-ui-icons/Autorenew';
 import inflection from 'inflection';
 import areaApi from './api';
 import { PageTitle } from '../App';
+import List from './List';
 
 const styles = theme => ({
   root: {
@@ -108,6 +109,7 @@ class Form extends React.Component {
     return (
       <form className={classes.root} onSubmit={this.submitForm}>
         <PageTitle title="Create Town" />
+        <List />
         <Grid container>
           <Grid item xs={6}>
             <div className="flex-container">

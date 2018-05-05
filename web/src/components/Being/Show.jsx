@@ -1,40 +1,69 @@
 import React from 'react';
 import Card, { CardContent } from 'material-ui/Card';
-import Expression from '../Chromosome';
-
-const _ = require('underscore');
-
-const Being = props =>
-  (
-    <div>
-      <Card className="being">
-        <CardContent>
-          <div className="being-name">{props.being.name.display_name}</div>
-          <div className="being-age">{props.being.age}</div>
-          <div className="being-gender">{props.being.gender}</div>
-          <Expression expression={props.being.expression} />
-          <Chromosome chromosome={props.being.chromosome} />
-        </CardContent>
-      </Card>
-      <br />
-    </div>
-  );
-const expressionMap = (v, k) =>
-  (
-    <div key={k} className="key-value">
-      <div>{k}</div>
-      <div>{v}</div>
-    </div>
-  );
+import PropTypes from 'prop-types';
+import Expression from '../Chromosome/Expression';
+import Chromosome from '../Chromosome/Show';
+import beingApi from './api';
 
 
-const geneMap = gene => <div key={gene} className="being-chromosome-gene" style={{ backgroundColor: `#${gene}` }} />;
-const Chromosome = props =>
-  (
-    <div className="being-chromosome">
-      {props.chromosome.genes.map(geneMap)}
-    </div>
+class Being extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      being: props.being,
+      loaded: false,
+    };
+  }
 
-  );
+  componentDidMount() {
+    this.get(this.props.match.params);
+  }
+
+  get({ id }) {
+    beingApi.get(id)
+      .then((s) => {
+        this.setState({
+          being: s,
+          loaded: true,
+        });
+      });
+  }
+  render() {
+    const { being, loaded } = this.state;
+    if (!loaded) {
+      return (<div>Loading</div>);
+    }
+    const {
+      name,
+      gender,
+      expression,
+      chromosome,
+      age,
+    } = being;
+    return (
+      <div>
+        <Card className="being">
+          <CardContent>
+            <div className="being-name">{name}</div>
+            <div className="being-age">{age}</div>
+            <div className="being-gender">{gender}</div>
+            <Expression expression={expression} />
+            <Chromosome chromosome={chromosome} />
+          </CardContent>
+        </Card>
+        <br />
+      </div>
+    );
+  }
+}
+
+Being.propTypes = {
+  being: PropTypes.object,
+  match: PropTypes.object.isRequired,
+};
+
+Being.defaultProps = {
+  being: {},
+};
 
 module.exports = Being;

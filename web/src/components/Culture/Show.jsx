@@ -3,7 +3,7 @@ import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import inflection from 'inflection';
 import cultureApi from './api';
-import { NamersList, NamersShow } from '../Namer';
+import { NamersShow } from '../Namer';
 import { PageTitle, TabBar } from '../App';
 
 const _ = require('underscore');
@@ -64,17 +64,23 @@ class Culture extends React.Component {
 
     const tabs = ['marriage'];
     tabs.push(..._.keys(namers).map(s => `${s} names`));
-    
+
     return (
       <div className={classes.root}>
         <PageTitle title={this.state.name} titleize subtitle="Culture" />
         <TabBar value={value} onChange={this.handleChange} tabs={tabs} />
         { value > 0 && (
-          <NamersShow showAppBar={false} match={{ params: { name: _.values(namers)[value - 1].name } }} />
+          <NamersShow
+            showAppBar={false}
+            match={{ params: { name: _.values(namers)[value - 1].name } }}
+          />
         )}
         { value === 0 && (
           <div className="flex-container">
-            { _.map(this.state.maritalStrategies, v => (<span key={v}>{inflection.titleize(v)}</span>)) }
+            { _.map(
+                this.state.maritalStrategies,
+                v => (<span key={v}>{inflection.titleize(v)}</span>),
+            )}
           </div>
         )}
       </div>

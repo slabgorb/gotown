@@ -46,7 +46,7 @@ class AreaList extends React.Component {
         {this.state.list.map(item => (
           <ListItem button divider key={item} onClick={() => this.handleClick(item)}>
             <ListItemText primary={inflection.titleize(item)} />
-            <IconButton className={classes.deleteButton} onClick={(e) => this.handleDelete(e, item)}>
+            <IconButton className={classes.deleteButton} onClick={e => this.handleDelete(e, item)}>
               <DeleteForeverIcon />
             </IconButton>
           </ListItem>

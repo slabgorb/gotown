@@ -18,6 +18,7 @@ import { SpeciesList } from '../Species';
 import { CulturesList } from '../Culture';
 import { WordsList } from '../Words';
 import { NamersList } from '../Namer';
+import { AreaList } from '../Area';
 
 
 const seed = () => axios.put('/api/seed');
@@ -25,7 +26,7 @@ const seed = () => axios.put('/api/seed');
 const style = theme => ({
   flex: { flex: '1 0' },
   pageRoot: { marginBottom: 64 },
-  appBar: {  },
+  appBar: {},
   root: {
     transition: '0.3s all',
     backgroundColor: theme.palette.primary.main,
@@ -113,6 +114,7 @@ class PageTitle extends React.Component {
             <CulturesList handleClick={v => this.handleMenuItem(v)} />
             <WordsList handleClick={v => this.handleMenuItem(v)} />
             <NamersList handleClick={v => this.handleMenuItem(v)} />
+            <AreaList handleClick={v => this.handleMenuItem(v)} />
           </div>
         </Drawer>
         <AppBar position="fixed" className={classes.appBar}>
