@@ -127,6 +127,9 @@ func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
 // GetName returns the name of the culture
 func (c *Culture) GetName() string { return c.Name }
 
+// GetID returns the id of the culture
+func (c *Culture) GetID() int { return c.ID }
+
 // Seed seeds the database with initial cultures.
 func Seed() error {
 	var culture = &Culture{}
@@ -134,14 +137,14 @@ func Seed() error {
 }
 
 // List returns the names of the cultures already in tha database
-func List() ([]string, error) {
+func List() ([]persist.IDPair, error) {
 	cultures := []Culture{}
 	if err := persist.DB.All(&cultures); err != nil {
 		return nil, err
 	}
-	names := []string{}
+	items := []persist.IDPair{}
 	for _, c := range cultures {
-		names = append(names, c.Name)
+		items = append(items, persist.IDPair{Name: c.Name, ID: c.ID})
 	}
-	return names, nil
+	return items, nil
 }

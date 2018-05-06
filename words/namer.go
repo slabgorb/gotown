@@ -30,6 +30,9 @@ func (n *Namer) PatternList() []string {
 	return pl
 }
 
+func (n *Namer) GetID() int      { return n.ID }
+func (n *Namer) GetName() string { return n.Name }
+
 // Save implements persist.Persistable
 func (n *Namer) Save() error {
 	return persist.DB.Save(n)

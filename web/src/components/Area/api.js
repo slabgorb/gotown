@@ -9,8 +9,8 @@ class areaApi {
   static getCultures() {
     return cultureApi.getAll();
   }
-  static get(name) {
-    return axios.get(`/api/towns/${name}`).then(resp => resp.data);
+  static get(id) {
+    return axios.get(`/api/towns/${id}`).then(resp => resp.data);
   }
 
   static getAll() {
@@ -24,10 +24,9 @@ class areaApi {
     return axios.get('/api/town/name').then(resp => resp.data);
   }
 
-  static delete(name) {
-    return axios.delete(`/api/towns/${name}`, { params: { name } }).then(resp => resp.data)
+  static delete(id) {
+    return axios.delete(`/api/towns/${id}`, { params: { id } }).then(resp => resp.data);
   }
-
 }
 
 export default areaApi;

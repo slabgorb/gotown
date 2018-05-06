@@ -71,6 +71,9 @@ func (s *Species) Read() error {
 	return persist.DB.One("Name", s.Name, s)
 }
 
+// GetID returns the ID
+func (s *Species) GetID() int { return s.ID }
+
 // GetGenders returns the genders appropriate for this species
 func (s *Species) GetGenders() []inhabitants.Gender {
 	return s.Genders
@@ -113,14 +116,14 @@ func Seed() error {
 }
 
 // List returns species names from the database
-func List() ([]string, error) {
+func List() ([]persist.IDPair, error) {
 	species := []Species{}
 	if err := persist.DB.All(&species); err != nil {
 		return nil, err
 	}
-	names := []string{}
+	names := []persist.IDPair{}
 	for _, c := range species {
-		names = append(names, c.Name)
+		names = append(names, persist.IDPair{Name: c.Name, ID: c.ID})
 	}
 	return names, nil
 }

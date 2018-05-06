@@ -46,7 +46,6 @@ type Populatable interface {
 
 // Readable abstracts the ability to read from a database
 type Readable interface {
-	GetName() string
 	persist.Persistable
 }
 

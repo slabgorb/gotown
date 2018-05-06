@@ -17,14 +17,26 @@ func SetDB(newDb *storm.DB) {
 	DB = newDb
 }
 
+type IDPair struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type Identifiable interface {
+	GetName() string
+	GetID() int
+}
+
 // Persistable models database persistence
 type Persistable interface {
 	Save() error
 	Read() error
 	Delete() error
 	Reset()
+	Identifiable
 }
 
+// Open opens the connection to the database file
 func Open(path string) error {
 	session, err := storm.Open(path, storm.Batch())
 	if err != nil {
@@ -34,6 +46,7 @@ func Open(path string) error {
 	return nil
 }
 
+// SaveAll saves a slice of persistables
 func SaveAll(items []Persistable) error {
 	quit := make(chan struct{})
 	errs := make(chan error)
@@ -68,10 +81,12 @@ func SaveAll(items []Persistable) error {
 	}
 }
 
+// Close closes the connection to the database file
 func Close() error {
 	return DB.Close()
 }
 
+// OpenTestDB sets up a connection to a test db instance
 func OpenTestDB() {
 	err := Open("_gotown_test.db")
 	if err != nil {
@@ -79,6 +94,7 @@ func OpenTestDB() {
 	}
 }
 
+// CloseTestDB closes the file and deletes it
 func CloseTestDB() {
 	defer os.Remove("_gotown_test.db")
 	DB.Close()

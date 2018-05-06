@@ -168,7 +168,12 @@ func (b *Being) Delete() error {
 }
 
 // GetName returns the name object
-func (b *Being) GetName() *Name {
+func (b *Being) GetName() string {
+	return b.Name.Display
+}
+
+// GetFullName returns the name object
+func (b *Being) GetFullName() *Name {
 	return b.Name
 }
 

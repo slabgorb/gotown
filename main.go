@@ -38,10 +38,10 @@ func defineAPIHandlers(e *echo.Echo) {
 	api.GET("/words", listWordsHandler)
 	api.GET("/words/:name", showWordsHandler)
 	api.GET("/town/name", townNameHandler)
-	api.DELETE("/towns/:name", deleteAreaHandler)
+	api.DELETE("/towns/:id", deleteAreaHandler)
 	api.GET("/towns", listAreasHandler)
-	api.GET("/towns/:name", showAreaHandler)
-	api.POST("/towns/create", townHandler)
+	api.GET("/towns/:id", showAreaHandler)
+	api.POST("/towns/create", createTownHandler)
 	//api.GET("/being/:id", showBeingHandler)
 	api.PUT("/seed", seedHandler)
 	//e.GET("/household", householdHandler)
@@ -92,7 +92,7 @@ func seedHandler(c echo.Context) error {
 	return nil
 }
 
-func list(c echo.Context, f func() ([]string, error)) error {
+func list(c echo.Context, f func() ([]persist.IDPair, error)) error {
 	names, err := f()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -151,6 +151,18 @@ type townHandlerRequest struct {
 	Culture string `json:"culture" form:"culture" query:"culture"`
 	Species string `json:"species" form:"species" query:"species"`
 	Name    string `json:"name" form:"name" query:"name"`
+	ID      int    `json:"id" form:"id" query:"id"`
+	Count   int    `json:"count" form:"count" query:"count"`
+}
+
+type lister interface {
+	GetId()
+	String()
+}
+
+type listItem struct {
+	S  string `json:"name"`
+	ID int    `json:"id"`
 }
 
 func listAreasHandler(c echo.Context) error {
@@ -158,23 +170,23 @@ func listAreasHandler(c echo.Context) error {
 	if err := persist.DB.All(&all); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	names := []string{}
+	names := []listItem{}
 	for _, t := range all {
-		names = append(names, t.String())
+		names = append(names, listItem{S: t.Name, ID: t.ID})
 	}
 	return c.JSON(http.StatusOK, names)
 }
 
 func deleteAreaHandler(c echo.Context) error {
-	var a locations.Area
 	req := new(townHandlerRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if err := persist.DB.One("Name", req.Name, &a); err != nil {
+	a := &locations.Area{ID: req.ID}
+	if err := a.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if err := persist.DB.DeleteStruct(&a); err != nil {
+	if err := a.Delete(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	return c.JSON(http.StatusOK, struct{ success bool }{success: true})
@@ -182,8 +194,12 @@ func deleteAreaHandler(c echo.Context) error {
 
 func showAreaHandler(c echo.Context) error {
 	var a locations.Area
-	a.Name = c.Param("name")
-	if err := persist.DB.One("Name", c.Param("name"), &a); err != nil {
+	var err error
+	a.ID, err = strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return err
+	}
+	if err = a.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, a)
@@ -229,7 +245,7 @@ func renameHandler(c echo.Context) error {
 // 	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
 // }
 
-func townHandler(c echo.Context) error {
+func createTownHandler(c echo.Context) error {
 	req := new(townHandlerRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -253,24 +269,21 @@ func townHandler(c echo.Context) error {
 	if req.Name != "" {
 		area.Name = req.Name
 	}
-	count := 100
 	var wg sync.WaitGroup
-	wg.Add(count)
-	//cron := timeline.NewChronology()
-	for i := 0; i < count; i++ {
+	for i := 0; i < req.Count; i++ {
 		go func(wg *sync.WaitGroup) {
+			wg.Add(1)
+			defer wg.Done()
 			being := being.New(s, cl)
 			being.Randomize()
 			being.Save()
 			area.Add(being)
-			wg.Done()
 		}(&wg)
 	}
 	wg.Wait()
 	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}
-	c.Logger().Debug(area.Residents)
 	api, err := area.API()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create area api for %d", area.ID))

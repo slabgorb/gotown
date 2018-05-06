@@ -73,6 +73,15 @@ func (p *Population) Reset() {
 
 // Delete implements persist.Persistable
 func (p *Population) Delete() error {
+	beings, err := p.Inhabitants()
+	if err != nil {
+		return err
+	}
+	for _, b := range beings {
+		if err := b.Delete(); err != nil {
+			return err
+		}
+	}
 	return persist.DB.DeleteStruct(p)
 }
 

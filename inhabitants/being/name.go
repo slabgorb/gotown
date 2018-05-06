@@ -53,7 +53,7 @@ type Nameable interface {
 	Father() (*Being, error)
 	Mother() (*Being, error)
 	GetNamer() *words.Namer
-	GetName() *Name
+	GetFullName() *Name
 	Sex() inhabitants.Gender
 }
 
@@ -67,7 +67,7 @@ var NameStrategies = map[string]NameStrategy{
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Mother()
 		if parent != nil && err == nil {
-			name.FamilyName = parent.GetName().FamilyName
+			name.FamilyName = parent.GetFullName().FamilyName
 			return name
 		}
 		name.FamilyName = namer.Words.FamilyName()
@@ -80,7 +80,7 @@ var NameStrategies = map[string]NameStrategy{
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Father()
 		if parent != nil && err == nil {
-			name.FamilyName = parent.GetName().FamilyName
+			name.FamilyName = parent.GetFullName().FamilyName
 			return name
 		}
 		name.FamilyName = namer.Words.FamilyName()
@@ -93,7 +93,7 @@ var NameStrategies = map[string]NameStrategy{
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Mother()
 		if parent != nil && err == nil {
-			name.FamilyName = parent.GetName().GivenName + namer.Words.Matronymic()
+			name.FamilyName = parent.GetFullName().GivenName + namer.Words.Matronymic()
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName() + namer.Words.Matronymic()
@@ -106,7 +106,7 @@ var NameStrategies = map[string]NameStrategy{
 		name := &Name{GivenName: namer.Words.GivenName()}
 		parent, err := b.Father()
 		if parent != nil && err == nil {
-			name.FamilyName = parent.GetName().GivenName + namer.Words.Patronymic()
+			name.FamilyName = parent.GetFullName().GivenName + namer.Words.Patronymic()
 			return name
 		}
 		name.FamilyName = namer.Words.GivenName() + namer.Words.Patronymic()

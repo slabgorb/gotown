@@ -86,6 +86,18 @@ func (a *Area) Read() error {
 
 // Delete implements persist.Persistable
 func (a *Area) Delete() error {
+	if a.Residents != nil {
+		if err := a.Residents.Delete(); err != nil {
+			return err
+		}
+	}
+
+	if a.Graveyard != nil {
+		if err := a.Graveyard.Delete(); err != nil {
+			return err
+		}
+	}
+
 	return persist.DB.DeleteStruct(a)
 }
 

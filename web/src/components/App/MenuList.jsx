@@ -5,15 +5,25 @@ import ExpansionPanel, {
   ExpansionPanelSummary,
   ExpansionPanelDetails,
 } from 'material-ui/ExpansionPanel';
+import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
+import IconButton from 'material-ui/IconButton';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Typography from 'material-ui/Typography';
 import inflection from 'inflection';
+
+const deleteIcon = (classes, handleDelete, item) => (
+  <IconButton className={classes.deleteButton} onClick={e => handleDelete(e, item.id)}>
+    <DeleteForeverIcon />
+  </IconButton>
+);
 
 const MenuList = ({
   classes,
   heading,
   list,
   handleClick,
+  handleDelete,
+  deletable,
 }) => (
   <ExpansionPanel>
     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -22,8 +32,9 @@ const MenuList = ({
     <ExpansionPanelDetails>
       <List component="nav">
         {list.map(item => (
-          <ListItem button divider key={item} onClick={() => handleClick(item)}>
-            <ListItemText primary={inflection.titleize(item)} />
+          <ListItem button divider key={item} onClick={() => handleClick(item.id)}>
+            <ListItemText primary={inflection.titleize(item.name)} />
+            {deletable ? deleteIcon(classes, handleDelete, item) : (<div />)}
           </ListItem>
           ))}
       </List>
@@ -36,6 +47,13 @@ MenuList.propTypes = {
   heading: PropTypes.node.isRequired,
   list: PropTypes.array.isRequired,
   handleClick: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func,
+  deletable: PropTypes.bool,
+};
+
+MenuList.defaultProps = {
+  handleDelete: () => {},
+  deletable: false,
 };
 
 module.exports = MenuList;

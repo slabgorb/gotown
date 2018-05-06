@@ -7,6 +7,7 @@ import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import IconButton from 'material-ui/IconButton';
 import TextField from 'material-ui/TextField';
+import Select from 'material-ui/Select';
 import AutoRenewIcon from 'material-ui-icons/Autorenew';
 import inflection from 'inflection';
 import areaApi from './api';
@@ -37,6 +38,7 @@ class Form extends React.Component {
       name: '',
       currentCulture: null,
       currentSpecies: null,
+      currentSize: 8,
     };
     this.clickRandomTownName = this.clickRandomTownName.bind(this);
     this.submitForm = this.submitForm.bind(this);
@@ -55,6 +57,7 @@ class Form extends React.Component {
         currentSpecies: '',
       }));
   }
+
 
   handleChange(control) {
     return (event) => {
@@ -103,7 +106,8 @@ class Form extends React.Component {
 
   render() {
     const { classes } = this.props;
-    if (!this.state.loaded) {
+    const { name, currentSize, loaded, species, cultures, currentCulture, currentSpecies } = this.state
+    if (!loaded) {
       return (<div>Loading</div>);
     }
     return (
@@ -113,22 +117,42 @@ class Form extends React.Component {
         <Grid container>
           <Grid item xs={6}>
             <div className="flex-container">
-              <TextField id="name-tf" label="Name" placeholder="Name" value={this.state.name} className={classes.textField} onChange={this.handleChange('name')} />
+              <TextField id="name-tf" label="Name" placeholder="Name" value={name} className={classes.textField} onChange={this.handleChange('name')} />
               <IconButton className={classes.avatar} onClick={this.clickRandomTownName}>
                 <AutoRenewIcon />
               </IconButton>
             </div>
           </Grid>
           <Grid item xs={6}>
-            <Button variant="raised" color="primary" type="submit" disabled={!(this.state.currentCulture && this.state.currentSpecies)} className={classes.button}>Create</Button>
+            <Button variant="raised" color="primary" type="submit" disabled={!(currentCulture && currentSpecies)} className={classes.button}>Create</Button>
           </Grid>
           <Grid item xs={6}>
-            {this.radioGroup('Species', 'species', this.state.species, this.state.currentSpecies, this.handleChange('currentSpecies'))}
+            {this.radioGroup('Species', 'species', species, currentSpecies, this.handleChange('currentSpecies'))}
           </Grid>
           <Grid item xs={6}>
-            {this.radioGroup('Culture', 'culture', this.state.cultures, this.state.currentCulture, this.handleChange('currentCulture'))}
+            {this.radioGroup('Culture', 'culture', cultures, currentCulture, this.handleChange('currentCulture'))}
           </Grid>
+          <Grid item xs={6}>
+            <Select
+              value={currentSize}
+              onChange={this.handleChange('currentSize')}
+            >
 
+              <option value="1">Hut </option>
+              <option value="2">Cottage</option>
+              <option value="3">House</option>
+              <option value="4">Tower</option>
+              <option value="5">Castle</option>
+              <option value="6">Hamlet</option>
+              <option value="7">Palace</option>
+              <option value="8">Village</option>
+              <option value="9">Town</option>
+              <option value="10">City</option>
+              <option value="11">Region</option>
+              <option value="12">NationState</option>
+              <option value="13">Empire</option>
+            </Select>
+          </Grid>
         </Grid>
       </form>
     );

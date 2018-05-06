@@ -2,11 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import IconButton from 'material-ui/IconButton';
-import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
-import inflection from 'inflection';
 import areaApi from './api';
+import { MenuList } from '../App';
 
 const styles = () => ({
   deleteButton: {},
@@ -38,20 +35,19 @@ class AreaList extends React.Component {
 
   render() {
     const { classes } = this.props;
-    if (this.state.list.length === 0) {
+    const { list } = this.state;
+    if (list.length === 0) {
       return null;
     }
     return (
-      <List component="nav">
-        {this.state.list.map(item => (
-          <ListItem button divider key={item} onClick={() => this.handleClick(item)}>
-            <ListItemText primary={inflection.titleize(item)} />
-            <IconButton className={classes.deleteButton} onClick={e => this.handleDelete(e, item)}>
-              <DeleteForeverIcon />
-            </IconButton>
-          </ListItem>
-          ))}
-      </List>
+      <MenuList
+        deletable
+        classes={classes}
+        heading="Towns"
+        list={list}
+        handleClick={this.handleClick}
+        handleDelete={this.handleDelete}
+      />
     );
   }
 }

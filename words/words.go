@@ -29,6 +29,9 @@ type Words struct {
 	BackupName string `json:"backup"`
 }
 
+func (w *Words) GetID() int      { return w.ID }
+func (w *Words) GetName() string { return w.Name }
+
 // Save implements persist.Persistable
 func (w *Words) Save() error {
 	return persist.DB.Save(w)
@@ -203,14 +206,14 @@ func Seed() {
 	}
 }
 
-func WordsList() ([]string, error) {
+func WordsList() ([]persist.IDPair, error) {
 	wds := []Words{}
 	if err := persist.DB.All(&wds); err != nil {
 		return nil, err
 	}
-	names := []string{}
+	names := []persist.IDPair{}
 	for _, w := range wds {
-		names = append(names, w.Name)
+		names = append(names, persist.IDPair{Name: w.Name, ID: w.ID})
 	}
 	return names, nil
 }

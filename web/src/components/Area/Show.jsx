@@ -11,12 +11,12 @@ class AreaShow extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: props.match.params.name,
+      id: props.match.params.id,
     };
   }
 
   componentWillMount() {
-    return areaApi.get(this.state.name).then((data) => {
+    return areaApi.get(this.state.id).then((data) => {
       this.setState({
         name: data.name,
       });
