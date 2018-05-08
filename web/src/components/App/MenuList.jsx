@@ -32,7 +32,7 @@ const MenuList = ({
     <ExpansionPanelDetails>
       <List component="nav">
         {list.map(item => (
-          <ListItem button divider key={item} onClick={() => handleClick(item.id)}>
+          <ListItem button divider key={item.id} onClick={() => handleClick(item.id)}>
             <ListItemText primary={inflection.titleize(item.name)} />
             {deletable ? deleteIcon(classes, handleDelete, item) : (<div />)}
           </ListItem>

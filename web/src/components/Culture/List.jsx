@@ -24,14 +24,15 @@ class CultureList extends React.Component {
   }
 
   render() {
-    if (this.state.list.length === 0) {
+    const { list } = this.state;
+    if (list.length === 0) {
       return null;
     }
     const { classes, handleClick } = this.props;
     return (<MenuList
       heading="Cultures"
       classes={classes}
-      list={this.state.list}
+      list={list}
       handleClick={v => handleClick(`cultures/${v}`)()}
     />);
   }

@@ -44,8 +44,8 @@ func (w *Words) Delete() error {
 
 // Fetch implements persist.Persistable
 func (w *Words) Read() error {
-	if err := persist.DB.One("Name", w.Name, w); err != nil {
-		return err
+	if err := persist.Read(w); err != nil {
+		return fmt.Errorf("could not load words: %s", err)
 	}
 	return w.loadBackup()
 }

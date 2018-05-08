@@ -36,6 +36,23 @@ type Persistable interface {
 	Identifiable
 }
 
+// Read reads in by id or name
+func Read(p Identifiable) error {
+	if p.GetID() == 0 && p.GetName() == "" {
+		return fmt.Errorf("cannot read without id or name")
+	}
+	if p.GetID() > 0 {
+		if err := DB.One("ID", p.GetID(), p); err != nil {
+			return fmt.Errorf("could not load id %d: %s", p.GetID(), err)
+		}
+	} else {
+		if err := DB.One("Name", p.GetName(), p); err != nil {
+			return fmt.Errorf("could not load name %s: %s", p.GetName(), err)
+		}
+	}
+	return nil
+}
+
 // Open opens the connection to the database file
 func Open(path string) error {
 	session, err := storm.Open(path, storm.Batch())

@@ -2,6 +2,7 @@ package words
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"regexp"
@@ -45,8 +46,8 @@ func (n *Namer) Delete() error {
 
 // Fetch implements persist.Persistable
 func (n *Namer) Read() error {
-	if err := persist.DB.One("Name", n.Name, n); err != nil {
-		return err
+	if err := persist.Read(n); err != nil {
+		return fmt.Errorf("could not read namer: %s", err)
 	}
 	w := Words{Name: n.WordsName}
 	if err := w.Read(); err != nil {
@@ -134,14 +135,14 @@ func New(patterns []string, words string, nameStrategy string) *Namer {
 }
 
 // NamerList returns a list of namers (as []string)
-func NamerList() ([]string, error) {
+func NamerList() ([]persist.IDPair, error) {
 	ns := []Namer{}
 	if err := persist.DB.All(&ns); err != nil {
 		return nil, err
 	}
-	names := []string{}
+	names := []persist.IDPair{}
 	for _, n := range ns {
-		names = append(names, n.Name)
+		names = append(names, persist.IDPair{Name: n.Name, ID: n.ID})
 	}
 	return names, nil
 }

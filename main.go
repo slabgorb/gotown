@@ -28,15 +28,15 @@ func init() {
 func defineAPIHandlers(e *echo.Echo) {
 	api := e.Group("/api")
 	api.GET("/cultures", listCulturesHandler)
-	api.GET("/cultures/:name", showCulturesHandler)
+	api.GET("/cultures/:id", showCulturesHandler)
 	api.GET("/species", listSpeciesHandler)
-	api.GET("/species/:name", showSpeciesHandler)
+	api.GET("/species/:id", showSpeciesHandler)
 	api.GET("/species/:name/expression", expressSpeciesHandler)
 	api.GET("/namers", listNamersHandler)
-	api.GET("/namers/:name", showNamersHandler)
-	api.GET("/namers/:name/random", randomNameHandler)
+	api.GET("/namers/:id", showNamersHandler)
+	api.GET("/namers/:id/random", randomNameHandler)
 	api.GET("/words", listWordsHandler)
-	api.GET("/words/:name", showWordsHandler)
+	api.GET("/words/:id", showWordsHandler)
 	api.GET("/town/name", townNameHandler)
 	api.DELETE("/towns/:id", deleteAreaHandler)
 	api.GET("/towns", listAreasHandler)
@@ -92,6 +92,14 @@ func seedHandler(c echo.Context) error {
 	return nil
 }
 
+func getID(c echo.Context) (int, error) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return 0, fmt.Errorf("could not convert %s into a valid int: %s", c.Param("id"), err)
+	}
+	return id, nil
+}
+
 func list(c echo.Context, f func() ([]persist.IDPair, error)) error {
 	names, err := f()
 	if err != nil {
@@ -109,14 +117,28 @@ func show(c echo.Context, item persist.Persistable) error {
 
 func listCulturesHandler(c echo.Context) error { return list(c, culture.List) }
 func showCulturesHandler(c echo.Context) error {
-	return show(c, &culture.Culture{Name: c.Param("name")})
+	id, err := getID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load culture: %s", err))
+	}
+	return show(c, &culture.Culture{ID: id})
 }
 
 func listSpeciesHandler(c echo.Context) error { return list(c, species.List) }
-func showSpeciesHandler(c echo.Context) error { return show(c, &species.Species{Name: c.Param("name")}) }
+func showSpeciesHandler(c echo.Context) error {
+	id, err := getID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load species: %s", err))
+	}
+	return show(c, &species.Species{ID: id})
+}
 
 func expressSpeciesHandler(c echo.Context) error {
-	item := &species.Species{Name: c.Param("name")}
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not convert %s into a valid int: %s", c.Param("id"), err))
+	}
+	item := &species.Species{ID: id}
 	if err := item.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -132,7 +154,13 @@ func expressSpeciesHandler(c echo.Context) error {
 }
 
 func listNamersHandler(c echo.Context) error { return list(c, words.NamerList) }
-func showNamersHandler(c echo.Context) error { return show(c, &words.Namer{Name: c.Param("name")}) }
+func showNamersHandler(c echo.Context) error {
+	id, err := getID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load namer: %s", err))
+	}
+	return show(c, &words.Namer{ID: id})
+}
 
 func randomNameHandler(c echo.Context) error {
 	n := &words.Namer{Name: c.Param("name")}
@@ -143,7 +171,13 @@ func randomNameHandler(c echo.Context) error {
 }
 
 func listWordsHandler(c echo.Context) error { return list(c, words.WordsList) }
-func showWordsHandler(c echo.Context) error { return show(c, &words.Words{Name: c.Param("name")}) }
+func showWordsHandler(c echo.Context) error {
+	id, err := getID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load words: %s", err))
+	}
+	return show(c, &words.Words{ID: id})
+}
 
 //func showBeingHandler(c echo.Context) error { return show(c, &being.Being{ID: c.Param("id")}) }
 

@@ -1,6 +1,7 @@
 package species
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/slabgorb/gotown/inhabitants/genetics"
@@ -68,7 +69,10 @@ func (s *Species) Delete() error {
 
 // Fetch implements persist.Persistable
 func (s *Species) Read() error {
-	return persist.DB.One("Name", s.Name, s)
+	if err := persist.Read(s); err != nil {
+		return fmt.Errorf("cannot read species: %s", err)
+	}
+	return nil
 }
 
 // GetID returns the ID

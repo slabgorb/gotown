@@ -14,7 +14,7 @@ class areaApi {
   }
 
   static getAll() {
-    return axios.get('api/towns').then(resp => resp.data);
+    return axios.get('/api/towns').then(resp => resp.data);
   }
 
   static create(params) {
