@@ -92,12 +92,12 @@ func seedHandler(c echo.Context) error {
 	return nil
 }
 
-func getID(c echo.Context) (int, error) {
+func getID(c echo.Context) int {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return 0, fmt.Errorf("could not convert %s into a valid int: %s", c.Param("id"), err)
+		return 0
 	}
-	return id, nil
+	return id
 }
 
 func list(c echo.Context, f func() ([]persist.IDPair, error)) error {
@@ -117,20 +117,12 @@ func show(c echo.Context, item persist.Persistable) error {
 
 func listCulturesHandler(c echo.Context) error { return list(c, culture.List) }
 func showCulturesHandler(c echo.Context) error {
-	id, err := getID(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load culture: %s", err))
-	}
-	return show(c, &culture.Culture{ID: id})
+	return show(c, &culture.Culture{ID: getID(c), Name: c.Param("id")})
 }
 
 func listSpeciesHandler(c echo.Context) error { return list(c, species.List) }
 func showSpeciesHandler(c echo.Context) error {
-	id, err := getID(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load species: %s", err))
-	}
-	return show(c, &species.Species{ID: id})
+	return show(c, &species.Species{ID: getID(c), Name: c.Param("id")})
 }
 
 func expressSpeciesHandler(c echo.Context) error {
@@ -155,11 +147,7 @@ func expressSpeciesHandler(c echo.Context) error {
 
 func listNamersHandler(c echo.Context) error { return list(c, words.NamerList) }
 func showNamersHandler(c echo.Context) error {
-	id, err := getID(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load namer: %s", err))
-	}
-	return show(c, &words.Namer{ID: id})
+	return show(c, &words.Namer{ID: getID(c), Name: c.Param("id")})
 }
 
 func randomNameHandler(c echo.Context) error {
@@ -172,11 +160,7 @@ func randomNameHandler(c echo.Context) error {
 
 func listWordsHandler(c echo.Context) error { return list(c, words.WordsList) }
 func showWordsHandler(c echo.Context) error {
-	id, err := getID(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load words: %s", err))
-	}
-	return show(c, &words.Words{ID: id})
+	return show(c, &words.Words{ID: getID(c), Name: c.Param("id")})
 }
 
 //func showBeingHandler(c echo.Context) error { return show(c, &being.Being{ID: c.Param("id")}) }
