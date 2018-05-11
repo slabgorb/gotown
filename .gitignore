@@ -16,3 +16,4 @@ main
 .vscode
 *hot-update*
 gin-bin
+!*/reference_images/*.png
