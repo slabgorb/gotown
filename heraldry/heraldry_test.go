@@ -8,6 +8,6 @@ import (
 )
 
 func TestApply(t *testing.T) {
-	dc := gg.NewContext(200, 200)
+	dc := gg.NewContext(300, 300)
 	Apply(dc)
 }
