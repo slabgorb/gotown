@@ -33,11 +33,11 @@ type AreaAPI struct {
 func (a *Area) API() (*AreaAPI, error) {
 	beings, err := a.Residents.Inhabitants()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not load residents for area %d: %s", a.ID, err)
 	}
 	beingsApi, err := being.APIList(beings)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not load being api for area %d: %s", a.ID, err)
 	}
 
 	api := &AreaAPI{
@@ -82,6 +82,19 @@ func (a *Area) Read() error {
 		return fmt.Errorf("could not read population %d for area %d: %s", a.PopulationID, a.ID, err)
 	}
 	return nil
+}
+
+func (a *Area) GetID() int      { return a.ID }
+func (a *Area) GetName() string { return a.Name }
+
+func (a *Area) Reset() {
+	a.Name = ""
+	a.ID = 0
+	a.Residents = nil
+	a.Graveyard = nil
+	a.GraveyardID = 0
+	a.PopulationID = 0
+	a.EnclosureIDS = []int{}
 }
 
 // Delete implements persist.Persistable

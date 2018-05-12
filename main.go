@@ -211,16 +211,15 @@ func deleteAreaHandler(c echo.Context) error {
 }
 
 func showAreaHandler(c echo.Context) error {
-	var a locations.Area
-	var err error
-	a.ID, err = strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return err
-	}
-	if err = a.Read(); err != nil {
+	a := &locations.Area{ID: getID(c), Name: c.Param("id")}
+	if err := a.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, a)
+	api, err := a.API()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load api for area %d", a.ID))
+	}
+	return c.JSON(http.StatusOK, api)
 }
 
 func randomChromosomeHandler(c echo.Context) error {

@@ -1,12 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import { withRouter } from 'react-router-dom';
 import areaApi from './api';
 import { MenuList } from '../App';
 
 const styles = () => ({
-  deleteButton: {},
 });
 
 class AreaList extends React.Component {
@@ -15,16 +13,13 @@ class AreaList extends React.Component {
     this.state = {
       list: [],
     };
-    this.handleClick = this.handleClick.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
   }
 
   componentWillMount() {
     areaApi.getAll().then(data => this.setState({ list: data }));
   }
 
-  handleClick(value) {
-    this.props.history.push(`/towns/${value}`);
-  }
 
   handleDelete(event, item) {
     event.stopPropagation();
@@ -34,18 +29,18 @@ class AreaList extends React.Component {
 
 
   render() {
-    const { classes } = this.props;
     const { list } = this.state;
     if (list.length === 0) {
       return null;
     }
+    const { classes, handleClick } = this.props;
     return (
       <MenuList
         deletable
         classes={classes}
         heading="Towns"
         list={list}
-        handleClick={this.handleClick}
+        handleClick={v => handleClick(`towns/${v}`)()}
         handleDelete={this.handleDelete}
       />
     );
@@ -53,8 +48,8 @@ class AreaList extends React.Component {
 }
 
 AreaList.propTypes = {
-  history: PropTypes.object.isRequired,
+  handleClick: PropTypes.func.isRequired,
   classes: PropTypes.object.isRequired,
 };
 
-export default withRouter(withStyles(styles)(AreaList));
+export default withStyles(styles)(AreaList);

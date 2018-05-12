@@ -48,6 +48,8 @@ class PageTitle extends React.Component {
       dialogOpen: false,
     };
     this.handleDrawer = this.handleDrawer.bind(this);
+    this.handleMenuItem = this.handleMenuItem.bind(this);
+    this.handleDialog = this.handleDialog.bind(this);
   }
 
   handleDialog(dialogOpen) {
@@ -106,7 +108,6 @@ class PageTitle extends React.Component {
                 <IconButton color="default" onClick={this.handleDrawer(false)}>
                   <CloseIcon className={classes.button} />
                 </IconButton>
-                <Button className={classes.button} onClick={this.handleMenuItem('towns')}>Towns</Button>
                 <Button className={classes.button} onClick={this.handleDialog(true)} >Seed</Button>
               </Toolbar>
             </AppBar>

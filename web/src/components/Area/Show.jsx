@@ -25,7 +25,7 @@ class AreaShow extends React.Component {
 
   render() {
     const { classes } = this.props;
-    return (<div className={ classes.root }>{this.state.name}</div>);
+    return (<div className={classes.root}>{this.state.name}</div>);
   }
 }
 

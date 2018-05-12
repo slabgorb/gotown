@@ -26,7 +26,7 @@ render(
           <Route path="/species/:name" component={SpeciesShow} />
           <Route path="/cultures/:name" component={CulturesShow} />
           <Route path="/towns" component={TownForm} />
-          <Route path="/towns/:name" component={AreaShow} />
+          <Route path="/towns/:id" component={AreaShow} />
         </App>
       </BrowserRouter>
     </Provider>
