@@ -27,11 +27,12 @@ func compareImages(name string) bool {
 
 func TestEscutcheon(t *testing.T) {
 	type testCase struct {
-		draw func(dc *gg.Context) *image.Alpha
-		fill func(dc *gg.Context)
-		name string
+		draw   func(dc *gg.Context) *image.Alpha
+		fill   func(dc *gg.Context)
+		charge string
+		name   string
 	}
-	dc := gg.NewContext(300, 300)
+	dc := gg.NewContext(270, 270)
 	testCases := []testCase{
 		testCase{
 			name: "heater_per_chevron",
@@ -39,9 +40,10 @@ func TestEscutcheon(t *testing.T) {
 			fill: PerChevron(Colors["sable"], Metals["or"]),
 		},
 		testCase{
-			name: "heater_per_pale",
-			draw: HeaterShield,
-			fill: PerPale(Colors["sable"], Metals["or"]),
+			name:   "heater_per_pale",
+			draw:   HeaterShield,
+			fill:   PerPale(Colors["sable"], Metals["or"]),
+			charge: "acorn.png",
 		},
 		testCase{
 			name: "heater_per_fess",
@@ -63,6 +65,12 @@ func TestEscutcheon(t *testing.T) {
 		e := Escutcheon{
 			Shape: tc.draw,
 			Fill:  tc.fill,
+		}
+		if tc.charge != "" {
+			e.Charge = &Charge{
+				Color: Metals["argent"],
+				Key:   tc.charge,
+			}
 		}
 		e.Render(dc)
 		dc.SavePNG(fmt.Sprintf("%s.png", tc.name))
