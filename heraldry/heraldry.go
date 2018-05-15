@@ -34,10 +34,13 @@ var Colors = Tincture{
 type Fill func(dc *gg.Context)
 type Shape func(dc *gg.Context) *image.Alpha
 
+type Charge struct{}
+
 // Escutcheon represents the 'shield' part of a heraldric device
 type Escutcheon struct {
 	Shape
 	Fill
+	Charge
 }
 
 // Render draws the Escutcheon
