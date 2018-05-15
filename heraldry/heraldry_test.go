@@ -40,10 +40,9 @@ func TestEscutcheon(t *testing.T) {
 			fill: PerChevron(Colors["sable"], Metals["or"]),
 		},
 		testCase{
-			name:   "heater_per_pale",
-			draw:   HeaterShield,
-			fill:   PerPale(Colors["sable"], Metals["or"]),
-			charge: "acorn.png",
+			name: "heater_per_pale",
+			draw: HeaterShield,
+			fill: PerPale(Colors["sable"], Metals["or"]),
 		},
 		testCase{
 			name: "heater_per_fess",
@@ -56,9 +55,10 @@ func TestEscutcheon(t *testing.T) {
 			fill: PerBend(Colors["sable"], Metals["or"]),
 		},
 		testCase{
-			name: "heater_per_bend_sinister",
-			draw: HeaterShield,
-			fill: PerBendSinister(Colors["sable"], Metals["or"]),
+			name:   "heater_per_bend_sinister",
+			draw:   HeaterShield,
+			fill:   PerBendSinister(Colors["sable"], Metals["or"]),
+			charge: "acorn.png",
 		},
 	}
 	for _, tc := range testCases {

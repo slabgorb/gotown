@@ -1,11 +1,13 @@
 package heraldry
 
 import (
+	"github.com/fogleman/gg"
 	"image"
 	"image/color"
+	"image/draw"
+	"image/png"
 	"io/ioutil"
-
-	"github.com/fogleman/gg"
+	"os"
 )
 
 // Device models a heraldric device
@@ -72,10 +74,17 @@ func (e Escutcheon) Render(dc *gg.Context) {
 		if err != nil {
 			panic(err)
 		}
-		dc.SetMask(mask)
-		dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
-		dc.SetColor(e.Color)
-		dc.Fill()
+		//dc.SetMask(mask)
+		dc.SavePNG("tmp.png")
+		f, _ := os.Open("tmp.png")
+		defer f.Close()
+		dst, _ := png.Decode(f)
+		m := draw.Image{Image: dst}
+		rect := image.Rect(0, 0, dc.Width(), dc.Height())
+		draw.Draw(m, rect, mask, image.ZP, draw.Over)
+		// dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
+		// dc.SetColor(e.Color)
+		// dc.Fill()
 	}
 }
 
