@@ -2,10 +2,11 @@ package heraldry_test
 
 import (
 	"fmt"
-	"github.com/fogleman/gg"
-	. "github.com/slabgorb/gotown/heraldry"
 	"image"
 	"testing"
+
+	"github.com/fogleman/gg"
+	. "github.com/slabgorb/gotown/heraldry"
 )
 
 func compareImages(name string) bool {
@@ -32,7 +33,7 @@ func TestEscutcheon(t *testing.T) {
 		charge string
 		name   string
 	}
-	dc := gg.NewContext(270, 270)
+	dc := gg.NewContext(300, 300)
 	testCases := []testCase{
 		testCase{
 			name: "heater_per_chevron",
@@ -50,15 +51,16 @@ func TestEscutcheon(t *testing.T) {
 			fill: PerFess(Colors["sable"], Metals["or"]),
 		},
 		testCase{
-			name: "heater_per_bend",
-			draw: HeaterShield,
-			fill: PerBend(Colors["sable"], Metals["or"]),
+			name:   "heater_per_bend",
+			draw:   HeaterShield,
+			fill:   PerBend(Colors["sable"], Metals["or"]),
+			charge: "bears-head-couped",
 		},
 		testCase{
 			name:   "heater_per_bend_sinister",
 			draw:   HeaterShield,
 			fill:   PerBendSinister(Colors["sable"], Metals["or"]),
-			charge: "acorn.png",
+			charge: "acorn",
 		},
 	}
 	for _, tc := range testCases {
@@ -73,10 +75,12 @@ func TestEscutcheon(t *testing.T) {
 			}
 		}
 		e.Render(dc)
-		dc.SavePNG(fmt.Sprintf("%s.png", tc.name))
+		fname := fmt.Sprintf("%s.png", tc.name)
+		dc.SavePNG(fname)
 		if !compareImages(tc.name) {
 			t.Errorf("images are not equal for %s", tc.name)
 		}
+		//os.Remove(fname)
 	}
 
 }
