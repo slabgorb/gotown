@@ -3,6 +3,7 @@ package heraldry_test
 import (
 	"fmt"
 	"image"
+	"os"
 	"testing"
 
 	"github.com/fogleman/gg"
@@ -33,7 +34,6 @@ func TestEscutcheon(t *testing.T) {
 		charge string
 		name   string
 	}
-	dc := gg.NewContext(300, 300)
 	testCases := []testCase{
 		testCase{
 			name: "heater_per_chevron",
@@ -64,6 +64,7 @@ func TestEscutcheon(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		dc := gg.NewContext(270, 270)
 		e := Escutcheon{
 			Shape: tc.draw,
 			Fill:  tc.fill,
@@ -80,7 +81,7 @@ func TestEscutcheon(t *testing.T) {
 		if !compareImages(tc.name) {
 			t.Errorf("images are not equal for %s", tc.name)
 		}
-		//os.Remove(fname)
+		os.Remove(fname)
 	}
 
 }
