@@ -1,13 +1,12 @@
 package heraldry
 
 import (
-	"github.com/fogleman/gg"
 	"image"
 	"image/color"
-	"image/draw"
 	"image/png"
-	"io/ioutil"
-	"os"
+
+	"github.com/fogleman/gg"
+	"github.com/slabgorb/gotown/resource"
 )
 
 // Device models a heraldric device
@@ -42,19 +41,17 @@ type Charge struct {
 	color.Color
 }
 
-func (c *Charge) mask(dc *gg.Context) (*image.Alpha, error) {
-	rect := image.Rect(0, 0, 270, 270)
-	r, err := HeraldryBundle.Open(c.Key)
+func (c *Charge) mask() (*image.Alpha, error) {
+	r, err := resource.HeraldryBundle.Open(c.Key)
 	if err != nil {
 		return nil, err
 	}
-	bytes, err := ioutil.ReadAll(r)
+	img, err := png.Decode(r)
 	if err != nil {
 		return nil, err
 	}
-	img := image.NewAlpha(rect)
-	img.Pix = bytes
-	return img, nil
+	dc := gg.NewContextForImage(img)
+	return dc.AsMask(), nil
 }
 
 // Escutcheon represents the 'shield' part of a heraldric device
@@ -70,21 +67,14 @@ func (e Escutcheon) Render(dc *gg.Context) {
 	dc.SetMask(mask)
 	e.Fill(dc)
 	if e.Charge != nil {
-		mask, err := e.Charge.mask(dc)
+		mask, err := e.Charge.mask()
 		if err != nil {
 			panic(err)
 		}
-		//dc.SetMask(mask)
-		dc.SavePNG("tmp.png")
-		f, _ := os.Open("tmp.png")
-		defer f.Close()
-		dst, _ := png.Decode(f)
-		m := draw.Image{Image: dst}
-		rect := image.Rect(0, 0, dc.Width(), dc.Height())
-		draw.Draw(m, rect, mask, image.ZP, draw.Over)
-		// dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
-		// dc.SetColor(e.Color)
-		// dc.Fill()
+		dc.SetMask(mask)
+		dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
+		dc.SetColor(e.Color)
+		dc.Fill()
 	}
 }
 
