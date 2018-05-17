@@ -11,26 +11,6 @@ import (
 type Device struct {
 }
 
-type Tincture map[string]color.RGBA
-
-// Metals is a heraldric color set
-var Metals = Tincture{
-	"argent": color.RGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
-	"or":     color.RGBA{R: 0xff, G: 0xd4, B: 0x00, A: 0xff},
-}
-
-// Colors is a heraldric color set
-var Colors = Tincture{
-	"sable":    color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xff},
-	"gules":    color.RGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff},
-	"sanguine": color.RGBA{R: 0x66, G: 0x00, B: 0x00, A: 0xff},
-	"azure":    color.RGBA{R: 0x00, G: 0x00, B: 0xff, A: 0xff},
-	"vert":     color.RGBA{R: 0x00, G: 0x66, B: 0x00, A: 0xff},
-	"purpure":  color.RGBA{R: 0x80, G: 0x00, B: 0x80, A: 0xff},
-	"murrey":   color.RGBA{R: 0x8c, G: 0x00, B: 0x4b, A: 0xff},
-	"cendree":  color.RGBA{R: 0x80, G: 0x80, B: 0x80, A: 0xff},
-}
-
 type Fill func(dc *gg.Context)
 type Shape func(dc *gg.Context) *image.Alpha
 
@@ -58,6 +38,27 @@ func PerFess(top color.Color, bottom color.Color) Fill {
 		dc.Fill()
 		dc.DrawRectangle(0, divide, w, divide)
 		dc.SetColor(bottom)
+		dc.Fill()
+	}
+}
+
+func PerCross(ul color.Color, ur color.Color, ll color.Color, lr color.Color) Fill {
+	return func(dc *gg.Context) {
+		h := float64(dc.Height())
+		w := float64(dc.Width())
+		divide := h / 2
+		divideW := w / 2
+		dc.DrawRectangle(0, 0, divideW, divide)
+		dc.SetColor(ul)
+		dc.Fill()
+		dc.DrawRectangle(divideW, 0, divideW, divide)
+		dc.SetColor(ur)
+		dc.Fill()
+		dc.DrawRectangle(0, divide, divideW, divide)
+		dc.SetColor(ll)
+		dc.Fill()
+		dc.DrawRectangle(divideW, divide, divideW, divide)
+		dc.SetColor(lr)
 		dc.Fill()
 	}
 }
@@ -98,6 +99,17 @@ func PerBend(left color.Color, right color.Color) Fill {
 		dc.LineTo(w, 0)
 		dc.SetColor(right)
 		dc.Fill()
+	}
+}
+
+func PerSaltire(ul color.Color, ur color.Color, ll color.Color, lr color.Color) Fill {
+	fill := PerCross(ul, ur, ll, lr)
+	return func(dc *gg.Context) {
+		h := float64(dc.Height())
+		w := float64(dc.Width())
+		dc.RotateAbout(0.785398, w/2, h/2)
+		dc.ScaleAbout(2.0, 2.0, w/2, h/2)
+		fill(dc)
 	}
 }
 

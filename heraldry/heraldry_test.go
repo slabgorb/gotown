@@ -2,10 +2,11 @@ package heraldry_test
 
 import (
 	"fmt"
-	"github.com/fogleman/gg"
-	. "github.com/slabgorb/gotown/heraldry"
 	"image"
 	"testing"
+
+	"github.com/fogleman/gg"
+	. "github.com/slabgorb/gotown/heraldry"
 )
 
 func compareImages(name string) bool {
@@ -57,6 +58,16 @@ func TestEscutcheon(t *testing.T) {
 			name: "heater_per_bend_sinister",
 			draw: HeaterShield,
 			fill: PerBendSinister(Colors["sable"], Metals["or"]),
+		},
+		testCase{
+			name: "heater_per_cross",
+			draw: HeaterShield,
+			fill: PerCross(Colors["sable"], Metals["or"], Colors["murrey"], Metals["argent"]),
+		},
+		testCase{
+			name: "heater_per_saltire",
+			draw: HeaterShield,
+			fill: PerSaltire(Colors["sable"], Metals["or"], Colors["murrey"], Metals["argent"]),
 		},
 	}
 	for _, tc := range testCases {
