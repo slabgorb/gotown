@@ -28,11 +28,11 @@ func compareImages(name string) bool {
 
 func TestEscutcheon(t *testing.T) {
 	type testCase struct {
-		draw func(dc *gg.Context) *image.Alpha
-		fill func(dc *gg.Context)
-		name string
+		draw   func(dc *gg.Context) *image.Alpha
+		fill   func(dc *gg.Context)
+		charge string
+		name   string
 	}
-	dc := gg.NewContext(300, 300)
 	testCases := []testCase{
 		testCase{
 			name: "heater_per_chevron",
@@ -50,36 +50,47 @@ func TestEscutcheon(t *testing.T) {
 			fill: PerFess(Colors["sable"], Metals["or"]),
 		},
 		testCase{
-			name: "heater_per_bend",
-			draw: HeaterShield,
-			fill: PerBend(Colors["sable"], Metals["or"]),
+			name:   "heater_per_bend",
+			draw:   HeaterShield,
+			fill:   PerBend(Colors["sable"], Metals["or"]),
+			charge: "bears-head-couped",
 		},
 		testCase{
-			name: "heater_per_bend_sinister",
-			draw: HeaterShield,
-			fill: PerBendSinister(Colors["sable"], Metals["or"]),
+			name:   "heater_per_bend_sinister",
+			draw:   HeaterShield,
+			fill:   PerBendSinister(Colors["sable"], Metals["or"]),
+			charge: "acorn",
 		},
 		testCase{
 			name: "heater_per_cross",
 			draw: HeaterShield,
-			fill: PerCross(Colors["sable"], Metals["or"], Colors["murrey"], Metals["argent"]),
+			fill: PerCross(Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]),
 		},
 		testCase{
 			name: "heater_per_saltire",
 			draw: HeaterShield,
-			fill: PerSaltire(Colors["sable"], Metals["or"], Colors["murrey"], Metals["argent"]),
+			fill: PerSaltire(Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]),
 		},
 	}
 	for _, tc := range testCases {
+		dc := gg.NewContext(270, 270)
 		e := Escutcheon{
 			Shape: tc.draw,
 			Fill:  tc.fill,
 		}
+		if tc.charge != "" {
+			e.Charge = &Charge{
+				Color: Metals["argent"],
+				Key:   tc.charge,
+			}
+		}
 		e.Render(dc)
-		dc.SavePNG(fmt.Sprintf("%s.png", tc.name))
+		fname := fmt.Sprintf("%s.png", tc.name)
+		dc.SavePNG(fname)
 		if !compareImages(tc.name) {
 			t.Errorf("images are not equal for %s", tc.name)
 		}
+		//os.Remove(fname)
 	}
 
 }

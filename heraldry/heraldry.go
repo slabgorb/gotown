@@ -1,10 +1,13 @@
 package heraldry
 
 import (
+	"fmt"
 	"image"
 	"image/color"
+	"image/png"
 
 	"github.com/fogleman/gg"
+	"github.com/slabgorb/gotown/resource"
 )
 
 // Device models a heraldric device
@@ -14,10 +17,29 @@ type Device struct {
 type Fill func(dc *gg.Context)
 type Shape func(dc *gg.Context) *image.Alpha
 
+type Charge struct {
+	Key string
+	color.Color
+}
+
+func (c *Charge) mask() (*image.Alpha, error) {
+	r, err := resource.HeraldryBundle.Open(fmt.Sprintf("%s.png", c.Key))
+	if err != nil {
+		return nil, err
+	}
+	img, err := png.Decode(r)
+	if err != nil {
+		return nil, err
+	}
+	dc := gg.NewContextForImage(img)
+	return dc.AsMask(), nil
+}
+
 // Escutcheon represents the 'shield' part of a heraldric device
 type Escutcheon struct {
 	Shape
 	Fill
+	*Charge
 }
 
 // Render draws the Escutcheon
@@ -25,6 +47,16 @@ func (e Escutcheon) Render(dc *gg.Context) {
 	mask := e.Shape(dc)
 	dc.SetMask(mask)
 	e.Fill(dc)
+	if e.Charge != nil {
+		mask, err := e.Charge.mask()
+		if err != nil {
+			panic(err)
+		}
+		dc.SetMask(mask)
+		dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
+		dc.SetColor(e.Charge.Color)
+		dc.Fill()
+	}
 }
 
 // PerFess divides the field horizontally
