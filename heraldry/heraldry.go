@@ -42,6 +42,31 @@ type Escutcheon struct {
 	*Charge
 }
 
+type Div func(...color.Color) Fill
+
+var Divisions = map[string]Div{
+	"per fess":          PerFess,
+	"per cross":         PerCross,
+	"per chevron":       PerChevron,
+	"per bend":          PerBend,
+	"per saltire":       PerSaltire,
+	"per bend sinister": PerBendSinister,
+	"per pale":          PerPale,
+	"":                  Solid,
+}
+
+func fillOutColors(c []color.Color, count int) []color.Color {
+	ret := make([]color.Color, count)
+	for i := 0; i < count; i++ {
+		if len(c) >= i {
+			ret[i] = c[i]
+		} else {
+			ret[i] = Colors["sable"]
+		}
+	}
+	return ret
+}
+
 // Render draws the Escutcheon
 func (e Escutcheon) Render(dc *gg.Context) {
 	mask := e.Shape(dc)
@@ -60,62 +85,66 @@ func (e Escutcheon) Render(dc *gg.Context) {
 }
 
 // PerFess divides the field horizontally
-func PerFess(top color.Color, bottom color.Color) Fill {
+func PerFess(c ...color.Color) Fill {
+	c = fillOutColors(c, 2)
 	return func(dc *gg.Context) {
 		h := float64(dc.Height())
 		w := float64(dc.Width())
 		divide := h / 2
 		dc.DrawRectangle(0, 0, w, divide)
-		dc.SetColor(top)
+		dc.SetColor(c[0])
 		dc.Fill()
 		dc.DrawRectangle(0, divide, w, divide)
-		dc.SetColor(bottom)
+		dc.SetColor(c[1])
 		dc.Fill()
 	}
 }
 
-func PerCross(ul color.Color, ur color.Color, ll color.Color, lr color.Color) Fill {
+func PerCross(c ...color.Color) Fill {
+	c = fillOutColors(c, 4)
 	return func(dc *gg.Context) {
 		h := float64(dc.Height())
 		w := float64(dc.Width())
 		divide := h / 2
 		divideW := w / 2
 		dc.DrawRectangle(0, 0, divideW, divide)
-		dc.SetColor(ul)
+		dc.SetColor(c[0])
 		dc.Fill()
 		dc.DrawRectangle(divideW, 0, divideW, divide)
-		dc.SetColor(ur)
+		dc.SetColor(c[1])
 		dc.Fill()
 		dc.DrawRectangle(0, divide, divideW, divide)
-		dc.SetColor(ll)
+		dc.SetColor(c[2])
 		dc.Fill()
 		dc.DrawRectangle(divideW, divide, divideW, divide)
-		dc.SetColor(lr)
+		dc.SetColor(c[3])
 		dc.Fill()
 	}
 }
 
 // PerChevron divides the field 'after the manner of a chevron'
-func PerChevron(top color.Color, bottom color.Color) Fill {
+func PerChevron(c ...color.Color) Fill {
+	c = fillOutColors(c, 2)
 	return func(dc *gg.Context) {
 		h := float64(dc.Height())
 		w := float64(dc.Width())
 		divide := h / 2
 		divideW := w / 2
-		dc.SetColor(top)
+		dc.SetColor(c[0])
 		dc.DrawRectangle(0, 0, w, h)
 		dc.Fill()
 		dc.MoveTo(0, h)
 		dc.LineTo(divideW, divide)
 		dc.LineTo(w, h)
 		dc.LineTo(0, h)
-		dc.SetColor(bottom)
+		dc.SetColor(c[1])
 		dc.Fill()
 	}
 }
 
 // PerBend divides the field diagonally from upper left to lower right
-func PerBend(left color.Color, right color.Color) Fill {
+func PerBend(c ...color.Color) Fill {
+	c = fillOutColors(c, 2)
 	return func(dc *gg.Context) {
 		h := float64(dc.Height())
 		w := float64(dc.Width())
@@ -123,19 +152,19 @@ func PerBend(left color.Color, right color.Color) Fill {
 		dc.LineTo(0, h)
 		dc.LineTo(w, h)
 		dc.LineTo(0, 0)
-		dc.SetColor(left)
+		dc.SetColor(c[0])
 		dc.Fill()
 		dc.MoveTo(w, 0)
 		dc.LineTo(w, h)
 		dc.LineTo(0, 0)
 		dc.LineTo(w, 0)
-		dc.SetColor(right)
+		dc.SetColor(c[1])
 		dc.Fill()
 	}
 }
 
-func PerSaltire(ul color.Color, ur color.Color, ll color.Color, lr color.Color) Fill {
-	fill := PerCross(ul, ur, ll, lr)
+func PerSaltire(c ...color.Color) Fill {
+	fill := PerCross(c...)
 	return func(dc *gg.Context) {
 		h := float64(dc.Height())
 		w := float64(dc.Width())
@@ -146,8 +175,8 @@ func PerSaltire(ul color.Color, ur color.Color, ll color.Color, lr color.Color) 
 }
 
 // PerBendSinister divides the field diagonally from upper right to lower left
-func PerBendSinister(left color.Color, right color.Color) Fill {
-	fill := PerBend(left, right)
+func PerBendSinister(c ...color.Color) Fill {
+	fill := PerBend(c...)
 	return func(dc *gg.Context) {
 		h := float64(dc.Height())
 		w := float64(dc.Width())
@@ -156,23 +185,25 @@ func PerBendSinister(left color.Color, right color.Color) Fill {
 	}
 }
 
-func PerPale(left color.Color, right color.Color) Fill {
+func PerPale(c ...color.Color) Fill {
+	c = fillOutColors(c, 2)
 	return func(dc *gg.Context) {
 		h := float64(dc.Height())
 		w := float64(dc.Width())
 		divide := w / 2
 		dc.DrawRectangle(0, 0, divide, h)
-		dc.SetColor(left)
+		dc.SetColor(c[0])
 		dc.Fill()
 		dc.DrawRectangle(divide, 0, divide, h)
-		dc.SetColor(right)
+		dc.SetColor(c[1])
 		dc.Fill()
 	}
 }
 
-func Solid(fillColor color.Color) Fill {
+func Solid(c ...color.Color) Fill {
+	c = fillOutColors(c, 1)
 	return func(dc *gg.Context) {
-		dc.SetColor(fillColor)
+		dc.SetColor(c[0])
 		dc.Fill()
 	}
 }

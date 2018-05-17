@@ -3,6 +3,7 @@ package heraldry_test
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"os"
 	"testing"
 
@@ -29,55 +30,63 @@ func compareImages(name string) bool {
 
 func TestEscutcheon(t *testing.T) {
 	type testCase struct {
-		draw   func(dc *gg.Context) *image.Alpha
-		fill   func(dc *gg.Context)
-		charge string
-		name   string
+		draw     func(dc *gg.Context) *image.Alpha
+		division string
+		colors   []color.Color
+		charge   string
+		name     string
 	}
 	testCases := []testCase{
 		testCase{
-			name: "heater_per_chevron",
-			draw: HeaterShield,
-			fill: PerChevron(Colors["sable"], Metals["or"]),
+			name:     "heater_per_chevron",
+			draw:     HeaterShield,
+			division: "per chevron",
+			colors:   []color.Color{Colors["sable"], Metals["or"]},
 		},
 		testCase{
-			name: "heater_per_pale",
-			draw: HeaterShield,
-			fill: PerPale(Colors["sable"], Metals["or"]),
+			name:     "heater_per_pale",
+			draw:     HeaterShield,
+			division: "per pale",
+			colors:   []color.Color{Colors["sable"], Metals["or"]},
 		},
 		testCase{
-			name: "heater_per_fess",
-			draw: HeaterShield,
-			fill: PerFess(Colors["sable"], Metals["or"]),
+			name:     "heater_per_fess",
+			draw:     HeaterShield,
+			division: "per fess",
+			colors:   []color.Color{Colors["sable"], Metals["or"]},
 		},
 		testCase{
-			name:   "heater_per_bend",
-			draw:   HeaterShield,
-			fill:   PerBend(Colors["sable"], Metals["or"]),
-			charge: "bears-head-couped",
+			name:     "heater_per_bend",
+			draw:     HeaterShield,
+			division: "per bend",
+			colors:   []color.Color{Colors["sable"], Metals["or"]},
+			charge:   "bears-head-couped",
 		},
 		testCase{
-			name:   "heater_per_bend_sinister",
-			draw:   HeaterShield,
-			fill:   PerBendSinister(Colors["sable"], Metals["or"]),
-			charge: "acorn",
+			name:     "heater_per_bend_sinister",
+			draw:     HeaterShield,
+			division: "per bend sinister",
+			colors:   []color.Color{Colors["sable"], Metals["or"]},
+			charge:   "acorn",
 		},
 		testCase{
-			name: "heater_per_cross",
-			draw: HeaterShield,
-			fill: PerCross(Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]),
+			name:     "heater_per_cross",
+			draw:     HeaterShield,
+			division: "per cross",
+			colors:   []color.Color{Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]},
 		},
 		testCase{
-			name: "heater_per_saltire",
-			draw: HeaterShield,
-			fill: PerSaltire(Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]),
+			name:     "heater_per_saltire",
+			draw:     HeaterShield,
+			division: "per saltire",
+			colors:   []color.Color{Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]},
 		},
 	}
 	for _, tc := range testCases {
 		dc := gg.NewContext(270, 270)
 		e := Escutcheon{
 			Shape: tc.draw,
-			Fill:  tc.fill,
+			Fill:  Divisions[tc.division](tc.colors...),
 		}
 		if tc.charge != "" {
 			e.Charge = &Charge{
