@@ -37,9 +37,11 @@ func (c *Charge) mask() (*image.Alpha, error) {
 
 // Escutcheon represents the 'shield' part of a heraldric device
 type Escutcheon struct {
-	Shape
-	Fill
-	*Charge
+	DivisionKey string   `json:"division"`
+	FieldColors []string `json:"field_colors"`
+	ShapeKey    string   `json:"shape"`
+	ChargeKey   string   `json:"charge"`
+	ChargeColor string   `json:"charge_color"`
 }
 
 type Div func(...color.Color) Fill
@@ -55,31 +57,50 @@ var Divisions = map[string]Div{
 	"":                  Solid,
 }
 
+var Shapes = map[string]Shape{
+	"heater": HeaterShield,
+}
+
 func fillOutColors(c []color.Color, count int) []color.Color {
 	ret := make([]color.Color, count)
 	for i := 0; i < count; i++ {
 		if len(c) >= i {
 			ret[i] = c[i]
 		} else {
-			ret[i] = Colors["sable"]
+			ret[i] = Tinctures["sable"]
 		}
 	}
 	return ret
 }
 
+func (e Escutcheon) charge() *Charge {
+	if e.ChargeKey == "" {
+		return nil
+	}
+	return &Charge{
+		Color: Tinctures[e.ChargeColor],
+		Key:   e.ChargeKey,
+	}
+}
+
 // Render draws the Escutcheon
 func (e Escutcheon) Render(dc *gg.Context) {
-	mask := e.Shape(dc)
+	c := []color.Color{}
+	for _, clr := range e.FieldColors {
+		c = append(c, Tinctures[clr])
+	}
+	mask := Shapes[e.ShapeKey](dc)
 	dc.SetMask(mask)
-	e.Fill(dc)
-	if e.Charge != nil {
-		mask, err := e.Charge.mask()
+	Divisions[e.DivisionKey](c...)(dc)
+	ch := e.charge()
+	if ch != nil {
+		mask, err := ch.mask()
 		if err != nil {
 			panic(err)
 		}
 		dc.SetMask(mask)
 		dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
-		dc.SetColor(e.Charge.Color)
+		dc.SetColor(ch.Color)
 		dc.Fill()
 	}
 }
@@ -192,10 +213,10 @@ func PerPale(c ...color.Color) Fill {
 		w := float64(dc.Width())
 		divide := w / 2
 		dc.DrawRectangle(0, 0, divide, h)
-		dc.SetColor(c[0])
+		dc.SetColor(c[1])
 		dc.Fill()
 		dc.DrawRectangle(divide, 0, divide, h)
-		dc.SetColor(c[1])
+		dc.SetColor(c[0])
 		dc.Fill()
 	}
 }

@@ -2,9 +2,7 @@ package heraldry_test
 
 import (
 	"fmt"
-	"image"
-	"image/color"
-	"os"
+	//"os"
 	"testing"
 
 	"github.com/fogleman/gg"
@@ -30,77 +28,67 @@ func compareImages(name string) bool {
 
 func TestEscutcheon(t *testing.T) {
 	type testCase struct {
-		draw     func(dc *gg.Context) *image.Alpha
+		draw     string
 		division string
-		colors   []color.Color
 		charge   string
 		name     string
 	}
 	testCases := []testCase{
 		testCase{
 			name:     "heater_per_chevron",
-			draw:     HeaterShield,
+			draw:     "heater",
 			division: "per chevron",
-			colors:   []color.Color{Colors["sable"], Metals["or"]},
 		},
 		testCase{
 			name:     "heater_per_pale",
-			draw:     HeaterShield,
+			draw:     "heater",
 			division: "per pale",
-			colors:   []color.Color{Colors["sable"], Metals["or"]},
 		},
 		testCase{
 			name:     "heater_per_fess",
-			draw:     HeaterShield,
+			draw:     "heater",
 			division: "per fess",
-			colors:   []color.Color{Colors["sable"], Metals["or"]},
 		},
 		testCase{
 			name:     "heater_per_bend",
-			draw:     HeaterShield,
+			draw:     "heater",
 			division: "per bend",
-			colors:   []color.Color{Colors["sable"], Metals["or"]},
 			charge:   "bears-head-couped",
 		},
 		testCase{
 			name:     "heater_per_bend_sinister",
-			draw:     HeaterShield,
+			draw:     "heater",
 			division: "per bend sinister",
-			colors:   []color.Color{Colors["sable"], Metals["or"]},
 			charge:   "acorn",
 		},
 		testCase{
 			name:     "heater_per_cross",
-			draw:     HeaterShield,
+			draw:     "heater",
 			division: "per cross",
-			colors:   []color.Color{Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]},
 		},
 		testCase{
 			name:     "heater_per_saltire",
-			draw:     HeaterShield,
+			draw:     "heater",
 			division: "per saltire",
-			colors:   []color.Color{Colors["sable"], Metals["or"], Stains["murrey"], Metals["argent"]},
 		},
 	}
 	for _, tc := range testCases {
 		dc := gg.NewContext(270, 270)
 		e := Escutcheon{
-			Shape: tc.draw,
-			Fill:  Divisions[tc.division](tc.colors...),
+			ShapeKey:    tc.draw,
+			DivisionKey: tc.division,
+			ChargeColor: "argent",
+			FieldColors: []string{"tenne", "sable", "murrey", "purpure"},
+			ChargeKey:   tc.charge,
 		}
-		if tc.charge != "" {
-			e.Charge = &Charge{
-				Color: Metals["argent"],
-				Key:   tc.charge,
-			}
-		}
+
 		e.Render(dc)
 		fname := fmt.Sprintf("%s.png", tc.name)
 		dc.SavePNG(fname)
 		if !compareImages(tc.name) {
 			t.Errorf("images are not equal for %s", tc.name)
 		}
-		os.Remove(fname)
+		//os.Remove(fname)
 	}
 
 }
