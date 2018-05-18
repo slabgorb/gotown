@@ -4,6 +4,20 @@ import "image/color"
 
 type Tincture map[string]color.RGBA
 
+const (
+	sable    = "sable"
+	gules    = "gules"
+	azure    = "azure"
+	vert     = "vert"
+	purpure  = "purpure"
+	cendree  = "cendree"
+	murrey   = "murrey"
+	sanguine = "sanguine"
+	tenne    = "tenne"
+	argent   = "argent"
+	or       = "or"
+)
+
 // Metals is a heraldric color set
 var Metals = []string{"argent", "or"}
 

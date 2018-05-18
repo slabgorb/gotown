@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/fogleman/gg"
+	"github.com/nfnt/resize"
 	"github.com/slabgorb/gotown/resource"
 )
 
@@ -26,19 +27,61 @@ const (
 	height = 270
 )
 
-func RandomEscutcheon() Escutcheon {
+type colorStrategy func() (string, []string)
+
+func randomColorStrategy() colorStrategy {
+
+	randomColorStrategies := map[string]colorStrategy{
+		"alternate_1": func() (string, []string) {
+			a := RandomColorKey()
+			b := RandomColorKey()
+			c := RandomMetalKey()
+			return c, []string{a, b, a, b, a, b}
+		},
+		"alternate_2": func() (string, []string) {
+			a := argent
+			b := or
+			c := RandomColorKey()
+			return c, []string{a, b, a, b, a, b}
+		},
+		"alternate_3": func() (string, []string) {
+			b := argent
+			a := or
+			c := RandomColorKey()
+			return c, []string{a, b, a, b, a, b}
+		},
+	}
+	keys := []string{}
+	for k := range randomColorStrategies {
+		keys = append(keys, k)
+	}
+	return randomColorStrategies[keys[randomizer.Intn(len(keys))]]
+}
+
+func RandomEscutcheon(shape string) Escutcheon {
+	dKey := RandomDivisionKey()
+	cColor, cField := randomColorStrategy()()
 	e := Escutcheon{
 		DC:          gg.NewContext(width, height),
-		DivisionKey: RandomDivisionKey(),
-		ShapeKey:    RandomShapeKey(),
+		DivisionKey: dKey,
+		ShapeKey:    shape,
 		ChargeKey:   RandomChargeKey(),
-		ChargeColor: RandomMetalKey(),
+		ChargeColor: cColor,
+		FieldColors: cField,
 	}
 	return e
 }
 
-// Render draws the Escutcheon
-func (e Escutcheon) Render() image.Image {
+func (e Escutcheon) RenderAtPercent(size float64) image.Image {
+	img := e.image()
+	if size == 1.0 {
+		return img
+	}
+	resize.Resize(uint(width*size), 0, img, resize.NearestNeighbor)
+	return img
+}
+
+func (e Escutcheon) image() image.Image {
 	c := []color.Color{}
 	for _, clr := range e.FieldColors {
 		c = append(c, Tinctures[clr])
@@ -58,6 +101,11 @@ func (e Escutcheon) Render() image.Image {
 		e.DC.Fill()
 	}
 	return e.DC.Image()
+}
+
+// Render draws the Escutcheon
+func (e Escutcheon) Render() image.Image {
+	return e.RenderAtPercent(1.0)
 }
 
 func (e Escutcheon) charge() *charge {

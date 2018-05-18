@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"image/png"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/slabgorb/gotown/heraldry"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -46,6 +50,7 @@ func defineAPIHandlers(e *echo.Echo) {
 	api.PUT("/seed", seedHandler)
 	//e.GET("/household", householdHandler)
 	api.GET("/random/chromosome", randomChromosomeHandler)
+	api.GET("/random/heraldry", randomHeraldryHandler)
 
 }
 
@@ -314,4 +319,14 @@ func townNameHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, namer.CreateName())
+}
+
+func randomHeraldryHandler(c echo.Context) error {
+	e := heraldry.RandomEscutcheon("square")
+	m := e.Render()
+	buffer := new(bytes.Buffer)
+	if err := png.Encode(buffer, m); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.Blob(http.StatusOK, "image/png", buffer.Bytes())
 }

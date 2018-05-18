@@ -27,7 +27,7 @@ func compareImages(name string) bool {
 }
 
 func TestRandom(t *testing.T) {
-	e := RandomEscutcheon()
+	e := RandomEscutcheon("square")
 	e.Render()
 	e.DC.SavePNG("random.png")
 }
