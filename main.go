@@ -322,7 +322,7 @@ func townNameHandler(c echo.Context) error {
 }
 
 func randomHeraldryHandler(c echo.Context) error {
-	e := heraldry.RandomEscutcheon("square")
+	e := heraldry.RandomEscutcheon("square", true)
 	m := e.Render()
 	buffer := new(bytes.Buffer)
 	if err := png.Encode(buffer, m); err != nil {

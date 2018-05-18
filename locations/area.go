@@ -3,6 +3,8 @@ package locations
 import (
 	"fmt"
 
+	"github.com/slabgorb/gotown/heraldry"
+
 	"github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/words"
@@ -10,24 +12,26 @@ import (
 
 // Area represents a geographical area
 type Area struct {
-	ID           int               `json:"id" storm:"id,increment"`
-	Name         string            `json:"name" storm:"index"`
-	PopulationID int               `json:"population_id"`
-	Size         AreaSize          `json:"size"`
-	GraveyardID  int               `json:"graveyard_id"`
-	LocationID   int               `json:"location_id"`
-	EnclosureIDS []int             `json:"enclosure_ids"`
-	Residents    *being.Population `json:"-"`
-	Graveyard    *being.Population `json:"-"`
-	Location     *Area             `json:"-"`
-	Enclosures   map[int]*Area     `json:"-"`
+	ID           int                  `json:"id" storm:"id,increment"`
+	Name         string               `json:"name" storm:"index"`
+	PopulationID int                  `json:"population_id"`
+	Size         AreaSize             `json:"size"`
+	GraveyardID  int                  `json:"graveyard_id"`
+	LocationID   int                  `json:"location_id"`
+	EnclosureIDS []int                `json:"enclosure_ids"`
+	Residents    *being.Population    `json:"-"`
+	Graveyard    *being.Population    `json:"-"`
+	Location     *Area                `json:"-"`
+	Enclosures   map[int]*Area        `json:"-"`
+	Heraldry     *heraldry.Escutcheon `json:"heraldry"`
 }
 
 type AreaAPI struct {
-	ID        int          `json:"id"`
-	Name      string       `json:"name"`
-	Residents []*being.API `json:"residents"`
-	Size      string       `json:"size"`
+	ID        int                  `json:"id"`
+	Name      string               `json:"name"`
+	Residents []*being.API         `json:"residents"`
+	Size      string               `json:"size"`
+	Heraldry  *heraldry.Escutcheon `json:"heraldry"`
 }
 
 func (a *Area) API() (*AreaAPI, error) {
@@ -122,6 +126,8 @@ func NewArea(size AreaSize, location *Area, namer *words.Namer) *Area {
 	a.EnclosureIDS = []int{}
 	a.Enclosures = make(map[int]*Area)
 	a.Name = namer.CreateName()
+	e := heraldry.RandomEscutcheon("square", true)
+	a.Heraldry = &e
 	return a
 }
 

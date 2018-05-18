@@ -25,6 +25,8 @@ var Stains = []string{"murrey", "sanguine", "tenne"}
 
 var Colors = []string{"sable", "gules", "azure", "vert", "purpure", "cendree"}
 
+var SableOn = []string{"gules", "azure", "vert", "purpure", "cendree"}
+
 func RandomTinctureKey() string {
 	keys := []string{}
 	for k := range Tinctures {
@@ -47,6 +49,9 @@ func RandomMetalKey() string {
 
 func RandomStainKey() string {
 	return randomPick(Stains)
+}
+func RandomSableOn() string {
+	return randomPick(SableOn)
 }
 
 // Tinctures is a heraldric color set
