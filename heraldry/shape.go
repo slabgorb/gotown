@@ -10,8 +10,22 @@ type Shape func(dc *gg.Context) *image.Alpha
 
 var Shapes = map[string]Shape{
 	"heater": HeaterShield,
+	"square": squareField,
 }
 
+func RandomShapeKey() string {
+	keys := []string{}
+	for k := range Shapes {
+		keys = append(keys, k)
+	}
+	return keys[randomizer.Intn(len(keys))]
+}
+
+func squareField(dc *gg.Context) *image.Alpha {
+	dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
+	dc.Fill()
+	return dc.AsMask()
+}
 func HeaterShield(dc *gg.Context) *image.Alpha {
 	w := float64(dc.Width())
 	h := float64(dc.Height())

@@ -26,6 +26,12 @@ func compareImages(name string) bool {
 	return true
 }
 
+func TestRandom(t *testing.T) {
+	e := RandomEscutcheon()
+	e.Render()
+	e.DC.SavePNG("random.png")
+}
+
 func TestEscutcheon(t *testing.T) {
 	type testCase struct {
 		draw     string
@@ -80,9 +86,10 @@ func TestEscutcheon(t *testing.T) {
 			ChargeColor: "argent",
 			FieldColors: []string{"tenne", "sable", "murrey", "purpure"},
 			ChargeKey:   tc.charge,
+			DC:          dc,
 		}
 
-		e.Render(dc)
+		e.Render()
 		fname := fmt.Sprintf("%s.png", tc.name)
 		dc.SavePNG(fname)
 		if !compareImages(tc.name) {

@@ -13,33 +13,51 @@ import (
 
 // Escutcheon represents the 'shield' part of a heraldric device
 type Escutcheon struct {
-	DivisionKey string   `json:"division"`
-	FieldColors []string `json:"field_colors"`
-	ShapeKey    string   `json:"shape"`
-	ChargeKey   string   `json:"charge"`
-	ChargeColor string   `json:"charge_color"`
+	DivisionKey string      `json:"division"`
+	FieldColors []string    `json:"field_colors"`
+	ShapeKey    string      `json:"shape"`
+	ChargeKey   string      `json:"charge"`
+	ChargeColor string      `json:"charge_color"`
+	DC          *gg.Context `json:"-"`
+}
+
+const (
+	width  = 270
+	height = 270
+)
+
+func RandomEscutcheon() Escutcheon {
+	e := Escutcheon{
+		DC:          gg.NewContext(width, height),
+		DivisionKey: RandomDivisionKey(),
+		ShapeKey:    RandomShapeKey(),
+		ChargeKey:   RandomChargeKey(),
+		ChargeColor: RandomMetalKey(),
+	}
+	return e
 }
 
 // Render draws the Escutcheon
-func (e Escutcheon) Render(dc *gg.Context) {
+func (e Escutcheon) Render() image.Image {
 	c := []color.Color{}
 	for _, clr := range e.FieldColors {
 		c = append(c, Tinctures[clr])
 	}
-	mask := Shapes[e.ShapeKey](dc)
-	dc.SetMask(mask)
-	divisions[e.DivisionKey](c...)(dc)
+	mask := Shapes[e.ShapeKey](e.DC)
+	e.DC.SetMask(mask)
+	divisions[e.DivisionKey](c...)(e.DC)
 	ch := e.charge()
 	if ch != nil {
 		mask, err := ch.mask()
 		if err != nil {
 			panic(err)
 		}
-		dc.SetMask(mask)
-		dc.DrawRectangle(0, 0, float64(dc.Width()), float64(dc.Height()))
-		dc.SetColor(ch.c)
-		dc.Fill()
+		e.DC.SetMask(mask)
+		e.DC.DrawRectangle(0, 0, float64(e.DC.Width()), float64(e.DC.Height()))
+		e.DC.SetColor(ch.c)
+		e.DC.Fill()
 	}
+	return e.DC.Image()
 }
 
 func (e Escutcheon) charge() *charge {
@@ -77,4 +95,12 @@ func ListCharges() []string {
 		ret = append(ret, strings.TrimSuffix(f, ".png"))
 	}
 	return ret
+}
+
+func RandomChargeKey() string {
+	keys := []string{}
+	for _, k := range ListCharges() {
+		keys = append(keys, k)
+	}
+	return keys[randomizer.Intn(len(keys))]
 }

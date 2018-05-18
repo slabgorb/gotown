@@ -11,6 +11,30 @@ var Stains = []string{"murrey", "sanguine", "tenne"}
 
 var Colors = []string{"sable", "gules", "azure", "vert", "purpure", "cendree"}
 
+func RandomTinctureKey() string {
+	keys := []string{}
+	for k := range Tinctures {
+		keys = append(keys, k)
+	}
+	return keys[randomizer.Intn(len(keys))]
+}
+
+func randomPick(s []string) string {
+	return s[randomizer.Intn(len(s))]
+}
+
+func RandomColorKey() string {
+	return randomPick(Colors)
+}
+
+func RandomMetalKey() string {
+	return randomPick(Metals)
+}
+
+func RandomStainKey() string {
+	return randomPick(Stains)
+}
+
 // Tinctures is a heraldric color set
 var Tinctures = Tincture{
 	"sable":    color.RGBA{R: 0x00, G: 0x00, B: 0x0, A: 0xff},

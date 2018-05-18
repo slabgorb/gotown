@@ -20,6 +20,14 @@ var divisions = map[string]div{
 	"":                  solid,
 }
 
+func RandomDivisionKey() string {
+	keys := []string{}
+	for k := range divisions {
+		keys = append(keys, k)
+	}
+	return keys[randomizer.Intn(len(keys))]
+}
+
 // perFess divides the field horizontally
 func perFess(c ...color.Color) fill {
 	c = fillOutColors(c, 2)
@@ -147,10 +155,10 @@ func solid(c ...color.Color) fill {
 func fillOutColors(c []color.Color, count int) []color.Color {
 	ret := make([]color.Color, count)
 	for i := 0; i < count; i++ {
-		if len(c) >= i {
+		if len(c) > i {
 			ret[i] = c[i]
 		} else {
-			ret[i] = Tinctures["sable"]
+			ret[i] = Tinctures[RandomTinctureKey()]
 		}
 	}
 	return ret
