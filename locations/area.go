@@ -1,11 +1,7 @@
 package locations
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
-	"image/png"
-
 	"github.com/slabgorb/gotown/heraldry"
 
 	"github.com/slabgorb/gotown/inhabitants/being"
@@ -15,18 +11,18 @@ import (
 
 // Area represents a geographical area
 type Area struct {
-	ID           int                  `json:"id" storm:"id,increment"`
-	Name         string               `json:"name" storm:"index"`
-	PopulationID int                  `json:"population_id"`
-	Size         AreaSize             `json:"size"`
-	GraveyardID  int                  `json:"graveyard_id"`
-	LocationID   int                  `json:"location_id"`
-	EnclosureIDS []int                `json:"enclosure_ids"`
-	Residents    *being.Population    `json:"-"`
-	Graveyard    *being.Population    `json:"-"`
-	Location     *Area                `json:"-"`
-	Enclosures   map[int]*Area        `json:"-"`
-	Heraldry     *heraldry.Escutcheon `json:"heraldry"`
+	ID           int                `json:"id" storm:"id,increment"`
+	Name         string             `json:"name" storm:"index"`
+	PopulationID int                `json:"population_id"`
+	Size         AreaSize           `json:"size"`
+	GraveyardID  int                `json:"graveyard_id"`
+	LocationID   int                `json:"location_id"`
+	EnclosureIDS []int              `json:"enclosure_ids"`
+	Residents    *being.Population  `json:"-"`
+	Graveyard    *being.Population  `json:"-"`
+	Location     *Area              `json:"-"`
+	Enclosures   map[int]*Area      `json:"-"`
+	Heraldry     *heraldry.Heraldry `json:"heraldry"`
 }
 
 type AreaAPI struct {
@@ -56,17 +52,10 @@ func (a *Area) API() (*AreaAPI, error) {
 		Name:      a.Name,
 		Residents: beingsApi,
 		Size:      a.Size.String(),
-		Icon:      a.renderImageToBase64(0.25),
-		Image:     a.renderImageToBase64(1.0),
+		Icon:      a.Heraldry.Icon,
+		Image:     a.Heraldry.Image,
 	}
 	return api, nil
-}
-
-func (a *Area) renderImageToBase64(pct float64) string {
-	buf := bytes.NewBuffer([]byte{})
-	png.Encode(buf, a.Heraldry.RenderAtPercent(pct))
-	b64 := base64.StdEncoding.EncodeToString(buf.Bytes())
-	return fmt.Sprintf("data:image/png;base64,%s", b64)
 }
 
 // Add adds a being to the area
@@ -143,7 +132,7 @@ func NewArea(size AreaSize, location *Area, namer *words.Namer) *Area {
 	a.Enclosures = make(map[int]*Area)
 	a.Name = namer.CreateName()
 	e := heraldry.RandomEscutcheon("square", true)
-	a.Heraldry = &e
+	a.Heraldry = heraldry.New(e)
 	return a
 }
 

@@ -298,7 +298,7 @@ func createTownHandler(c echo.Context) error {
 		area.Name = req.Name
 	}
 	h := heraldry.RandomEscutcheon("square", true)
-	area.Heraldry = &h
+	area.Heraldry = heraldry.New(h)
 	var wg sync.WaitGroup
 	size := locations.AreaSize(req.Size)
 	count := size.Population()
