@@ -34,30 +34,39 @@ type AreaAPI struct {
 	Name      string       `json:"name"`
 	Residents []*being.API `json:"residents"`
 	Size      string       `json:"size"`
-	Heraldry  string       `json:"heraldry"`
+	Image     string       `json:"image"`
+	Icon      string       `json:"icon"`
 }
 
 func (a *Area) API() (*AreaAPI, error) {
-	beings, err := a.Residents.Inhabitants()
-	if err != nil {
-		return nil, fmt.Errorf("could not load residents for area %d: %s", a.ID, err)
+	beingsApi := []*being.API{}
+	if a.Residents != nil {
+		beings, err := a.Residents.Inhabitants()
+		if err != nil {
+			return nil, fmt.Errorf("could not load residents for area %d: %s", a.ID, err)
+		}
+		beingsApi, err = being.APIList(beings)
+		if err != nil {
+			return nil, fmt.Errorf("could not load being api for area %d: %s", a.ID, err)
+		}
 	}
-	beingsApi, err := being.APIList(beings)
-	if err != nil {
-		return nil, fmt.Errorf("could not load being api for area %d: %s", a.ID, err)
-	}
-	buf := bytes.NewBuffer([]byte{})
-	png.Encode(buf, a.Heraldry.Render())
-	b64 := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	api := &AreaAPI{
 		ID:        a.ID,
 		Name:      a.Name,
 		Residents: beingsApi,
 		Size:      a.Size.String(),
-		Heraldry:  fmt.Sprintf("data:image/png;base64,%s", b64),
+		Icon:      a.renderImageToBase64(0.25),
+		Image:     a.renderImageToBase64(1.0),
 	}
 	return api, nil
+}
+
+func (a *Area) renderImageToBase64(pct float64) string {
+	buf := bytes.NewBuffer([]byte{})
+	png.Encode(buf, a.Heraldry.RenderAtPercent(pct))
+	b64 := base64.StdEncoding.EncodeToString(buf.Bytes())
+	return fmt.Sprintf("data:image/png;base64,%s", b64)
 }
 
 // Add adds a being to the area
@@ -86,12 +95,12 @@ func (a *Area) Read() error {
 	if err := persist.DB.One("ID", a.ID, a); err != nil {
 		return err
 	}
-	if err := a.readGraveyard(); err != nil {
-		return fmt.Errorf("could not read graveyard %d for area %d: %s", a.GraveyardID, a.ID, err)
-	}
-	if err := a.readResidents(); err != nil {
-		return fmt.Errorf("could not read population %d for area %d: %s", a.PopulationID, a.ID, err)
-	}
+	// if err := a.readGraveyard(); err != nil {
+	// 	return fmt.Errorf("could not read graveyard %d for area %d: %s", a.GraveyardID, a.ID, err)
+	// }
+	// if err := a.readResidents(); err != nil {
+	// 	return fmt.Errorf("could not read population %d for area %d: %s", a.PopulationID, a.ID, err)
+	// }
 	return nil
 }
 
@@ -226,11 +235,11 @@ func (a *Area) String() string {
 }
 
 func (a *Area) readResidents() error {
-	p := being.Population{ID: a.PopulationID}
+	p := &being.Population{ID: a.PopulationID}
 	return p.Read()
 }
 func (a *Area) readGraveyard() error {
-	p := being.Population{ID: a.GraveyardID}
+	p := &being.Population{ID: a.GraveyardID}
 	return p.Read()
 }
 

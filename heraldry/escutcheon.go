@@ -69,7 +69,10 @@ func (e Escutcheon) RenderAtPercent(size float64) image.Image {
 	return img
 }
 
-func (e Escutcheon) image() image.Image {
+func (e *Escutcheon) image() image.Image {
+	if e.DC == nil {
+		e.DC = gg.NewContext(width, height)
+	}
 	c := []color.Color{}
 	for _, clr := range e.FieldColors {
 		c = append(c, Tinctures[clr])

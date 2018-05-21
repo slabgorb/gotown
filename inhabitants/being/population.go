@@ -134,6 +134,9 @@ func reproduction(p *Population) timeline.Callback {
 
 // Inhabitants returns the beings in the population
 func (p *Population) Inhabitants() ([]*Being, error) {
+	if p == nil {
+		return nil, fmt.Errorf("nil population")
+	}
 	bs := make([]*Being, p.Len())
 	i := 0
 	for id := range p.IDS {

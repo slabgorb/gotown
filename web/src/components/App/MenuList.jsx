@@ -1,15 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
-import ExpansionPanel, {
-  ExpansionPanelSummary,
-  ExpansionPanelDetails,
-} from 'material-ui/ExpansionPanel';
+import inflection from 'inflection';
 import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
+import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
+import ExpansionPanel, { ExpansionPanelDetails, ExpansionPanelSummary } from 'material-ui/ExpansionPanel';
 import IconButton from 'material-ui/IconButton';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Typography from 'material-ui/Typography';
-import inflection from 'inflection';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 const deleteIcon = (classes, handleDelete, item) => (
   <IconButton className={classes.deleteButton} onClick={e => handleDelete(e, item.id)}>
@@ -35,7 +32,7 @@ const MenuList = ({
           <ListItem button divider key={item.id} onClick={() => handleClick(item.id)}>
             <ListItemText primary={inflection.titleize(item.name)} />
             {deletable ? deleteIcon(classes, handleDelete, item) : (<div />)}
-            {item.imgSrc ? (<img src={item.imgSrc} alt="heraldry" width={50} />) : (<div />)}
+            {item.icon ? (<img src={item.icon} alt="icon" />) : (<div />)}
           </ListItem>
           ))}
       </List>

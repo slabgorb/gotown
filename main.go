@@ -176,9 +176,10 @@ type lister interface {
 }
 
 type listItem struct {
-	S    string `json:"name"`
-	ID   int    `json:"id"`
-	Icon string `json:"icon"`
+	S     string `json:"name"`
+	ID    int    `json:"id"`
+	Icon  string `json:"icon"`
+	Image string `json:"image"`
 }
 
 func listAreasHandler(c echo.Context) error {
@@ -188,8 +189,11 @@ func listAreasHandler(c echo.Context) error {
 	}
 	names := []listItem{}
 	for _, a := range all {
-		t, _ := a.API()
-		names = append(names, listItem{S: t.Name, ID: t.ID, Icon: t.Heraldry})
+		t, err := a.API()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		names = append(names, listItem{S: t.Name, ID: t.ID, Icon: t.Icon, Image: t.Image})
 	}
 	return c.JSON(http.StatusOK, names)
 }
@@ -216,7 +220,7 @@ func showAreaHandler(c echo.Context) error {
 	}
 	api, err := a.API()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load api for area %d", a.ID))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load api for area %d: %s", a.ID, err))
 	}
 	return c.JSON(http.StatusOK, api)
 }
@@ -293,6 +297,8 @@ func createTownHandler(c echo.Context) error {
 	if req.Name != "" {
 		area.Name = req.Name
 	}
+	h := heraldry.RandomEscutcheon("square", true)
+	area.Heraldry = &h
 	var wg sync.WaitGroup
 	size := locations.AreaSize(req.Size)
 	count := size.Population()
