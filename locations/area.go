@@ -1,7 +1,10 @@
 package locations
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
+	"image/png"
 
 	"github.com/slabgorb/gotown/heraldry"
 
@@ -27,11 +30,11 @@ type Area struct {
 }
 
 type AreaAPI struct {
-	ID        int                  `json:"id"`
-	Name      string               `json:"name"`
-	Residents []*being.API         `json:"residents"`
-	Size      string               `json:"size"`
-	Heraldry  *heraldry.Escutcheon `json:"heraldry"`
+	ID        int          `json:"id"`
+	Name      string       `json:"name"`
+	Residents []*being.API `json:"residents"`
+	Size      string       `json:"size"`
+	Heraldry  string       `json:"heraldry"`
 }
 
 func (a *Area) API() (*AreaAPI, error) {
@@ -43,12 +46,16 @@ func (a *Area) API() (*AreaAPI, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not load being api for area %d: %s", a.ID, err)
 	}
+	buf := bytes.NewBuffer([]byte{})
+	png.Encode(buf, a.Heraldry.Render())
+	b64 := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	api := &AreaAPI{
 		ID:        a.ID,
 		Name:      a.Name,
 		Residents: beingsApi,
 		Size:      a.Size.String(),
+		Heraldry:  fmt.Sprintf("data:image/png;base64,%s", b64),
 	}
 	return api, nil
 }

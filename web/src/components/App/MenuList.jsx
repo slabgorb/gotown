@@ -35,6 +35,7 @@ const MenuList = ({
           <ListItem button divider key={item.id} onClick={() => handleClick(item.id)}>
             <ListItemText primary={inflection.titleize(item.name)} />
             {deletable ? deleteIcon(classes, handleDelete, item) : (<div />)}
+            {item.imgSrc ? (<img src={item.imgSrc} alt="heraldry" width={50} />) : (<div />)}
           </ListItem>
           ))}
       </List>

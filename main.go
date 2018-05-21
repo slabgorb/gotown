@@ -170,22 +170,15 @@ func showWordsHandler(c echo.Context) error {
 
 //func showBeingHandler(c echo.Context) error { return show(c, &being.Being{ID: c.Param("id")}) }
 
-type townHandlerRequest struct {
-	Culture string `json:"culture" form:"culture" query:"culture"`
-	Species string `json:"species" form:"species" query:"species"`
-	Name    string `json:"name" form:"name" query:"name"`
-	ID      int    `json:"id" form:"id" query:"id"`
-	Count   int    `json:"count" form:"count" query:"count"`
-}
-
 type lister interface {
 	GetId()
 	String()
 }
 
 type listItem struct {
-	S  string `json:"name"`
-	ID int    `json:"id"`
+	S    string `json:"name"`
+	ID   int    `json:"id"`
+	Icon string `json:"icon"`
 }
 
 func listAreasHandler(c echo.Context) error {
@@ -194,8 +187,9 @@ func listAreasHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	names := []listItem{}
-	for _, t := range all {
-		names = append(names, listItem{S: t.Name, ID: t.ID})
+	for _, a := range all {
+		t, _ := a.API()
+		names = append(names, listItem{S: t.Name, ID: t.ID, Icon: t.Heraldry})
 	}
 	return c.JSON(http.StatusOK, names)
 }
@@ -267,6 +261,14 @@ func renameHandler(c echo.Context) error {
 // 	return c.JSON(http.StatusOK, []*inhabitants.Being{mom, dad})
 // }
 
+type townHandlerRequest struct {
+	Culture string `json:"culture" form:"culture" query:"culture"`
+	Species string `json:"species" form:"species" query:"species"`
+	Name    string `json:"name" form:"name" query:"name"`
+	ID      int    `json:"id" form:"id" query:"id"`
+	Size    int    `json:"size" form:"size" query:"size"`
+}
+
 func createTownHandler(c echo.Context) error {
 	req := new(townHandlerRequest)
 	if err := c.Bind(req); err != nil {
@@ -292,7 +294,9 @@ func createTownHandler(c echo.Context) error {
 		area.Name = req.Name
 	}
 	var wg sync.WaitGroup
-	for i := 0; i < req.Count; i++ {
+	size := locations.AreaSize(req.Size)
+	count := size.Population()
+	for i := 0; i < count; i++ {
 		go func(wg *sync.WaitGroup) {
 			wg.Add(1)
 			defer wg.Done()

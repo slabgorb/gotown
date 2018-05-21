@@ -73,6 +73,7 @@ class Form extends React.Component {
       culture: this.state.currentCulture,
       species: this.state.currentSpecies,
       name: this.state.name,
+      size: this.state.size,
     };
     areaApi.create(params).then(data => console.log(data));
   }
@@ -93,10 +94,10 @@ class Form extends React.Component {
         <RadioGroup name={name} value={value} onChange={onChange}>
           {list.map(f => (
             <FormControlLabel
-              key={f}
-              value={f}
+              key={f.id}
+              value={f.name}
               control={<Radio />}
-              label={inflection.titleize(f)}
+              label={inflection.titleize(f.name)}
             />
        ))}
         </RadioGroup>
@@ -106,7 +107,15 @@ class Form extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { name, currentSize, loaded, species, cultures, currentCulture, currentSpecies } = this.state
+    const {
+      name,
+      currentSize,
+      loaded,
+      species,
+      cultures,
+      currentCulture,
+      currentSpecies,
+    } = this.state;
     if (!loaded) {
       return (<div>Loading</div>);
     }
