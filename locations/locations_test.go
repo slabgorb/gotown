@@ -16,7 +16,7 @@ var testNamer = &words.Namer{Name: "english towns"}
 var testSpecies = &species.Species{Name: "human"}
 var testCulture = &culture.Culture{Name: "italianate"}
 
-func TestMain(m *testing.M) {
+func testMainWrapped(m *testing.M) int {
 	SetRandomizer(random.NewMock())
 	words.SetRandomizer(random.NewMock())
 	persist.OpenTestDB()
@@ -32,6 +32,11 @@ func TestMain(m *testing.M) {
 	if err := testSpecies.Read(); err != nil {
 		panic(err)
 	}
-	code := m.Run()
-	os.Exit(code)
+
+	defer persist.CloseTestDB()
+	return m.Run()
+}
+
+func TestMain(m *testing.M) {
+	os.Exit(testMainWrapped(m))
 }

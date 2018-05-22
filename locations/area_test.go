@@ -2,10 +2,11 @@ package locations_test
 
 import (
 	"encoding/json"
-	"github.com/slabgorb/gotown/inhabitants/being"
-	. "github.com/slabgorb/gotown/locations"
 	"sync"
 	"testing"
+
+	"github.com/slabgorb/gotown/inhabitants/being"
+	. "github.com/slabgorb/gotown/locations"
 )
 
 func makePop(t *testing.T, count int) (*being.Population, []*being.Being) {
@@ -47,14 +48,21 @@ func TestPersist(t *testing.T) {
 	area := NewArea(Town, nil, testNamer)
 	p, _ := makePop(t, 10)
 	area.Residents = p
-	if err := area.Save();err != nil {
+	if err := area.Save(); err != nil {
 		t.Fatal(err)
 	}
+	id := area.ID
+	area.Reset()
+	area.ID = id
 	if err := area.Read(); err != nil {
 		t.Fatal(err)
 	}
-	if area.Population() != 10 {
-		t.Errorf("Expected 10 got %d", area.Population())
+	pop, err := area.Population()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pop != 10 {
+		t.Errorf("Expected 10 got %d", pop)
 	}
 
 }

@@ -2,6 +2,7 @@ package locations
 
 import (
 	"fmt"
+
 	"github.com/slabgorb/gotown/heraldry"
 
 	"github.com/slabgorb/gotown/inhabitants/being"
@@ -87,9 +88,13 @@ func (a *Area) Read() error {
 	// if err := a.readGraveyard(); err != nil {
 	// 	return fmt.Errorf("could not read graveyard %d for area %d: %s", a.GraveyardID, a.ID, err)
 	// }
-	// if err := a.readResidents(); err != nil {
-	// 	return fmt.Errorf("could not read population %d for area %d: %s", a.PopulationID, a.ID, err)
-	// }
+	if err := a.readResidents(); err != nil {
+		return fmt.Errorf("could not read population %d for area %d: %s", a.PopulationID, a.ID, err)
+	}
+
+	if a.Residents == nil {
+		return fmt.Errorf("did not read population id: %d", a.PopulationID)
+	}
 	return nil
 }
 
@@ -137,15 +142,22 @@ func NewArea(size AreaSize, location *Area, namer *words.Namer) *Area {
 }
 
 // Population returns the total population of the enclosed area
-func (a *Area) Population() int {
+func (a *Area) Population() (int, error) {
 	if a.Residents == nil {
-		a.readResidents()
+		err := a.readResidents()
+		if err != nil {
+			return 0, err
+		}
 	}
 	pop := a.Residents.Len()
 	for _, area := range a.Enclosures {
-		pop = pop + area.Population()
+		p, err := area.Population()
+		if err != nil {
+			return 0, err
+		}
+		pop = pop + p
 	}
-	return pop
+	return pop, nil
 }
 
 // IsEnclosedBy returns whether the receiver is enclosed by the parameter
@@ -225,10 +237,12 @@ func (a *Area) String() string {
 
 func (a *Area) readResidents() error {
 	p := &being.Population{ID: a.PopulationID}
+	a.Residents = p
 	return p.Read()
 }
 func (a *Area) readGraveyard() error {
 	p := &being.Population{ID: a.GraveyardID}
+	a.Graveyard = p
 	return p.Read()
 }
 
