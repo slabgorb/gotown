@@ -13,6 +13,8 @@ import (
 )
 
 var testNamer = &words.Namer{Name: "english towns"}
+var testSpecies = &species.Species{Name: "human"}
+var testCulture = &culture.Culture{Name: "italianate"}
 
 func TestMain(m *testing.M) {
 	SetRandomizer(random.NewMock())
@@ -22,6 +24,12 @@ func TestMain(m *testing.M) {
 	culture.Seed()
 	words.Seed()
 	if err := testNamer.Read(); err != nil {
+		panic(err)
+	}
+	if err := testCulture.Read(); err != nil {
+		panic(err)
+	}
+	if err := testSpecies.Read(); err != nil {
 		panic(err)
 	}
 	code := m.Run()
