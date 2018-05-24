@@ -114,7 +114,7 @@ var NameStrategies = map[string]NameStrategy{
 		name.Display = display
 		return name
 	},
-	"onename": func(b Nameable) *Name {
+	"one name": func(b Nameable) *Name {
 		namer := b.GetNamer()
 		name := &Name{GivenName: namer.Words.GivenName()}
 		display, _ := namer.Execute(name)

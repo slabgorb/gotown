@@ -156,7 +156,7 @@ func showNamersHandler(c echo.Context) error {
 }
 
 func randomNameHandler(c echo.Context) error {
-	n := &words.Namer{Name: c.Param("name")}
+	n := &words.Namer{ID: getID(c)}
 	if err := n.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

@@ -8,10 +8,9 @@ class namerApi {
     return axios.get(`/api/namers/${name}`).then(response => response.data);
   }
 
-  static random(namer) {
-    return axios.get(`/api/namers/${namer}/random`).then(response => response.data);
+  static random(id) {
+    return axios.get(`/api/namers/${id}/random`).then(response => response.data);
   }
-
 }
 
 export default namerApi;

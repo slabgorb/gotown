@@ -1,10 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import AutoRenewIcon from 'material-ui-icons/Autorenew';
+import Grid from 'material-ui/Grid';
+import IconButton from 'material-ui/IconButton';
 import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
-import AutoRenewIcon from 'material-ui-icons/Autorenew';
-import IconButton from 'material-ui/IconButton';
-import Grid from 'material-ui/Grid';
+import PropTypes from 'prop-types';
+import React from 'react';
 import api from './api';
 
 const style = () => ({
@@ -23,8 +23,8 @@ class Random extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      namer: props.namer,
       name: props.name,
+      id: props.id,
     };
     this.get = this.get.bind(this);
   }
@@ -34,7 +34,7 @@ class Random extends React.Component {
   }
 
   get() {
-    api.random(this.state.namer)
+    api.random(this.state.id)
       .then(name => this.setState({ name }));
   }
 
@@ -62,7 +62,7 @@ class Random extends React.Component {
 }
 
 Random.propTypes = {
-  namer: PropTypes.string.isRequired,
+  id: PropTypes.number.isRequired,
   name: PropTypes.string,
   classes: PropTypes.object.isRequired,
 };
