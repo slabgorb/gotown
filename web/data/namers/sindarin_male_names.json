@@ -1,0 +1,8 @@
+{
+  "name": "sindarin male names",
+  "name_strategy":"one name",
+  "patterns":[  
+     "{{.GivenName}}"
+  ],
+  "words":"sindarin male names"
+}

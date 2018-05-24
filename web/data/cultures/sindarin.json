@@ -1,0 +1,12 @@
+{  
+   "name":"sindarin",
+   "species":"elf",
+   "marital_strategies":[  
+      "heterosexual",
+      "monogamous"
+   ],
+   "namer_names":{  
+      "male":"sindarin male names",
+      "female": "sindarin female names"
+   }
+}
