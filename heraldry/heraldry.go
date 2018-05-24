@@ -18,7 +18,7 @@ func SetRandomizer(g random.Generator) {
 }
 
 type Heraldry struct {
-	*Escutcheon `json:"escutcheon`
+	*Escutcheon `json:"escutcheon"`
 	Icon        string `json:"icon"`
 	Image       string `json:"image"`
 }
