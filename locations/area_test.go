@@ -44,17 +44,24 @@ func TestJsonEncode(t *testing.T) {
 	}
 }
 
-func TestPersist(t *testing.T) {
-	area := NewArea(Town, nil, testNamer)
-	p, _ := makePop(t, 10)
-	area.Residents = p
+func persistRoundtripArea(area *Area) error {
 	if err := area.Save(); err != nil {
-		t.Fatal(err)
+		return err
 	}
 	id := area.ID
 	area.Reset()
 	area.ID = id
 	if err := area.Read(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func TestPersist(t *testing.T) {
+	area := NewArea(Town, nil, testNamer)
+	p, _ := makePop(t, 10)
+	area.Residents = p
+	if err := persistRoundtripArea(area); err != nil {
 		t.Fatal(err)
 	}
 	pop, err := area.Population()
@@ -94,5 +101,20 @@ func TestAddTo(t *testing.T) {
 	if ok := a1.AttachTo(a2); ok {
 		t.Error("Should not allow adding in a circular relationship")
 	}
+}
 
+func TestAPI(t *testing.T) {
+	area := NewArea(Town, nil, testNamer)
+	p, _ := makePop(t, 10)
+	area.Residents = p
+	if err := persistRoundtripArea(area); err != nil {
+		t.Fatal(err)
+	}
+	api, err := area.API()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(api.Residents) != 10 {
+		t.Errorf("did not create residents in api")
+	}
 }

@@ -37,15 +37,13 @@ type AreaAPI struct {
 
 func (a *Area) API() (*AreaAPI, error) {
 	beingsApi := []*being.API{}
-	if a.Residents != nil {
-		beings, err := a.Residents.Inhabitants()
-		if err != nil {
-			return nil, fmt.Errorf("could not load residents for area %d: %s", a.ID, err)
-		}
-		beingsApi, err = being.APIList(beings)
-		if err != nil {
-			return nil, fmt.Errorf("could not load being api for area %d: %s", a.ID, err)
-		}
+	beings, err := a.Residents.Inhabitants()
+	if err != nil {
+		return nil, fmt.Errorf("could not load residents for area %d: %s", a.ID, err)
+	}
+	beingsApi, err = being.APIList(beings)
+	if err != nil {
+		return nil, fmt.Errorf("could not load being api for area %d: %s", a.ID, err)
 	}
 
 	api := &AreaAPI{
@@ -92,7 +90,7 @@ func (a *Area) Read() error {
 		return fmt.Errorf("could not read population %d for area %d: %s", a.PopulationID, a.ID, err)
 	}
 
-	if a.Residents == nil {
+	if a.Residents == nil || a.Residents.Len() == 0 {
 		return fmt.Errorf("did not read population id: %d", a.PopulationID)
 	}
 	return nil
