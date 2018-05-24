@@ -1,6 +1,7 @@
 import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { HeraldryShow } from '../Heraldry';
 import areaApi from './api';
 
 const styles = () => ({
@@ -12,6 +13,8 @@ class AreaShow extends React.Component {
     super(props);
     this.state = {
       id: props.match.params.id,
+      name: '',
+      image: '',
     };
   }
 
@@ -19,13 +22,20 @@ class AreaShow extends React.Component {
     return areaApi.get(this.state.id).then((data) => {
       this.setState({
         name: data.name,
+        image: data.image,
       });
     });
   }
 
   render() {
     const { classes } = this.props;
-    return (<div className={classes.root}>{this.state.name}</div>);
+    const { name, image } = this.state;
+    return (
+      <div>
+        <div className={classes.root}>{name}</div>
+        <HeraldryShow src={image} size={270} />
+      </div>
+    );
   }
 }
 
