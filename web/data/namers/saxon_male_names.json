@@ -1,0 +1,13 @@
+{
+  "name": "saxon male names",
+  "patterns":[  
+    "{{.GivenName}}",
+    "{{.GivenName}}",
+    "{{.GivenName}}",
+    "{{.GivenName}} {{.Nickname}}",
+    "{{.GivenName}} the {{.Nickname}}"
+ ],
+ "name_strategy":"one name",
+ "words":"saxon male names",
+ "town_namer": "english towns"
+}

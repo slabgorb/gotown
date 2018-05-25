@@ -1,0 +1,12 @@
+{
+  "name": "saxon female names",
+  "patterns":[  
+    "{{.GivenName}}",
+    "{{.GivenName}}",
+    "{{.GivenName}}",
+    "{{.GivenName}} {{.Nickname}}",
+    "{{.GivenName}} the {{.Nickname}}"
+ ],
+ "name_strategy":"one name",
+ "words":"saxon female names"
+}

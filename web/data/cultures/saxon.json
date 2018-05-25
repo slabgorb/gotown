@@ -1,0 +1,14 @@
+{  
+   "name":"saxon",
+   "species":"human",
+   "marital_strategies":[  
+      "heterosexual",
+      "monogamous"
+   ],
+   "namer_names":{  
+      "male":"saxon male names",
+      "female": "saxon female names"
+   },
+   "town_namer": "english towns"
+
+}

@@ -177,6 +177,10 @@ func (w *Words) FamilyName() string {
 	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("family_names")) })
 }
 
+func (w *Words) Nickname() string {
+	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("nicknames")) })
+}
+
 // Matronymic returns a matronymic name
 func (w *Words) Matronymic() string {
 	return w.withBackup(func(w *Words) string { return chooseRandomString(w.listFromKey("matronymics")) })
