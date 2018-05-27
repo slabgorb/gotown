@@ -27,29 +27,24 @@ type Area struct {
 }
 
 type AreaAPI struct {
-	ID        int          `json:"id"`
-	Name      string       `json:"name"`
-	Residents []*being.API `json:"residents"`
-	Size      string       `json:"size"`
-	Image     string       `json:"image"`
-	Icon      string       `json:"icon"`
+	ID        int         `json:"id"`
+	Name      string      `json:"name"`
+	Residents interface{} `json:"residents"`
+	Size      string      `json:"size"`
+	Image     string      `json:"image"`
+	Icon      string      `json:"icon"`
 }
 
-func (a *Area) API() (*AreaAPI, error) {
-	beingsApi := []*being.API{}
-	beings, err := a.Residents.Inhabitants()
-	if err != nil {
-		return nil, fmt.Errorf("could not load residents for area %d: %s", a.ID, err)
-	}
-	beingsApi, err = being.APIList(beings)
-	if err != nil {
-		return nil, fmt.Errorf("could not load being api for area %d: %s", a.ID, err)
-	}
+func (a *Area) API() (interface{}, error) {
 
+	populationAPI, err := a.Residents.API()
+	if err != nil {
+		return nil, fmt.Errorf("could not load population api %d for area %d", a.PopulationID, a.ID)
+	}
 	api := &AreaAPI{
 		ID:        a.ID,
 		Name:      a.Name,
-		Residents: beingsApi,
+		Residents: populationAPI,
 		Size:      a.Size.String(),
 		Icon:      a.Heraldry.Icon,
 		Image:     a.Heraldry.Image,
@@ -68,10 +63,10 @@ func (a *Area) Save() error {
 		return err
 	}
 	a.PopulationID = a.Residents.ID
-	if err := a.Graveyard.Save(); err != nil {
-		return err
-	}
-	a.GraveyardID = a.Graveyard.ID
+	// if err := a.Graveyard.Save(); err != nil {
+	// 	return err
+	// }
+	// a.GraveyardID = a.Graveyard.ID
 	return persist.DB.Save(a)
 }
 

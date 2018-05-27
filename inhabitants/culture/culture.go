@@ -67,6 +67,10 @@ var maritalStrategies = map[string]MaritalStrategy{
 	},
 }
 
+func (c *Culture) API() (interface{}, error) {
+	return c, nil
+}
+
 // String implements fmt.Stringer
 func (c *Culture) String() string {
 	return fmt.Sprintf("%s", c.Name)

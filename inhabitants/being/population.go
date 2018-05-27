@@ -44,27 +44,6 @@ func NewPopulation(ids []int) *Population {
 	return p
 }
 
-// type populationSerializer struct {
-// 	ID  int   `json:"id" storm:"id,increment"`
-// 	IDS []int `json:"ids"`
-// }
-
-// // MarshalJSON implements json.Marshaler
-// func (p *Population) MarshalJSON() ([]byte, error) {
-// 	ps := &populationSerializer{ID: p.ID, IDS: p.getIds()}
-// 	return json.Marshal(ps)
-// }
-
-// // UnmarshalJSON implements json.Unmarshaler
-// func (p *Population) UnmarshalJSON(data []byte) error {
-// 	ps := &populationSerializer{}
-// 	if err := json.Unmarshal(data, ps); err != nil {
-// 		return err
-// 	}
-// 	p.appendIds(ps.IDS...)
-// 	return nil
-// }
-
 // Reset implements persist.Persistable
 func (p *Population) Reset() {
 	p.ID = 0
@@ -89,6 +68,34 @@ func (p *Population) Delete() error {
 func (p *Population) Save() error {
 	return persist.DB.Save(p)
 }
+
+type PopulationAPI struct {
+	ID     int           `json:"id"`
+	Beings []interface{} `json:"beings"`
+}
+
+// API returns the population as an API struct
+func (p *Population) API() (interface{}, error) {
+	apis := []interface{}{}
+	beings, err := p.Inhabitants()
+	if err != nil {
+		return nil, err
+	}
+	for _, b := range beings {
+		api, err := b.API()
+		if err != nil {
+			return nil, err
+		}
+		apis = append(apis, api)
+	}
+	return &PopulationAPI{
+		ID:     p.ID,
+		Beings: apis,
+	}, nil
+}
+
+func (p *Population) GetID() int      { return p.ID }
+func (p *Population) GetName() string { return "" }
 
 // Read implements persist.Persistable
 func (p *Population) Read() error {

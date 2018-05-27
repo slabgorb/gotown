@@ -48,6 +48,10 @@ func (s *Species) String() string {
 	return s.Name
 }
 
+func (s *Species) API() (interface{}, error) {
+	return s, nil
+}
+
 // Save implements persist.Persistable
 func (s *Species) Save() error {
 	return persist.DB.Save(s)
