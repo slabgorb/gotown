@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import { Table, TableRow, TableCell } from 'material-ui/Table';
+import Table from 'material-ui/Table';
+import TableCell from 'material-ui/Table/TableCell';
+import TableRow from 'material-ui/Table/TableRow';
+import TableHead from 'material-ui/Table/TableHead';
 
 const styles = () => ({
   root: {},
@@ -18,6 +21,14 @@ const List = ({ beings }) => {
   ));
   return (
     <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>Name</TableCell>
+          <TableCell>Gender</TableCell>
+          <TableCell>Age</TableCell>
+        </TableRow>
+
+      </TableHead>
       {table}
     </Table>
 
