@@ -36,6 +36,22 @@ func makePop(t *testing.T, count int) (*Population, []*Being) {
 	return NewPopulation(ids), beings
 }
 
+func TestPersist(t *testing.T) {
+	count := 3
+	p, _ := makePop(t, count)
+	p.Save()
+
+	id := p.ID
+	p.Reset()
+	p.ID = id
+	if err := p.Read(); err != nil {
+		t.Error(err)
+	}
+	if p.Len() != count {
+		t.Errorf("expected %d got %d", count, p.Len())
+	}
+}
+
 func TestNew(t *testing.T) {
 	p, _ := makePop(t, 0)
 	if p.Len() != 0 {
