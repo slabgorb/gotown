@@ -1,18 +1,19 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import Radio, { RadioGroup } from 'material-ui/Radio';
-import { FormLabel, FormControl, FormControlLabel } from 'material-ui/Form';
+import inflection from 'inflection';
+import AutoRenewIcon from 'material-ui-icons/Autorenew';
 import Button from 'material-ui/Button';
+import { FormControl, FormControlLabel, FormLabel } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
 import IconButton from 'material-ui/IconButton';
-import TextField from 'material-ui/TextField';
+import { MenuItem } from 'material-ui/Menu';
+import Radio, { RadioGroup } from 'material-ui/Radio';
 import Select from 'material-ui/Select';
-import AutoRenewIcon from 'material-ui-icons/Autorenew';
-import inflection from 'inflection';
-import areaApi from './api';
+import TextField from 'material-ui/TextField';
+import { withStyles } from 'material-ui/styles';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { PageTitle } from '../App';
 import List from './List';
+import areaApi from './api';
 
 const styles = theme => ({
   root: {
@@ -73,7 +74,7 @@ class Form extends React.Component {
       culture: this.state.currentCulture,
       species: this.state.currentSpecies,
       name: this.state.name,
-      size: this.state.size,
+      size: this.state.currentSize,
     };
     areaApi.create(params).then(data => console.log(data));
   }
@@ -142,25 +143,28 @@ class Form extends React.Component {
             {this.radioGroup('Culture', 'culture', cultures, currentCulture, this.handleChange('currentCulture'))}
           </Grid>
           <Grid item xs={6}>
-            <Select
-              value={currentSize}
-              onChange={this.handleChange('currentSize')}
-            >
+            <FormControl classname={classes.formControl}>
+              <Select
+                value={currentSize}
+                onChange={this.handleChange('currentSize')}
+                name="size"
+              >
+                <MenuItem value={1}>Hut </MenuItem>
+                <MenuItem value={2}>Cottage</MenuItem>
+                <MenuItem value={3}>House</MenuItem>
+                <MenuItem value={4}>Tower</MenuItem>
+                <MenuItem value={5}>Castle</MenuItem>
+                <MenuItem value={6}>Hamlet</MenuItem>
+                <MenuItem value={7}>Palace</MenuItem>
+                <MenuItem value={8}>Village</MenuItem>
+                <MenuItem value={9}>Town</MenuItem>
+                <MenuItem value={10}>City</MenuItem>
+                <MenuItem value={11}>Region</MenuItem>
+                <MenuItem value={12}>NationState</MenuItem>
+                <MenuItem value={13}>Empire</MenuItem>
+              </Select>
+            </FormControl>
 
-              <option value="1">Hut </option>
-              <option value="2">Cottage</option>
-              <option value="3">House</option>
-              <option value="4">Tower</option>
-              <option value="5">Castle</option>
-              <option value="6">Hamlet</option>
-              <option value="7">Palace</option>
-              <option value="8">Village</option>
-              <option value="9">Town</option>
-              <option value="10">City</option>
-              <option value="11">Region</option>
-              <option value="12">NationState</option>
-              <option value="13">Empire</option>
-            </Select>
           </Grid>
         </Grid>
       </form>

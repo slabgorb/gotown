@@ -15,6 +15,7 @@ class AreaShow extends React.Component {
       id: props.match.params.id,
       name: '',
       image: '',
+      residents: [],
     };
   }
 
@@ -23,6 +24,7 @@ class AreaShow extends React.Component {
       this.setState({
         name: data.name,
         image: data.image,
+        residents: data.residents.beings,
       });
     });
   }

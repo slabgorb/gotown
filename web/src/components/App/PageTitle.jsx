@@ -109,7 +109,7 @@ class PageTitle extends React.Component {
                   <CloseIcon className={classes.button} />
                 </IconButton>
                 <Button className={classes.button} onClick={this.handleDialog(true)} >Seed</Button>
-                <Button className={classes.button} onClick={() => this.handleMenuItem('/towns')} >New Town</Button>
+                <Button className={classes.button} onClick={this.handleMenuItem('towns/create')} >New Town</Button>
               </Toolbar>
             </AppBar>
             <SpeciesList handleClick={v => this.handleMenuItem(v)} />

@@ -53,6 +53,7 @@ func defineAPIHandlers(e *echo.Echo) {
 	api.GET("/towns/:id", showAreaHandler)
 	api.POST("/towns/create", createTownHandler)
 	api.GET("/beings/:id", showBeingHandler)
+	api.GET("/beings", listBeingsHandler)
 	api.PUT("/seed", seedHandler)
 	//e.GET("/household", householdHandler)
 	api.GET("/random/chromosome", randomChromosomeHandler)
@@ -199,7 +200,8 @@ func showWordsHandler(c echo.Context) error {
 	return show(c, &words.Words{ID: getID(c), Name: c.Param("id")})
 }
 
-func showBeingHandler(c echo.Context) error { return show(c, &being.Being{ID: getID(c)}) }
+func showBeingHandler(c echo.Context) error  { return show(c, &being.Being{ID: getID(c)}) }
+func listBeingsHandler(c echo.Context) error { return list(c, being.List) }
 
 type lister interface {
 	GetId()
@@ -238,9 +240,7 @@ func deleteAreaHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	a := &locations.Area{ID: req.ID}
-	if err := a.Read(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
+
 	if err := a.Delete(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}

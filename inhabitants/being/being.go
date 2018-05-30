@@ -475,3 +475,16 @@ func (b *Being) API() (interface{}, error) {
 		Expression:  expression,
 	}, nil
 }
+
+// List returns the names of the beings already in the database
+func List() ([]persist.IDPair, error) {
+	beings := []Being{}
+	if err := persist.DB.All(&beings); err != nil {
+		return nil, err
+	}
+	items := []persist.IDPair{}
+	for _, c := range beings {
+		items = append(items, persist.IDPair{Name: c.Name.Display, ID: c.ID})
+	}
+	return items, nil
+}
