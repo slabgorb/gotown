@@ -29,8 +29,9 @@ type Words struct {
 	BackupName string `json:"backup"`
 }
 
-func (w *Words) GetID() int      { return w.ID }
-func (w *Words) GetName() string { return w.Name }
+func (w *Words) GetID() int                { return w.ID }
+func (w *Words) GetName() string           { return w.Name }
+func (w *Words) API() (interface{}, error) { return w, nil }
 
 // Save implements persist.Persistable
 func (w *Words) Save() error {

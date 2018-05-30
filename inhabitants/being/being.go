@@ -424,3 +424,54 @@ func saveAll(beings []*Being) error {
 	}
 	return persist.SaveAll(ps)
 }
+
+type BeingAPI struct {
+	ID          int               `json:"id"`
+	Name        string            `json:"name"`
+	SpeciesName string            `json:"species"`
+	CultureName string            `json:"culture"`
+	Parents     []string          `json:"parents"`
+	Children    []string          `json:"children"`
+	Spouses     []string          `json:"spouses"`
+	Gender      string            `json:"gender"`
+	Age         int               `json:"age"`
+	Chromosome  string            `json:"chromosome"`
+	Expression  map[string]string `json:"expression"`
+}
+
+func getStrings(beings []*Being) []string {
+	display := []string{}
+	for _, b := range beings {
+		display = append(display, b.Name.GetDisplay())
+	}
+	return display
+}
+
+func (b *Being) API() (interface{}, error) {
+	parents, err := b.GetParents()
+	if err != nil {
+		return nil, err
+	}
+	children, err := b.GetChildren()
+	if err != nil {
+		return nil, err
+	}
+	spouses, err := b.getSpouses()
+	if err != nil {
+		return nil, err
+	}
+	expression := b.Expression()
+	return &BeingAPI{
+		ID:          b.ID,
+		Parents:     getStrings(parents),
+		Children:    getStrings(children),
+		Spouses:     getStrings(spouses),
+		Name:        b.Name.GetDisplay(),
+		SpeciesName: b.Species.Name,
+		CultureName: b.Culture.Name,
+		Age:         b.Age,
+		Gender:      b.Gender.String(),
+		Chromosome:  b.Chromosome.String(),
+		Expression:  expression,
+	}, nil
+}

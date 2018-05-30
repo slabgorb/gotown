@@ -11,11 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/slabgorb/gotown/heraldry"
-
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/slabgorb/gotown/heraldry"
 	"github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
@@ -29,8 +28,15 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+type response interface {
+	persist.Persistable
+	API() (interface{}, error)
+}
+
 func defineAPIHandlers(e *echo.Echo) {
 	api := e.Group("/api")
+	api.GET("/populations", listPopulationHandler)
+	api.GET("/populations/:id", showPopulationHandler)
 	api.GET("/cultures", listCulturesHandler)
 	api.GET("/cultures/:id", showCulturesHandler)
 	api.GET("/species", listSpeciesHandler)
@@ -113,11 +119,15 @@ func list(c echo.Context, f func() ([]persist.IDPair, error)) error {
 	return c.JSON(http.StatusOK, names)
 }
 
-func show(c echo.Context, item persist.Persistable) error {
+func show(c echo.Context, item response) error {
 	if err := item.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, item)
+	api, err := item.API()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, api)
 }
 
 func listCulturesHandler(c echo.Context) error { return list(c, culture.List) }
@@ -128,6 +138,27 @@ func showCulturesHandler(c echo.Context) error {
 func listSpeciesHandler(c echo.Context) error { return list(c, species.List) }
 func showSpeciesHandler(c echo.Context) error {
 	return show(c, &species.Species{ID: getID(c), Name: c.Param("id")})
+}
+
+func listPopulationHandler(c echo.Context) error {
+	pops := []being.Population{}
+	err := persist.DB.All(&pops)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	apis := []interface{}{}
+	for _, p := range pops {
+		api, err := p.API()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		apis = append(apis, api)
+	}
+	return c.JSON(http.StatusOK, apis)
+}
+
+func showPopulationHandler(c echo.Context) error {
+	return show(c, &being.Population{ID: getID(c)})
 }
 
 func expressSpeciesHandler(c echo.Context) error {
@@ -187,7 +218,7 @@ func listAreasHandler(c echo.Context) error {
 	if err := persist.DB.All(&all); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	names := []listItem{}
+	names := []interface{}{}
 	for _, a := range all {
 		if err := a.Read(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -196,7 +227,7 @@ func listAreasHandler(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		names = append(names, listItem{S: t.Name, ID: t.ID, Icon: t.Icon, Image: t.Image})
+		names = append(names, t)
 	}
 	return c.JSON(http.StatusOK, names)
 }
@@ -319,9 +350,15 @@ func createTownHandler(c echo.Context) error {
 	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}
+	id := area.ID
+	area.Reset()
+	area.ID = id
+	if err := area.Read(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not read area %d: %s", area.ID, err))
+	}
 	api, err := area.API()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create area api for %d", area.ID))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create area api for %d: %s", area.ID, err))
 	}
 	return c.JSON(http.StatusOK, api)
 }

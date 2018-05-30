@@ -37,10 +37,11 @@ func makePop(t *testing.T, count int) (*Population, []*Being) {
 }
 
 func TestPersist(t *testing.T) {
-	count := 3
+	count := 10
 	p, _ := makePop(t, count)
-	p.Save()
-
+	if err := p.Save(); err != nil {
+		t.Error(err)
+	}
 	id := p.ID
 	p.Reset()
 	p.ID = id
@@ -48,8 +49,9 @@ func TestPersist(t *testing.T) {
 		t.Error(err)
 	}
 	if p.Len() != count {
-		t.Errorf("expected %d got %d", count, p.Len())
+		t.Errorf("did not read back pop, expected %d got %d", count, p.Len())
 	}
+
 }
 
 func TestNew(t *testing.T) {
