@@ -2,7 +2,9 @@ import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { HeraldryShow } from '../Heraldry';
+import { BeingList } from '../Being';
 import areaApi from './api';
+
 
 const styles = () => ({
   root: {},
@@ -31,11 +33,12 @@ class AreaShow extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { name, image } = this.state;
+    const { name, image, residents } = this.state;
     return (
       <div>
         <div className={classes.root}>{name}</div>
         <HeraldryShow src={image} size={270} />
+        <BeingList beings={residents} />
       </div>
     );
   }
