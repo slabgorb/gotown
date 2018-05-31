@@ -1,8 +1,8 @@
 import React from 'react';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Tabs, { Tab } from 'material-ui/Tabs';
-import AppBar from 'material-ui/AppBar';
+import Tabs, { Tab } from '@material-ui/core/Tabs';
+import AppBar from '@material-ui/core/AppBar';
 import inflection from 'inflection';
 
 const _ = require('underscore');

@@ -1,11 +1,11 @@
-import React from 'react';
-import Card, { CardHeader, CardContent, CardActions } from 'material-ui/Card';
-import PropTypes from 'prop-types';
-import Collapse from 'material-ui/transitions/Collapse';
-import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
-import { withStyles } from 'material-ui/styles';
-import IconButton from 'material-ui/IconButton';
+import Card, { CardActions, CardContent, CardHeader } from '@material-ui/core/Card';
+import Collapse from '@material-ui/core/Collapse';
+import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from '@material-ui/core/styles';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Variant from './Variant';
 
 const styles = theme => ({

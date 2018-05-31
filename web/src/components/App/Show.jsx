@@ -1,7 +1,6 @@
-import { MuiThemeProvider, createMuiTheme, withStyles } from 'material-ui/styles';
-import Reboot from 'material-ui/Reboot';
-import React from 'react';
+import { MuiThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import React from 'react';
 
 
 const ralewayFF = ({ fontFamily: 'Raleway' });
@@ -49,13 +48,11 @@ const theme = createMuiTheme({
 
 const App = ({ children, classes }) => (
   <div>
-    <Reboot>
-      <MuiThemeProvider theme={theme}>
-        <div className={classes.main}>
-          {children}
-        </div>
-      </MuiThemeProvider>
-    </Reboot>
+    <MuiThemeProvider theme={theme}>
+      <div className={classes.main}>
+        {children}
+      </div>
+    </MuiThemeProvider>
   </div>
 );
 

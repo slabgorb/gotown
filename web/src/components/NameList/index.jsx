@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import List, { ListItem } from 'material-ui/List';
-import Card, { CardHeader, CardContent } from 'material-ui/Card';
-import { withStyles } from 'material-ui/styles';
+import List, { ListItem } from '@material-ui/core/List';
+import Card, { CardHeader, CardContent } from '@material-ui/core/Card';
+import { withStyles } from '@material-ui/core/styles';
 import inflection from 'inflection';
 
 const _ = require('underscore');

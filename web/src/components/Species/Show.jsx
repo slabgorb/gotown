@@ -1,7 +1,7 @@
 import React from 'react';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import AppBar from 'material-ui/AppBar';
+import AppBar from '@material-ui/core/AppBar';
 import { ChromosomeShow } from '../Chromosome';
 import Genetics from './Genetics';
 import GeneticsMap from './GeneticsMap';

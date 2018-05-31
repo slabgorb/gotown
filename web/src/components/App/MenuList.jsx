@@ -1,10 +1,10 @@
 import inflection from 'inflection';
-import DeleteForeverIcon from 'material-ui-icons/DeleteForever';
-import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
-import ExpansionPanel, { ExpansionPanelDetails, ExpansionPanelSummary } from 'material-ui/ExpansionPanel';
-import IconButton from 'material-ui/IconButton';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import Typography from 'material-ui/Typography';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpansionPanel, { ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core/ExpansionPanel';
+import IconButton from '@material-ui/core/IconButton';
+import List, { ListItem, ListItemText } from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 

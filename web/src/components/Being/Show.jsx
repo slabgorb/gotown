@@ -1,5 +1,5 @@
 import React from 'react';
-import Card, { CardContent } from 'material-ui/Card';
+import Card, { CardContent } from '@material-ui/core/Card';
 import PropTypes from 'prop-types';
 import Expression from '../Chromosome/Expression';
 import Chromosome from '../Chromosome/Show';

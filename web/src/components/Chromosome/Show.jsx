@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import IconButton from 'material-ui/IconButton';
-import Button from 'material-ui/Button';
-import AutoRenewIcon from 'material-ui-icons/Autorenew';
-import { FormLabel, FormControl } from 'material-ui/Form';
-import Grid from 'material-ui/Grid';
+import { withStyles } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import AutoRenewIcon from '@material-ui/icons/Autorenew';
+import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
 import Gene from './Gene';
 import chromosomeApi from './api';
 import speciesApi from '../Species/api';

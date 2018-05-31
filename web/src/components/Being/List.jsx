@@ -1,9 +1,9 @@
-import Table from 'material-ui/Table';
-import TableCell from 'material-ui/Table/TableCell';
-import TableHead from 'material-ui/Table/TableHead';
-import TablePagination from 'material-ui/Table/TablePagination';
-import TableRow from 'material-ui/Table/TableRow';
-import { withStyles } from 'material-ui/styles';
+import Table from '@material-ui/core/Table';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 

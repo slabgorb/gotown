@@ -1,14 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import Radio, { RadioGroup } from 'material-ui/Radio';
-import { FormLabel, FormControl, FormControlLabel } from 'material-ui/Form';
-import Button from 'material-ui/Button';
-import Grid from 'material-ui/Grid';
-import IconButton from 'material-ui/IconButton';
-import TextField from 'material-ui/TextField';
-import AutoRenewIcon from 'material-ui-icons/Autorenew';
+import Button from '@material-ui/core/Button';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import Radio, { RadioGroup } from '@material-ui/core/Radio';
+import TextField from '@material-ui/core/TextField';
+import { withStyles } from '@material-ui/core/styles';
+import AutoRenewIcon from '@material-ui/icons/Autorenew';
 import inflection from 'inflection';
+import PropTypes from 'prop-types';
+import React from 'react';
 import areaApi from './api';
 
 const styles = theme => ({

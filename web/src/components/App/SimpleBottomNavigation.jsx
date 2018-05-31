@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavigation';
-import FingerprintIcon from 'material-ui-icons/Fingerprint';
-import LanguageIcon from 'material-ui-icons/Language';
-import PlaceIcon from 'material-ui-icons/Place';
+import { withStyles } from '@material-ui/core/styles';
+import BottomNavigation, { BottomNavigationAction } from '@material-ui/core/BottomNavigation';
+import FingerprintIcon from '@material-ui/icons/Fingerprint';
+import LanguageIcon from '@material-ui/icons/Language';
+import PlaceIcon from '@material-ui/icons/Place';
 import { withRouter } from 'react-router-dom';
 
 const styles = () => {

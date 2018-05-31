@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 import wordsApi from './api';
 import NameList from '../NameList';
 import { PageTitle, TabBar } from '../App';

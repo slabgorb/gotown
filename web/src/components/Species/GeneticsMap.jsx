@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Card from 'material-ui/Card';
+import Card from '@material-ui/core/Card';
 
 const hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
 const lines = (h, traits) => {

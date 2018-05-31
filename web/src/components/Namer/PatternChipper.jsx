@@ -1,5 +1,5 @@
-import Chip from 'material-ui/Chip';
-import { withStyles } from 'material-ui/styles';
+import Chip from '@material-ui/core/Chip';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 

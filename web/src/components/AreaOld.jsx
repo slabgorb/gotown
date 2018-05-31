@@ -1,8 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 var Being = require('./Being.jsx');
-import Menu, {MenuItem} from 'material-ui/Menu';
-import List, { ListItem, ListItemText } from 'material-ui/List';
+import Menu, {MenuItem} from '@material-ui/core/Menu';
+import List, { ListItem, ListItemText } from '@material-ui/core/List';
 var _ = require('underscore');
 
 const sizes = {

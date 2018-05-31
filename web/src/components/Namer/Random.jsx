@@ -1,8 +1,8 @@
-import AutoRenewIcon from 'material-ui-icons/Autorenew';
-import Grid from 'material-ui/Grid';
-import IconButton from 'material-ui/IconButton';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
+import AutoRenewIcon from '@material-ui/icons/Autorenew';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 import api from './api';
