@@ -1,11 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import wordsApi from './api';
-import NameList from '../NameList';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { PageTitle, TabBar } from '../App';
+import NameList from '../NameList';
+import wordsApi from './api';
 
 const _ = require('underscore');
 
@@ -116,7 +115,7 @@ class Words extends React.Component {
                     title={k}
                     listItems={dictionary[k]}
                   />
-                )
+                );
               }
               return '';
             })

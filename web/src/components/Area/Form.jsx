@@ -78,7 +78,7 @@ class Form extends React.Component {
       name: this.state.name,
       size: this.state.currentSize,
     };
-    areaApi.create(params).then(data => console.log(data));
+    areaApi.create(params);
   }
 
   clickRandomTownName() {

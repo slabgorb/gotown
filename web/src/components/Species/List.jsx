@@ -1,9 +1,9 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-
-import speciesApi from './api';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { MenuList } from '../App';
+import speciesApi from './api';
+
 
 const styles = () => ({
   heading: {
@@ -20,7 +20,7 @@ class SpeciesList extends React.Component {
     //  this.handleClick = this.handleClick.bind(this);
   }
 
-  componentWillMount() { 
+  componentWillMount() {
     if (this.state.list.length > 0) { return; }
     speciesApi.getAll().then(data => this.setState({ list: data }));
   }
