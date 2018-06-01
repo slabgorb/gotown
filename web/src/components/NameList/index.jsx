@@ -1,5 +1,8 @@
-import Card, { CardContent, CardHeader } from '@material-ui/core/Card';
-import List, { ListItem } from '@material-ui/core/List';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import CardHeader from '@material-ui/core/CardHeader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 import { withStyles } from '@material-ui/core/styles';
 import inflection from 'inflection';
 import PropTypes from 'prop-types';

@@ -29,7 +29,7 @@ class NavDrawer extends React.Component {
     const { history } = this.props;
     return () => {
       history.push(`/${value}`);
-      this.handleDrawer(false)();
+      this.props.handleClose();
     };
   }
   render() {
@@ -42,7 +42,7 @@ class NavDrawer extends React.Component {
     } = this.props;
     return (
       <Drawer
-        classes={classes.root}
+        className={classes.root}
         open={open}
         anchor="right"
         onClose={onClose}

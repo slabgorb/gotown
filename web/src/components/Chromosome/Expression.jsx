@@ -1,6 +1,8 @@
-import React from 'react';
+import Table from '@material-ui/core/Table';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import PropTypes from 'prop-types';
-import Table, { TableBody, TableCell, TableRow } from '@material-ui/core/Table';
+import React from 'react';
 
 const _ = require('underscore');
 
