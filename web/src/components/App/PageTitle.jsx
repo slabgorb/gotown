@@ -1,25 +1,17 @@
-import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import PropTypes from 'prop-types';
-import Typography from '@material-ui/core/Typography';
-import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Button from '@material-ui/core/Button';
-import MenuIcon from '@material-ui/icons/Menu';
-import CloseIcon from '@material-ui/icons/Close';
 import Grid from '@material-ui/core/Grid';
-import Dialog, { DialogTitle } from '@material-ui/core/Dialog';
-import { withRouter } from 'react-router-dom';
-import inflection from 'inflection';
+import IconButton from '@material-ui/core/IconButton';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import MenuIcon from '@material-ui/icons/Menu';
 import axios from 'axios';
-import { SpeciesList } from '../Species';
-import { CulturesList } from '../Culture';
-import { WordsList } from '../Words';
-import { NamersList } from '../Namer';
-import { AreaList } from '../Area';
-
+import inflection from 'inflection';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { withRouter } from 'react-router-dom';
+import NavDrawer from './NavDrawer';
+import SimpleDialog from './SimpleDialog';
 
 const seed = () => axios.put('/api/seed');
 
@@ -48,7 +40,6 @@ class PageTitle extends React.Component {
       dialogOpen: false,
     };
     this.handleDrawer = this.handleDrawer.bind(this);
-    this.handleMenuItem = this.handleMenuItem.bind(this);
     this.handleDialog = this.handleDialog.bind(this);
   }
 
@@ -61,14 +52,6 @@ class PageTitle extends React.Component {
   handleDrawer(drawerOpen) {
     return () => {
       this.setState({ drawerOpen });
-    };
-  }
-
-  handleMenuItem(value) {
-    const { history } = this.props;
-    return () => {
-      history.push(`/${value}`);
-      this.handleDrawer(false)();
     };
   }
 
@@ -86,39 +69,19 @@ class PageTitle extends React.Component {
     if (titleize) { endTitle = inflection.titleize(title); }
     return (
       <div className={classes.pageRoot}>
-        <Dialog open={dialogOpen}>
-          <DialogTitle>Are you sure?</DialogTitle>
-          <Typography>
-            This will destroy the current database and recreate
-            it will seeded data.
-          </Typography>
-          <Toolbar>
-            <Button onClick={() => seed().then(this.handleDialog(false))}>Yes</Button>
-            <Button onClick={this.handleDialog(false)}>Cancel</Button>
-          </Toolbar>
-        </Dialog>
-        <Drawer
+        <SimpleDialog
+          open={dialogOpen}
+          title="Are you sure?"
+          message="This will destroy the current database and recreate it with seeded data."
+          onYes={() => seed().then(this.handleDialog(false))}
+          onCancel={this.handleDialog(false)}
+        />
+        <NavDrawer
           open={drawerOpen}
-          anchor="right"
           onClose={this.handleDrawer(false)}
-        >
-          <div>
-            <AppBar position="static" className={classes.appBar}>
-              <Toolbar>
-                <IconButton color="default" onClick={this.handleDrawer(false)}>
-                  <CloseIcon className={classes.button} />
-                </IconButton>
-                <Button className={classes.button} onClick={this.handleDialog(true)} >Seed</Button>
-                <Button className={classes.button} onClick={this.handleMenuItem('towns/create')} >New Town</Button>
-              </Toolbar>
-            </AppBar>
-            <SpeciesList handleClick={v => this.handleMenuItem(v)} />
-            <CulturesList handleClick={v => this.handleMenuItem(v)} />
-            <WordsList handleClick={v => this.handleMenuItem(v)} />
-            <NamersList handleClick={v => this.handleMenuItem(v)} />
-            <AreaList handleClick={v => this.handleMenuItem(v)} />
-          </div>
-        </Drawer>
+          handleDialog={this.handleDialog(true)}
+          handleClose={this.handleDrawer(false)}
+        />
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
             <Grid container alignContent="space-between" alignItems="center" spacing={24}>
@@ -151,7 +114,6 @@ class PageTitle extends React.Component {
 }
 
 PageTitle.propTypes = {
-  history: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
   titleize: PropTypes.bool,

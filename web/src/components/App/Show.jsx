@@ -8,7 +8,7 @@ const montserratFF = ({ fontFamily: 'Montserrat' });
 
 const styles = () => ({
   flex: { flex: 1 },
-  main: {  },
+  main: {},
   appBar: {},
   button: {
     color: 'white',
@@ -55,8 +55,6 @@ const App = ({ children, classes }) => (
     </MuiThemeProvider>
   </div>
 );
-
-
 
 App.propTypes = {
   children: PropTypes.node.isRequired,
