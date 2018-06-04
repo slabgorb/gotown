@@ -4,6 +4,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { withStyles } from '@material-ui/core/styles';
 import inflection from 'inflection';
 import PropTypes from 'prop-types';
@@ -13,17 +14,23 @@ const styles = () => ({
   root: {},
 });
 
-const sortString = t => (a, b) => {
+const sortString = (t, dir) => (a, b) => {
+  let up = -1;
+  let down = 1;
+  if (dir === 'desc') {
+    up = 1;
+    down = -1;
+  }
   const aS = a[t].toUpperCase();
   const bS = b[t].toUpperCase();
-  if (aS < bS) { return -1; }
-  if (aS > bS) { return 1; }
+  if (aS < bS) { return up; }
+  if (aS > bS) { return down; }
   return 0;
 };
 
-const sorter = (t) => {
-  if (t === 'age') { return (a, b) => a.age - b.age; }
-  return sortString(t);
+const sorter = (t, dir) => {
+  if (t === 'age') { return dir === 'asc' ? ((a, b) => a.age - b.age) : ((a, b) => b.age - a.age); }
+  return sortString(t, dir);
 };
 
 class List extends React.Component {
@@ -33,9 +40,13 @@ class List extends React.Component {
       page: 0,
       rowsPerPage: 25,
       orderBy: 'name',
+      dir: 'asc',
     };
     this.handleChangePage = this.handleChangePage.bind(this);
     this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
+    this.header = this.header.bind(this);
+    this.headers = this.headers.bind(this);
+    this.handleChangeSortFactory = this.handleChangeSortFactory.bind(this);
   }
 
   handleChangePage(event, page) {
@@ -45,10 +56,47 @@ class List extends React.Component {
     this.setState({ rowsPerPage });
   }
 
+  headers() {
+    const headerEntries = ['name', 'gender', 'age', 'species', 'culture'];
+    return (
+      <TableRow>
+        {headerEntries.map(he => this.header(he))}
+      </TableRow>
+    );
+  }
+
+  handleChangeSortFactory(orderBy) {
+    return () => {
+      let dir = 'desc';
+      if (this.state.orderBy === orderBy && this.state.dir === 'desc') {
+        dir = 'asc';
+      }
+      this.setState({
+        orderBy,
+        dir,
+      });
+    };
+  }
+
+  header(label) {
+    const { orderBy, dir } = this.state;
+    return (
+      <TableCell sortDirection={orderBy === label ? dir : false}>
+        <TableSortLabel
+          active={orderBy === label}
+          direction={dir}
+          onClick={this.handleChangeSortFactory(label)}
+        >
+          {inflection.titleize(label)}
+        </TableSortLabel>
+      </TableCell>
+    );
+  }
+
   render() {
     const { beings } = this.props;
-    const { page, rowsPerPage, orderBy } = this.state;
-    beings.sort(sorter(orderBy));
+    const { page, rowsPerPage, orderBy, dir } = this.state;
+    beings.sort(sorter(orderBy, dir));
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, (beings.length - page) * rowsPerPage);
     const table = beings.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(b => (
       <TableRow key={b.id}>
@@ -63,13 +111,7 @@ class List extends React.Component {
       <div>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Gender</TableCell>
-              <TableCell>Age</TableCell>
-              <TableCell>Species</TableCell>
-              <TableCell>Culture</TableCell>
-            </TableRow>
+            {this.headers()}
           </TableHead>
           <TableBody>
             {table}
