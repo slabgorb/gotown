@@ -1,10 +1,12 @@
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { HeraldryShow } from '../Heraldry';
 import { BeingList } from '../Being';
+import { Histogram } from '../Charts';
+import { HeraldryShow } from '../Heraldry';
 import areaApi from './api';
 
+const _ = require('underscore');
 
 const styles = () => ({
   root: {},
@@ -34,9 +36,21 @@ class AreaShow extends React.Component {
   render() {
     const { classes } = this.props;
     const { name, image, residents } = this.state;
+
+    const histogramReducer = (memo, current) => {
+      if (current.age in memo) {
+        memo[current.age] += 1;
+      } else {
+        memo[current.age] = 1;
+      }
+      return memo;
+    };
+
+    const histoData = _.map(residents.reduce(histogramReducer, {}), (value, title) => ({ title, value }));
     return (
       <div>
         <div className={classes.root}>{name}</div>
+        <Histogram data={histoData} />
         <HeraldryShow src={image} size={270} />
         <BeingList beings={residents} />
       </div>
