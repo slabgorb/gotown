@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const Bars = ({ scales, margins, data, svgDimensions }) => {
+const Bars = ({
+  scales,
+  margins,
+  data,
+  svgDimensions,
+}) => {
   const { xScale, yScale } = scales;
   const { height } = svgDimensions;
 
@@ -14,8 +19,7 @@ const Bars = ({ scales, margins, data, svgDimensions }) => {
         height={height - margins.bottom - scales.yScale(datum.value)}
         width={xScale.bandwidth()}
         fill="blue"
-      />),
-    )
+      />))
   );
 
   return (

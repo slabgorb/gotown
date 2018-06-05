@@ -4,7 +4,7 @@ import React from 'react';
 import Axes from './Axes';
 import Bars from './Bars';
 
-class Histogram extends React.Component {
+class BarChart extends React.Component {
   constructor(props) {
     super(props);
     this.xScale = scaleBand();
@@ -45,10 +45,10 @@ class Histogram extends React.Component {
   }
 }
 
-Histogram.propTypes = {
+BarChart.propTypes = {
   data: PropTypes.array.isRequired,
 
 };
-Histogram.defaultProps = {};
+BarChart.defaultProps = {};
 
-module.exports = Histogram;
+module.exports = BarChart;

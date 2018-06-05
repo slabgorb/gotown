@@ -2,7 +2,7 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { BeingList } from '../Being';
-import { Histogram } from '../Charts';
+import { BarChart, RadarChart } from '../Charts/';
 import { HeraldryShow } from '../Heraldry';
 import areaApi from './api';
 
@@ -46,11 +46,23 @@ class AreaShow extends React.Component {
       return memo;
     };
 
+    const eyeColorReducer = (memo, current) => {
+      const ec = current.expression["eye color"]
+      if (ec in memo) {
+        memo[ec] += 1;
+      } else {
+        memo[ec] = 1;
+      }
+      return memo
+    }
+
     const histoData = _.map(residents.reduce(histogramReducer, {}), (value, title) => ({ title, value }));
+    const radarData = [{ axes: _.map(residents.reduce(eyeColorReducer, {}), (value, axis) => ({ axis, value })) }];
     return (
       <div>
         <div className={classes.root}>{name}</div>
-        <Histogram data={histoData} />
+        <BarChart data={histoData} />
+        <RadarChart data={radarData} />
         <HeraldryShow src={image} size={270} />
         <BeingList beings={residents} />
       </div>
