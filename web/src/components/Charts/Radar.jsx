@@ -1,29 +1,55 @@
-import { scaleBand, scaleLinear } from 'd3-scale';
 import PropTypes from 'prop-types';
 import React from 'react';
+
+const _ = require('underscore');
 
 const radians = 2 * Math.PI;
 
 class Radar extends React.Component {
   constructor(props) {
     super(props);
-    this.xScale = scaleBand();
-    this.yScale = scaleLinear();
+
+
     this.axis = this.axis.bind(this);
     this.getPosition = this.getPosition.bind(this);
   }
   
-  getPosition(i, rnge, func) {
-    const total = this.props.data[0].axes.length;
-    const { factor } = this.props;
-    const pos =  rnge * (1 - (factor * func((i * radians) / total)));
-    return pos
+  getPosition(i, rnge, fact, func) {
+    const { data } = this.props;
+    const total = data[0].axes.length;
+    const pos = rnge * (1 - (fact * func((i * radians) / total)));
+    return pos;
   }
-  getHorizontalPosition(i, rnge) {
-    return this.getPosition(i, rnge, Math.sin);
+  getHorizontalPosition(i, rnge, fact) {
+    return this.getPosition(i, rnge, fact, Math.sin);
   }
-  getVerticalPosition(i, rnge) {
-    return this.getPosition(i, rnge, Math.cos);
+  getVerticalPosition(i, rnge, fact) {
+    return this.getPosition(i, rnge, fact, Math.cos);
+  }
+
+  chart() {
+    const {
+      data,
+      w,
+      h,
+      factor,
+    } = this.props;
+    const outerRadius = Math.min(w / 2, h / 2);
+    const maxValue = Math.max(..._.flatten(data.map(d => _.map(d.axes, a => a.value))));
+    const children = _.flatten(_.map(data, v =>
+      _.map(v.axes, (a, i) => {
+        const fact = a.value / maxValue;
+        return (
+          <circle
+            key={i}
+            cx={this.getHorizontalPosition(i, outerRadius, fact)}
+            cy={this.getVerticalPosition(i, outerRadius, fact)}
+            r={10}
+            fill="blue"
+          />
+        );
+      })));
+    return (<g className="RadarChart">{children}</g>);
   }
 
   axis() {
@@ -68,32 +94,19 @@ class Radar extends React.Component {
       axisLabel(
         ((w / 2) - outerRadius) + this.getHorizontalPosition(i, outerRadius, factor),
         ((h / 2) - outerRadius) + this.getVerticalPosition(i, outerRadius, factor),
-        a.axis,
+        a.name,
       ));
     return (<g className="RadarAxis">{children}{labels}</g>);
   }
 
   render() {
     const {
-      data, w, h, factor, levels,
+      w, h,
     } = this.props;
-    const maxValue = Math.max(...data.map(d => d.value));
-    const radius = factor * Math.min(w / 2, h / 2);
-
-    const margins = {
-      top: 50,
-      right: 20,
-      bottom: 100,
-      left: 60,
-    };
-
-    //let levelFactors = range(0, levels).map(level => radius * ((level + 1) / levels));
-
-
-
     return (
       <svg width={w} height={h}>
         {this.axis()}
+        {this.chart()}
       </svg>
     );
   }
@@ -104,7 +117,6 @@ Radar.propTypes = {
   w: PropTypes.number,
   h: PropTypes.number,
   factor: PropTypes.number,
-  levels: PropTypes.number,
 };
 
 Radar.defaultProps = {
