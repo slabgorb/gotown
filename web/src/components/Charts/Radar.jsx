@@ -27,29 +27,71 @@ class Radar extends React.Component {
     return this.getPosition(i, rnge, fact, Math.cos);
   }
 
-  chart() {
+  maxValue() {
+    const { data } = this.props;
+    return Math.max(..._.flatten(data.map(d => _.map(d.axes, a => a.value))))
+  }
+
+  outerRadius() {
+    const { w, h } = this.props;
+    return Math.min(w / 2, h / 2);
+  }
+
+  circles() {
     const {
-      data,
       w,
       h,
       factor,
     } = this.props;
-    const outerRadius = Math.min(w / 2, h / 2);
-    const maxValue = Math.max(..._.flatten(data.map(d => _.map(d.axes, a => a.value))));
-    const children = _.flatten(_.map(data, v =>
+    const cx = w / 2;
+    const cy = h / 2;
+    const outerRadius = this.outerRadius();
+    const circleCount = 2;
+    const circs = [];
+    for (let i = circleCount; i > 0; i -= 1) {
+      const radius = (outerRadius / i) * factor;
+      circs.push((
+        <circle
+          key={i}
+          cx={cx}
+          cy={cy}
+          r={radius}
+          stroke="#E0E0E0"
+          fill="transparent"
+        />
+      ));
+    } 
+    return (<g>{circs}</g>)
+  }
+
+  chart() {
+    const {
+      data,
+      factor,
+    } = this.props;
+    const dots = _.flatten(_.map(data, v =>
       _.map(v.axes, (a, i) => {
-        const fact = a.value / maxValue;
+        const fact = (a.value / this.maxValue()) * factor;
         return (
           <circle
             key={i}
-            cx={this.getHorizontalPosition(i, outerRadius, fact)}
-            cy={this.getVerticalPosition(i, outerRadius, fact)}
-            r={10}
-            fill="blue"
+            cx={this.getHorizontalPosition(i, this.outerRadius(), fact)}
+            cy={this.getVerticalPosition(i, this.outerRadius(), fact)}
+            r={5}
           />
         );
       })));
-    return (<g className="RadarChart">{children}</g>);
+    const polyPoints = _.flatten(_.map(data, v =>
+      _.map(v.axes, (a, i) => {
+        const fact = (a.value / this.maxValue()) * factor;
+        return [this.getHorizontalPosition(i, this.outerRadius(), fact), this.getVerticalPosition(i, this.outerRadius(), fact)].join(',');
+      }))).join(' ');
+    return (
+      <g className="RadarChart">
+        <polygon points={polyPoints} />
+        {dots}
+      </g>
+    );
   }
 
   axis() {
@@ -59,7 +101,7 @@ class Radar extends React.Component {
       h,
       factor,
     } = this.props;
-    const outerRadius = Math.min(w / 2, h / 2);
+    const outerRadius = this.outerRadius();
     const axes = data[0].axes.map(i => ({ name: i.axis, xOffset: (i.xOffset) ? i.xOffset : 0, yOffset: (i.yOffset) ? i.yOffset : 0 }));
     const axisLine = (x1, y1, x2, y2) => (
       <line
@@ -77,8 +119,6 @@ class Radar extends React.Component {
         key={text}
         x={x1}
         y={y1}
-        fill="black"
-        stroke="black"
       >
         {text}
       </text>
@@ -106,6 +146,7 @@ class Radar extends React.Component {
     return (
       <svg width={w} height={h}>
         {this.axis()}
+        {this.circles()}
         {this.chart()}
       </svg>
     );
@@ -122,8 +163,7 @@ Radar.propTypes = {
 Radar.defaultProps = {
   w: 500,
   h: 500,
-  factor: 0.95,
-  levels: 3,
+  factor: 0.85,
 }
 
 module.exports = Radar;

@@ -3,7 +3,6 @@
 
 body {
   font-family: 'Raleway';
-  font-size: 1.2rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -109,4 +108,30 @@ li:hover {
 .Axis-Bottom text {
   transform: rotate(-45deg);
   text-anchor: end;
+}
+
+.RadarChart {
+  circle {
+    fill: transparent;
+    stroke-width: 2px;
+    stroke: $neptune;
+  }
+  polygon {
+    fill-opacity: 0.65;
+    stroke: $neptune;
+    fill: $silver;
+  }
+}
+
+.RadarAxis {
+  fill: $neptune;
+  text {
+    font-size: 0.75rem;
+    font-family: Raleway;
+    font-weight: normal;
+    text-anchor: middle;
+  }
+  line {
+    stroke: $neptune;
+  }
 }
