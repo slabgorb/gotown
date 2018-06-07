@@ -18,3 +18,4 @@ main
 gin-bin
 !*/reference_images/*.png
 !*/charges/*.png
+!*/charges/masks/*.png
