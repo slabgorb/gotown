@@ -51,7 +51,7 @@ class AreaShow extends React.Component {
   render() {
     const { classes } = this.props;
     const { name, image, residents } = this.state;
-
+    /* eslint-disable no-param-reassign */
     const histogramReducer = (memo, current) => {
       if (current.age in memo) {
         memo[current.age] += 1;
@@ -69,8 +69,12 @@ class AreaShow extends React.Component {
       }
       return memo;
     };
+    /* eslint-enable no-param-reassign */
 
-    const histoData = _.map(residents.reduce(histogramReducer, {}), (value, title) => ({ title, value }));
+    const histoData = _.map(
+      residents.reduce(histogramReducer, {}),
+      (value, title) => ({ title, value }),
+    );
     const traits = [
       'agreeableness',
       'conscientiousness',
@@ -88,7 +92,9 @@ class AreaShow extends React.Component {
       'skin color',
     ];
 
-    const radarDataSets = traits.map(t => [{ axes: _.map(residents.reduce(traitReducer(t), {}), (value, axis) => ({ axis, value })) }]);
+    const radarDataSets = traits.map(t => [
+      { axes: _.map(residents.reduce(traitReducer(t), {}), (value, axis) => ({ axis, value })) },
+    ]);
     const radarCharts = radarDataSets.map((ds, i) =>
       (
         <Grid item xs={12} sm={6}>

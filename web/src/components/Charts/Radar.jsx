@@ -13,7 +13,7 @@ class Radar extends React.Component {
     this.axis = this.axis.bind(this);
     this.getPosition = this.getPosition.bind(this);
   }
-  
+
   getPosition(i, rnge, fact, func) {
     const { data } = this.props;
     const total = data[0].axes.length;
@@ -29,7 +29,7 @@ class Radar extends React.Component {
 
   maxValue() {
     const { data } = this.props;
-    return Math.max(..._.flatten(data.map(d => _.map(d.axes, a => a.value))))
+    return Math.max(..._.flatten(data.map(d => _.map(d.axes, a => a.value))));
   }
 
   outerRadius() {
@@ -60,8 +60,8 @@ class Radar extends React.Component {
           fill="transparent"
         />
       ));
-    } 
-    return (<g>{circs}</g>)
+    }
+    return (<g>{circs}</g>);
   }
 
   chart() {
@@ -102,7 +102,11 @@ class Radar extends React.Component {
       factor,
     } = this.props;
     const outerRadius = this.outerRadius();
-    const axes = data[0].axes.map(i => ({ name: i.axis, xOffset: (i.xOffset) ? i.xOffset : 0, yOffset: (i.yOffset) ? i.yOffset : 0 }));
+    const axes = data[0].axes.map(i => ({
+      name: i.axis,
+      xOffset: (i.xOffset) ? i.xOffset : 0,
+      yOffset: (i.yOffset) ? i.yOffset : 0,
+    }));
     const axisLine = (x1, y1, x2, y2) => (
       <line
         key={`${x1}${x2}${y1}${y2}`}
@@ -164,6 +168,6 @@ Radar.defaultProps = {
   w: 500,
   h: 500,
   factor: 0.85,
-}
+};
 
 module.exports = Radar;
