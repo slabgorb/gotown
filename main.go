@@ -6,6 +6,7 @@ import (
 	"image/png"
 	"math/rand"
 	"net/http"
+	_ "net/http/pprof"
 	"strconv"
 	"strings"
 	"sync"
@@ -31,6 +32,10 @@ func init() {
 type response interface {
 	persist.Persistable
 	API() (interface{}, error)
+}
+
+func definePprofHandlers(e *echo.Echo) {
+	e.GET("/debug/pprof/*", echo.WrapHandler(http.DefaultServeMux))
 }
 
 func defineAPIHandlers(e *echo.Echo) {
@@ -68,7 +73,6 @@ func defineStaticHandlers(e *echo.Echo) {
 	e.Static("/data", "web/data")
 	e.File("/manifest.json", "web/manifest.json")
 	e.File("/", "web")
-	e.File("/*", "web/index.html")
 }
 
 func main() {
@@ -94,6 +98,7 @@ func main() {
 		Format: "${time_rfc3339} ${remote_ip} ${method} ${uri}\t=>\t${status}\t${latency_human}\n${query} ${form} ",
 	}))
 	e.Logger.SetLevel(log.DEBUG)
+	definePprofHandlers(e)
 	e.Start(":8003")
 }
 

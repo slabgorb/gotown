@@ -135,7 +135,7 @@
           },
           {
             "name":"stable",
-            "match":"2(9|b)"
+            "match":"29,2b"
           },
           {
             "name":"self-assured",
@@ -359,15 +359,15 @@
         "variants":[
           {
             "name":"brown",
-            "match":"f(9|a|b|c|d)"
+            "match":"f9,fa,fb,fc,fd"
           },
           {
             "name":"hazel",
-            "match":"f(6|7|8)"
+            "match":"f6,f7,f8"
           },
           {
             "name":"blue",
-            "match":"f1|f2"
+            "match":"f1,f2"
           },
           {
             "name":"gray",
@@ -375,7 +375,7 @@
           },
           {
             "name":"green",
-            "match":"f4|f5"
+            "match":"f4,f5"
           }
         ]
       },
@@ -384,23 +384,23 @@
         "variants":[
           {
             "name":"almond shape",
-            "match":"e(1|2|3)"
+            "match":"e1,e2,e3"
           },
           {
             "name":"close set",
-            "match":"e(4|5)"
+            "match":"e4,e5"
           },
           {
             "name":"deep set",
-            "match":"e(6|7)"
+            "match":"e6,e7"
           },
           {
             "name":"protruding",
-            "match":"e(8|9)"
+            "match":"e8,e9"
           },
           {
             "name":"deep set",
-            "match":"e(a|b)"
+            "match":"ea,eb"
           }
         ]
       },
@@ -417,11 +417,11 @@
           },
           {
             "name":"ordinary",
-            "match":"c(3|4|5|6|7)"
+            "match":"c3,c4,c5,c6,c7"
           },
           {
             "name":"triangular",
-            "match":"c(8|9)"
+            "match":"c9,c9"
           }
         ]
       },
@@ -430,15 +430,15 @@
         "variants":[
           {
             "name":"blond",
-            "match":"a(1|2)"
+            "match":"a1,a2"
           },
           {
             "name":"brown",
-            "match":"a(3|4|5)"
+            "match":"a3,a4,a5"
           },
           {
             "name":"black",
-            "match":"a(6|7)"
+            "match":"a6,a7"
           },
           {
             "name":"red",
@@ -446,15 +446,15 @@
           },
           {
             "name":"auburn",
-            "match":"a(9|a)"
+            "match":"a9,aa"
           },
           {
             "name":"chestnut",
-            "match":"a(b|c)"
+            "match":"ab.ac"
           },
           {
             "name":"sandy blond",
-            "match":"a(d|e)"
+            "match":"ad,ae"
           },
           {
             "name":"jet black",
@@ -488,11 +488,11 @@
         "variants": [
           {
             "name": "oval",
-            "match": "0(1|2)"
+            "match": "01,02"
           },
           {
             "name": "round",
-            "match": "0(3|4)"
+            "match": "03,04"
           },
           {
             "name": "long",
@@ -519,23 +519,23 @@
         "variants": [
           {
             "name":"pale",
-            "match":"d(0|f)"
+            "match":"d0,df"
           },
           {
             "name":"dark",
-            "match":"d(7|8)"
+            "match":"d7,d8"
           },
           {
             "name":"light",
-            "match":"d(8|9)"
+            "match":"d8,d9"
           },
           {
             "name":"olive",
-            "match":"d(a|b)"
+            "match":"da,db"
           },
           {
             "name":"very dark",
-            "match":"d(c|d)"
+            "match":"dc,dd"
           },
           {
             "name":"albino",
@@ -552,7 +552,7 @@
           },
           {
             "name":"thin",
-            "match":"d(2|3)"
+            "match":"d2,d3"
           },
           {
             "name":"cupid bow",
@@ -560,7 +560,7 @@
           },
           {
             "name":"natural",
-            "match":"d(5,6)"
+            "match":"d5,d6"
           }
         ]
       }
