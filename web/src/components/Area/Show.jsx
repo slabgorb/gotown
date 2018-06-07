@@ -3,11 +3,11 @@ import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import inflection from 'inflection';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { PageTitle, TabBar } from '../App';
 import { BeingList } from '../Being';
 import { BarChart, RadarChart } from '../Charts/';
 import { HeraldryShow } from '../Heraldry';
@@ -25,6 +25,7 @@ const styles = () => ({
     display: 'flex',
   },
   root: {},
+  paper: {},
 });
 
 class AreaShow extends React.Component {
@@ -35,7 +36,9 @@ class AreaShow extends React.Component {
       name: '',
       image: '',
       residents: [],
+      tab: 0,
     };
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentWillMount() {
@@ -48,9 +51,14 @@ class AreaShow extends React.Component {
     });
   }
 
+
+  handleChange(tab) {
+    this.setState({ tab });
+  }
+
   render() {
     const { classes } = this.props;
-    const { name, image, residents } = this.state;
+    const { name, image, residents, tab } = this.state;
     /* eslint-disable no-param-reassign */
     const histogramReducer = (memo, current) => {
       if (current.age in memo) {
@@ -106,16 +114,21 @@ class AreaShow extends React.Component {
           </Card>
         </Grid>
       ));
+
+    const tab1 = (<div><HeraldryShow src={image} size={270} /><BarChart data={histoData} /></div>);
+    const tab2 = (<Grid container spacing={8}>{radarCharts}</Grid>);
+    const tab3 = (<BeingList beings={residents} />);
+
     return (
-      <Paper className={classes.root} >
-        <Typography variant="display1">{name}</Typography>
-        <Grid container spacing={8}>
-          {radarCharts}
-        </Grid>
-        <BarChart data={histoData} />
-        <HeraldryShow src={image} size={270} />
-        <BeingList beings={residents} />
-      </Paper>
+      <div className={classes.root}>
+        <PageTitle title={name} titleize subtitle="Area" />
+        <TabBar value={tab} onChange={this.handleChange} tabs={['details', 'traits', 'list']} />
+        <Paper className={classes.paper} >
+          { tab === 0 && tab1 }
+          { tab === 1 && tab2 }
+          { tab === 2 && tab3 }
+        </Paper>
+      </div>
     );
   }
 }

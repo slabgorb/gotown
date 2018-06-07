@@ -1,3 +1,4 @@
+import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -5,7 +6,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { withStyles } from '@material-ui/core/styles';
 import inflection from 'inflection';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -95,7 +95,12 @@ class List extends React.Component {
 
   render() {
     const { beings } = this.props;
-    const { page, rowsPerPage, orderBy, dir } = this.state;
+    const {
+      page,
+      rowsPerPage,
+      orderBy,
+      dir,
+    } = this.state;
     beings.sort(sorter(orderBy, dir));
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, (beings.length - page) * rowsPerPage);
     const table = beings.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(b => (
@@ -116,7 +121,7 @@ class List extends React.Component {
           <TableBody>
             {table}
             {emptyRows > 0 && (
-              <TableRow style={{ height: 48 * emptyRows }}>
+              <TableRow key="empty" style={{ height: 48 * emptyRows }}>
                 <TableCell colSpan={5} />
               </TableRow>
             )}
