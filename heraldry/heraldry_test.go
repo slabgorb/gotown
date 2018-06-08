@@ -2,7 +2,6 @@ package heraldry_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/fogleman/gg"
@@ -95,7 +94,7 @@ func TestEscutcheon(t *testing.T) {
 		if !compareImages(tc.name) {
 			t.Errorf("images are not equal for %s", tc.name)
 		}
-		os.Remove(fname)
+		//os.Remove(fname)
 	}
 
 }

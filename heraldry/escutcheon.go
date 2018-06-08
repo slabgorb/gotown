@@ -1,15 +1,11 @@
 package heraldry
 
 import (
-	"fmt"
 	"image"
 	"image/color"
-	"image/png"
-	"strings"
 
 	"github.com/fogleman/gg"
 	"github.com/nfnt/resize"
-	"github.com/slabgorb/gotown/resource"
 )
 
 // Escutcheon represents the 'shield' part of a heraldric device
@@ -91,7 +87,15 @@ func (e *Escutcheon) image() image.Image {
 		}
 		e.DC.SetMask(mask)
 		e.DC.DrawRectangle(0, 0, float64(e.DC.Width()), float64(e.DC.Height()))
-		e.DC.SetColor(ch.c)
+		e.DC.SetColor(ch.fill)
+		e.DC.Fill()
+		decal, err := ch.decal()
+		if err != nil {
+			panic(err)
+		}
+		e.DC.SetMask(decal)
+		e.DC.DrawRectangle(0, 0, float64(e.DC.Width()), float64(e.DC.Height()))
+		e.DC.SetColor(ch.stroke)
 		e.DC.Fill()
 	}
 	uniform := &image.Uniform{color.RGBA{A: 255}}
@@ -135,44 +139,10 @@ func (e Escutcheon) charge() *charge {
 		return nil
 	}
 	return &charge{
-		c:   Tinctures[e.ChargeColor],
-		key: e.ChargeKey,
+		fill:   Tinctures[e.ChargeColor],
+		stroke: Tinctures["sable"],
+		key:    e.ChargeKey,
 	}
-}
-
-type charge struct {
-	key string
-	c   color.Color
-}
-
-func (c *charge) mask() (*image.Alpha, error) {
-	r, err := resource.HeraldryBundle.Open(fmt.Sprintf("%s.png", c.key))
-	if err != nil {
-		return nil, err
-	}
-	img, err := png.Decode(r)
-	if err != nil {
-		return nil, err
-	}
-	dc := gg.NewContextForImage(img)
-	return dc.AsMask(), nil
-}
-
-// ListCharges returns a list of potential names of charges.
-func ListCharges() []string {
-	ret := []string{}
-	for _, f := range resource.HeraldryBundle.Files() {
-		ret = append(ret, strings.TrimSuffix(f, ".png"))
-	}
-	return ret
-}
-
-func RandomChargeKey() string {
-	keys := []string{}
-	for _, k := range ListCharges() {
-		keys = append(keys, k)
-	}
-	return keys[randomizer.Intn(len(keys))]
 }
 
 type quarterStrategy func() [4]*Escutcheon
