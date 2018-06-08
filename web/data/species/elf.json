@@ -87,10 +87,6 @@
           {
             "name":"hypocritical",
             "match":"1a"
-          },
-          {
-            "name":"pompous",
-            "match":"1b"
           }
         ]
       },
@@ -193,10 +189,6 @@
           {
             "name":"quiet",
             "match":"3b"
-          },
-          {
-            "name":"withdrawn",
-            "match":"3c"
           }
         ]
       },
@@ -401,10 +393,6 @@
           {
             "name":"protruding",
             "match":"e8,e9"
-          },
-          {
-            "name":"deep set",
-            "match":"ea,eb"
           }
         ]
       },

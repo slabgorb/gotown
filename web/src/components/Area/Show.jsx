@@ -105,7 +105,7 @@ class AreaShow extends React.Component {
     ]);
     const radarCharts = radarDataSets.map((ds, i) =>
       (
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={6} key={i}>
           <Card className={classes.card}>
             <CardHeader title={inflection.titleize(traits[i])} />
             <CardContent>
