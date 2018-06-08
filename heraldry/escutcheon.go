@@ -138,9 +138,13 @@ func (e Escutcheon) charge() *charge {
 	if e.ChargeKey == "" {
 		return nil
 	}
+	stroke := Tinctures["sable"]
+	if e.ChargeColor == "sable" {
+		stroke = Tinctures["argent"]
+	}
 	return &charge{
 		fill:   Tinctures[e.ChargeColor],
-		stroke: Tinctures["sable"],
+		stroke: stroke,
 		key:    e.ChargeKey,
 	}
 }
