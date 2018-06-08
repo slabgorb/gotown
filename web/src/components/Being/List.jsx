@@ -52,8 +52,8 @@ class List extends React.Component {
   handleChangePage(event, page) {
     this.setState({ page });
   }
-  handleChangeRowsPerPage(event, rowsPerPage) {
-    this.setState({ rowsPerPage });
+  handleChangeRowsPerPage(event) {
+    this.setState({ rowsPerPage: event.target.value });
   }
 
   headers() {
