@@ -1,9 +1,9 @@
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import axios from 'axios';
 import inflection from 'inflection';
@@ -62,6 +62,7 @@ class PageTitle extends React.Component {
       titleize,
       capitalize,
       subtitle,
+      icon,
     } = this.props;
     const { drawerOpen, dialogOpen } = this.state;
     let endTitle = title;
@@ -95,11 +96,14 @@ class PageTitle extends React.Component {
                   </Typography>
                 )}
               </Grid>
+              {icon && (<Grid xs={1} item>{icon}</Grid>)}
               <Grid xs={8} item>
                 <Typography variant="display1" align="right" classes={{ root: classes.root }}>
                   {endTitle}
                 </Typography>
               </Grid>
+              
+
             </Grid>
             <Grid xs={1} item>
               <IconButton onClick={this.handleDrawer(true)}>
@@ -119,12 +123,14 @@ PageTitle.propTypes = {
   titleize: PropTypes.bool,
   capitalize: PropTypes.bool,
   subtitle: PropTypes.string,
+  icon: PropTypes.node,
 };
 
 PageTitle.defaultProps = {
   titleize: false,
   capitalize: false,
   subtitle: '',
+  icon: null,
 };
 
 module.exports = withRouter(withStyles(style)(PageTitle));

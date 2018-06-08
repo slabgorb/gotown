@@ -47,6 +47,7 @@ class AreaShow extends React.Component {
         name: data.name,
         image: data.image,
         residents: data.residents.beings,
+        icon: data.icon,
       });
     });
   }
@@ -58,7 +59,7 @@ class AreaShow extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { name, image, residents, tab } = this.state;
+    const { name, image, residents, tab, icon } = this.state;
     /* eslint-disable no-param-reassign */
     const histogramReducer = (memo, current) => {
       if (current.age in memo) {
@@ -121,7 +122,7 @@ class AreaShow extends React.Component {
 
     return (
       <div className={classes.root}>
-        <PageTitle title={name} titleize subtitle="Area" />
+        <PageTitle title={name} titleize subtitle="Area" icon={(<img src={icon} width={32} height={32} alt="icon" />)} />
         <TabBar value={tab} onChange={this.handleChange} tabs={['details', 'traits', 'list']} />
         <Paper className={classes.paper} >
           { tab === 0 && tab1 }
