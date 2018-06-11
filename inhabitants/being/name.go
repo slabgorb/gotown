@@ -11,6 +11,7 @@ import (
 type Name struct {
 	GivenName  string   `json:"given_name"`
 	FamilyName string   `json:"family_name"`
+	Nickname   string   `json:"nickname"`
 	Other      []string `json:"other_name"`
 	Display    string   `json:"display_name"`
 }
@@ -116,7 +117,7 @@ var NameStrategies = map[string]NameStrategy{
 	},
 	"one name": func(b Nameable) *Name {
 		namer := b.GetNamer()
-		name := &Name{GivenName: namer.Words.GivenName()}
+		name := &Name{GivenName: namer.Words.GivenName(), Nickname: namer.Words.Nickname()}
 		display, _ := namer.Execute(name)
 		name.Display = display
 		return name

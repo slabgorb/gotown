@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { PageTitle, TabBar } from '../App';
 import { ChromosomeShow } from '../Chromosome';
+import speciesApi from './api';
 import Genetics from './Genetics';
 import GeneticsMap from './GeneticsMap';
-import speciesApi from './api';
 
 const styles = () => ({
   root: {},
@@ -15,7 +15,7 @@ class Species extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: props.match.params.name,
+      name: '',
       genetics: { traits: [] },
       value: 1,
     };
@@ -33,8 +33,8 @@ class Species extends React.Component {
     }
   }
 
-  get({ name }) {
-    speciesApi.get(name)
+  get({ id }) {
+    speciesApi.get(id)
       .then((s) => {
         this.setState({ name: s.name, genetics: s.expression });
       });

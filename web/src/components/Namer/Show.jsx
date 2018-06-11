@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { PageTitle, TabBar } from '../App';
 import { WordsShow } from '../Words';
+import namerApi from './api';
 import PatternChipper from './PatternChipper';
 import Random from './Random';
-import namerApi from './api';
 
 const _ = require('underscore');
 
@@ -54,8 +54,8 @@ class Namer extends React.Component {
     }
   }
 
-  get({ name }) {
-    namerApi.get(name)
+  get({ id }) {
+    namerApi.get(id)
       .then((s) => {
         this.setState({
           name: s.name,

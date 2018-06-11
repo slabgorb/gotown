@@ -2,8 +2,8 @@ import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
-import Toolbar from '@material-ui/core/Toolbar';
 import { withStyles } from '@material-ui/core/styles';
+import Toolbar from '@material-ui/core/Toolbar';
 import CloseIcon from '@material-ui/icons/Close';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -54,7 +54,7 @@ class NavDrawer extends React.Component {
                 <CloseIcon className={classes.button} />
               </IconButton>
               <Button className={classes.button} onClick={handleDialog} >Seed</Button>
-              <Button className={classes.button} onClick={this.handleMenuItem('towns/create')} >New Town</Button>
+              <Button className={classes.button} onClick={this.handleMenuItem('create/town')} >New Town</Button>
             </Toolbar>
           </AppBar>
           <SpeciesList handleClick={v => this.handleMenuItem(v)} />

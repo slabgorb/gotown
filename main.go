@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -45,7 +46,7 @@ func defineAPIHandlers(e *echo.Echo) {
 	api.GET("/cultures", listCulturesHandler)
 	api.GET("/cultures/:id", showCulturesHandler)
 	api.GET("/species", listSpeciesHandler)
-	api.GET("/species/:name/expression", expressSpeciesHandler)
+	api.GET("/species/:id/expression", expressSpeciesHandler)
 	api.GET("/species/:id", showSpeciesHandler)
 	api.GET("/namers", listNamersHandler)
 	api.GET("/namers/:id", showNamersHandler)
@@ -136,14 +137,21 @@ func show(c echo.Context, item response) error {
 	return c.JSON(http.StatusOK, api)
 }
 
-func listCulturesHandler(c echo.Context) error { return list(c, culture.List) }
-func showCulturesHandler(c echo.Context) error {
-	return show(c, &culture.Culture{ID: getID(c), Name: c.Param("id")})
+func listCulturesHandler(c echo.Context) error {
+	return list(c, culture.List)
 }
 
-func listSpeciesHandler(c echo.Context) error { return list(c, species.List) }
+func showCulturesHandler(c echo.Context) error {
+	return show(c, &culture.Culture{ID: getID(c)})
+}
+
+func listSpeciesHandler(c echo.Context) error {
+	return list(c, species.List)
+}
+
 func showSpeciesHandler(c echo.Context) error {
-	return show(c, &species.Species{ID: getID(c), Name: c.Param("id")})
+	fmt.Fprintln(os.Stderr, c.ParamNames())
+	return show(c, &species.Species{ID: getID(c)})
 }
 
 func listPopulationHandler(c echo.Context) error {

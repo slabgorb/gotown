@@ -1,10 +1,10 @@
-import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import PropTypes from 'prop-types';
 import inflection from 'inflection';
-import cultureApi from './api';
-import { NamersShow } from '../Namer';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { PageTitle, TabBar } from '../App';
+import { NamersShow } from '../Namer';
+import cultureApi from './api';
 
 const _ = require('underscore');
 
@@ -39,8 +39,8 @@ class Culture extends React.Component {
     }
   }
 
-  get({ name }) {
-    cultureApi.get(name)
+  get({ id }) {
+    cultureApi.get(id)
       .then((s) => {
         this.setState({
           name: s.name,

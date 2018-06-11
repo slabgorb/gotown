@@ -4,8 +4,8 @@ class cultureApi {
   static getAll() {
     return axios.get('/api/cultures').then(response => response.data);
   }
-  static get(name) {
-    return axios.get(`/api/cultures/${name}`).then(response => response.data);
+  static get(id) {
+    return axios.get(`/api/cultures/${id}`).then(response => response.data);
   }
 }
 

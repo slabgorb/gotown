@@ -24,12 +24,12 @@ render(
           <App>
             <Route exact path="/home" component={Home} />
             <Route exact path="/" component={Home} />
-            <Route path="/namers/:name" component={NamersShow} />
-            <Route path="/words/:name" component={WordsShow} />
-            <Route path="/species/:name" component={SpeciesShow} />
-            <Route path="/cultures/:name" component={CulturesShow} />
-            <Route exact path="/towns/create" component={TownForm} />
-            <Route path="/towns/:id" component={AreaShow} />
+            <Route exact path="/namers/:id" component={NamersShow} />
+            <Route exact path="/words/:id" component={WordsShow} />
+            <Route exact path="/species/:id" component={SpeciesShow} />
+            <Route exact path="/cultures/:id" component={CulturesShow} />
+            <Route exact path="/create/town" component={TownForm} />
+            <Route exact path="/towns/:id" component={AreaShow} />
           </App>
         </BrowserRouter>
       </Provider>
