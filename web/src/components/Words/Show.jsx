@@ -76,8 +76,8 @@ class Words extends React.Component {
     this.setState({ value });
   }
 
-  get({ id }) {
-    wordsApi.get(id)
+  get({ name, id }) {
+    wordsApi.get(name, id)
       .then((s) => {
         this.setState({
           name: s.name,
