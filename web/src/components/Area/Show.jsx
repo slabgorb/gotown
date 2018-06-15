@@ -85,6 +85,8 @@ class AreaShow extends React.Component {
       (value, title) => ({ title, value }),
     );
     const traits = [
+      'height',
+      'weight',
       'agreeableness',
       'conscientiousness',
       'ear shape',

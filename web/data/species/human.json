@@ -42,6 +42,88 @@
   "expression":{
     "traits":[
       {
+        "name": "height",
+        "variants": [
+          {
+            "name": "very tall",
+            "match": "E0"
+          },
+          {
+            "name": "taller",
+            "match": "E1"
+          },
+          {
+            "name": "tall",
+            "match": "E2"
+          },
+          {
+            "name": "above average",
+            "match": "E3,EB"
+          },
+          {
+            "name": "short",
+            "match": "E4"
+          },
+          {
+            "name": "shorter",
+            "match": "E5"
+          },
+          {
+            "name": "very short",
+            "match": "ED"
+          },
+          {
+            "name": "below average",
+            "match": "E6,EA"
+          },
+          {
+            "name": "average",
+            "match": "E7,E8,E9"
+          }
+        ]
+      },
+      {
+        "name": "weight",
+        "variants": [
+          {
+            "name": "very heavy",
+            "match": "E0"
+          },
+          {
+            "name": "heavier",
+            "match": "E1"
+          },
+          {
+            "name": "heavy",
+            "match": "E2"
+          },
+          {
+            "name": "above average",
+            "match": "E3,EB"
+          },
+          {
+            "name": "thin",
+            "match": "E4"
+          },
+          {
+            "name": "thinner",
+            "match": "E5"
+          },
+          {
+            "name": "very thin",
+            "match": "ED"
+          },
+          {
+            "name": "below average",
+            "match": "E6,EA"
+          },
+          {
+            "name": "average",
+            "match": "E7,E8,E9"
+          }
+        ]
+      },
+      {
         "name":"honesty/humility",
         "variants":[
           {
