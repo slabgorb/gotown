@@ -42,7 +42,7 @@ func TestSeed(t *testing.T) {
 
 	found := false
 	for _, v := range list {
-		if v == "human" {
+		if v.Name == "human" {
 			found = true
 		}
 	}
