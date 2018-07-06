@@ -370,19 +370,25 @@ func (b *Being) IsCloseRelativeOf(with int) bool {
 }
 
 // Reproduce creates new Being objects from the 'parent' beings
-func (b *Being) Reproduce(with *Being) ([]*Being, error) {
+func (b *Being) Reproduce(with *Being) (*Being, error) {
 	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
 	child := New(b.Species, b.Culture)
 	child.Parents = []int{b.ID, with.ID}
 	child.Randomize()
+	child.Age = 0
+	chromosome, err := b.Chromosome.Combine(with.Chromosome)
+	if err != nil {
+		return nil, err
+	}
+	child.Chromosome = chromosome
 	if err := child.Save(); err != nil {
 		return nil, fmt.Errorf("could not save new child: %s", err)
 	}
 	b.Children = append(b.Children, child.ID)
 	with.Children = append(with.Children, child.ID)
-	return b.GetChildren()
+	return child, nil
 }
 
 // GetAge returns the age of the being

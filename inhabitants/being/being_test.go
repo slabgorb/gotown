@@ -11,6 +11,7 @@ import (
 	"github.com/slabgorb/gotown/inhabitants"
 	. "github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/inhabitants/culture"
+	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/words"
 )
@@ -105,6 +106,7 @@ func testMainWrapped(m *testing.M) int {
 			Species: testSpecies,
 			Culture: testCulture,
 		}
+		b.Chromosome = genetics.RandomChromosome(30)
 		b.SetAge(bf.age)
 		if err := b.Save(); err != nil {
 			panic(err)
@@ -147,11 +149,10 @@ func TestInheritedName(t *testing.T) {
 	if err := f.Save(); err != nil {
 		t.Fatal(err)
 	}
-	children, err := f.Reproduce(m)
+	child, err := f.Reproduce(m)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	child := children[0]
 	if child.Name.GetFamilyName() != f.Name.GetFamilyName() {
 		t.Errorf("expected %s got %s", f.Name.GetFamilyName(), child.Name.GetFamilyName())
 	}
@@ -223,6 +224,36 @@ func TestDeath(t *testing.T) {
 	adam.Die()
 	if adam.Alive() {
 		t.Fail()
+	}
+
+}
+
+func TestRepro(t *testing.T) {
+	bf := beingFixtures
+	adam := bf["adam"]
+	ac := adam.Chromosome
+	eve := bf["eve"]
+	ec := eve.Chromosome
+	fmt.Println(ac, ec)
+	adam.Marry(eve)
+	child, err := eve.Reproduce(adam)
+	if err != nil {
+		t.Errorf("failed repro: %s", err)
+	}
+	if child.Age != 0 {
+		t.Errorf("expected 0 for age, got %v", child.Age)
+	}
+
+	if child.ID == 0 {
+		t.Errorf("expected child to have a non-zero id")
+	}
+
+	for _, g := range child.Chromosome.Genes {
+		fa := adam.Chromosome.Find(g)
+		fe := eve.Chromosome.Find(g)
+		if fa < 0 && fe < 0 {
+			t.Errorf("expected all genes of the child to be members of the genes of the parents")
+		}
 	}
 
 }

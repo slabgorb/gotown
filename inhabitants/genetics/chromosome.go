@@ -18,6 +18,16 @@ func RandomChromosome(count int) *Chromosome {
 	return c
 }
 
+// Find locates the gene within the chromosome, returning the index, or -1 if not found
+func (c *Chromosome) Find(g Gene) int {
+	for i, cg := range c.Genes {
+		if cg == g {
+			return i
+		}
+	}
+	return -1
+}
+
 // Add adds a 'custom' gene to a Chromosome, used for testing, usually
 func (c *Chromosome) Add(s string) {
 	c.Genes = append(c.Genes, Gene(s))
