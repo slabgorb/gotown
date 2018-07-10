@@ -63,6 +63,15 @@ func Open(path string) error {
 	return nil
 }
 
+// Save saves a Persistable
+func Save(item Persistable) error {
+	return DB.Save(item)
+}
+
+func Delete(item Persistable) error {
+	return DB.DeleteStruct(item)
+}
+
 // SaveAll saves a slice of persistables
 func SaveAll(items []Persistable) error {
 	quit := make(chan struct{})

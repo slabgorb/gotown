@@ -360,6 +360,24 @@ func createTownHandler(c echo.Context) error {
 		}(&wg)
 	}
 	wg.Wait()
+
+	for i := 0; i < 10; i++ {
+		if err := area.Residents.Age(); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed aging population in year  %d: %s", i+1, err))
+		}
+		mcs, err := area.Residents.MaritalCandidates(cl)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed getting marital candidates year  %d: %s", i+1, err))
+		}
+		for _, mc := range mcs {
+			a, b := mc.Pair()
+			a.Marry(b)
+		}
+		// rcs := area.Residents.ReproductionCandidates()
+		// for _, rc := range rcs {
+		// 	rc
+		// }
+	}
 	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}

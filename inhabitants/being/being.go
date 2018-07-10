@@ -48,19 +48,20 @@ type Cultured interface {
 
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	ID          int                  `json:"id" storm:"id,increment"`
-	Name        *Name                `json:"name"`
-	SpeciesName string               `json:"species_name"`
-	CultureName string               `json:"culture_name"`
-	Parents     []int                `json:"parents"`
-	Children    []int                `json:"children"`
-	Spouses     []int                `json:"spouses"`
-	Gender      inhabitants.Gender   `json:"gender"`
-	Dead        bool                 `json:"dead"`
-	Chromosome  *genetics.Chromosome `json:"chromosome"`
-	Age         int                  `json:"age"`
-	Species     *species.Species     `json:"-"`
-	Culture     *culture.Culture     `json:"-"`
+	ID           int                  `json:"id" storm:"id,increment"`
+	PopulationID int                  `json:"population_id" storm:"index"`
+	Name         *Name                `json:"name"`
+	SpeciesName  string               `json:"species_name"`
+	CultureName  string               `json:"culture_name"`
+	Parents      []int                `json:"parents"`
+	Children     []int                `json:"children"`
+	Spouses      []int                `json:"spouses"`
+	Gender       inhabitants.Gender   `json:"gender"`
+	Dead         bool                 `json:"dead"`
+	Chromosome   *genetics.Chromosome `json:"chromosome"`
+	Age          int                  `json:"age"`
+	Species      *species.Species     `json:"-"`
+	Culture      *culture.Culture     `json:"-"`
 }
 
 // New initializes a being
@@ -141,15 +142,15 @@ func (b *Being) Read() error {
 	if b.ID == 0 {
 		return fmt.Errorf("cannot read being without id")
 	}
-	if err := persist.DB.One("ID", b.ID, b); err != nil {
+	if err := persist.Read(b); err != nil {
 		return fmt.Errorf("could not load being %d: %s", b.ID, err)
 	}
 	b.Species = &species.Species{}
-	if err := persist.DB.One("Name", b.SpeciesName, b.Species); err != nil {
+	if err := persist.Read(b.Species); err != nil {
 		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesName, b.ID, err)
 	}
 	b.Culture = &culture.Culture{}
-	if err := persist.DB.One("Name", b.CultureName, b.Culture); err != nil {
+	if err := persist.Read(b.Culture); err != nil {
 		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureName, b.ID, err)
 	}
 	return nil
@@ -159,12 +160,12 @@ func (b *Being) Read() error {
 func (b *Being) Save() error {
 	b.CultureName = b.Culture.GetName()
 	b.SpeciesName = b.Species.GetName()
-	return persist.DB.Save(b)
+	return persist.Save(b)
 }
 
 // Delete implements persist.Persistable
 func (b *Being) Delete() error {
-	return persist.DB.DeleteStruct(b)
+	return persist.Delete(b)
 }
 
 // GetName returns the name object
@@ -377,6 +378,13 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	child := New(b.Species, b.Culture)
 	child.Parents = []int{b.ID, with.ID}
 	child.Randomize()
+	child.Age = 0
+	child.PopulationID = b.PopulationID
+	chromosome, err := b.Chromosome.Combine(with.Chromosome)
+	if err != nil {
+		return nil, err
+	}
+	child.Chromosome = chromosome
 	if err := child.Save(); err != nil {
 		return nil, fmt.Errorf("could not save new child: %s", err)
 	}
