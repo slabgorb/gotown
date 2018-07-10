@@ -145,11 +145,11 @@ func (b *Being) Read() error {
 	if err := persist.Read(b); err != nil {
 		return fmt.Errorf("could not load being %d: %s", b.ID, err)
 	}
-	b.Species = &species.Species{}
+	b.Species = &species.Species{Name: b.SpeciesName}
 	if err := persist.Read(b.Species); err != nil {
 		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesName, b.ID, err)
 	}
-	b.Culture = &culture.Culture{}
+	b.Culture = &culture.Culture{Name: b.CultureName}
 	if err := persist.Read(b.Culture); err != nil {
 		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureName, b.ID, err)
 	}
