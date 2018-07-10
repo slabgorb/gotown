@@ -17,14 +17,16 @@ const _ = require('underscore');
 
 const styles = () => ({
   card: {
-    maxWidth: 350,
-    minWidth: 350,
+    maxWidth: 300,
+    minWidth: 300,
     margin: 20,
   },
   charts: {
     display: 'flex',
   },
-  root: {},
+  root: {
+    flexGrow: 1,
+  },
   paper: {},
 });
 
@@ -108,18 +110,18 @@ class AreaShow extends React.Component {
     ]);
     const radarCharts = radarDataSets.map((ds, i) =>
       (
-        <Grid item xs={12} sm={6} key={i}>
+        <Grid item xs={12} sm={6} lg={3} key={ds.name}>
           <Card className={classes.card}>
             <CardHeader title={inflection.titleize(traits[i])} />
             <CardContent>
-              <RadarChart data={ds} w={300} h={300} />
+              <RadarChart data={ds} w={240} h={240} />
             </CardContent>
           </Card>
         </Grid>
       ));
 
     const tab1 = (<div><HeraldryShow src={image} size={270} /><BarChart data={histoData} /></div>);
-    const tab2 = (<Grid container spacing={8}>{radarCharts}</Grid>);
+    const tab2 = (<div className={classes.root}><Grid container spacing={8}>{radarCharts}</Grid></div>);
     const tab3 = (<BeingList beings={residents} />);
 
     return (
