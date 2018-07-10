@@ -147,11 +147,10 @@ func TestInheritedName(t *testing.T) {
 	if err := f.Save(); err != nil {
 		t.Fatal(err)
 	}
-	children, err := f.Reproduce(m)
+	child, err := f.Reproduce(m)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	child := children[0]
 	if child.Name.GetFamilyName() != f.Name.GetFamilyName() {
 		t.Errorf("expected %s got %s", f.Name.GetFamilyName(), child.Name.GetFamilyName())
 	}

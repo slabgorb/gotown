@@ -371,7 +371,7 @@ func (b *Being) IsCloseRelativeOf(with int) bool {
 }
 
 // Reproduce creates new Being objects from the 'parent' beings
-func (b *Being) Reproduce(with *Being) ([]*Being, error) {
+func (b *Being) Reproduce(with *Being) (*Being, error) {
 	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
@@ -390,7 +390,7 @@ func (b *Being) Reproduce(with *Being) ([]*Being, error) {
 	}
 	b.Children = append(b.Children, child.ID)
 	with.Children = append(with.Children, child.ID)
-	return b.GetChildren()
+	return child, nil
 }
 
 // GetAge returns the age of the being
