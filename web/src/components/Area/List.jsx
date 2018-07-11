@@ -1,23 +1,27 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import React from 'react';
+import MenuList from '../App/MenuList';
+import WithLoading from '../App/WithLoading';
 import areaApi from './api';
-import { MenuList } from '../App';
 
 const styles = () => ({
 });
+
+const MenuListWithLoading = WithLoading(MenuList);
 
 class AreaList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
+      isLoading: true,
     };
     this.handleDelete = this.handleDelete.bind(this);
   }
 
   componentWillMount() {
-    areaApi.getAll().then(data => this.setState({ list: data }));
+    areaApi.getAll().then(data => this.setState({ list: data, isLoading: false }));
   }
 
 
@@ -29,13 +33,11 @@ class AreaList extends React.Component {
 
 
   render() {
-    const { list } = this.state;
-    if (list.length === 0) {
-      return null;
-    }
+    const { list, isLoading } = this.state;
     const { classes, handleClick } = this.props;
     return (
-      <MenuList
+      <MenuListWithLoading
+        isLoading={isLoading}
         deletable
         classes={classes}
         heading="Towns"
