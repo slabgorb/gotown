@@ -1,10 +1,13 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { withRouter } from 'react-router-dom';
-import { MenuList } from '../App';
+import MenuList from '../App/MenuList';
+import WithLoading from '../App/WithLoading';
 import cultureApi from './api';
 
+
+const MenuListWithLoading = WithLoading(MenuList);
 const styles = () => ({
   heading: {
     fontSize: 14,
@@ -16,20 +19,19 @@ class CultureList extends React.Component {
     super(props);
     this.state = {
       list: [],
+      isLoading: true,
     };
   }
 
   componentWillMount() {
-    cultureApi.getAll().then(data => this.setState({ list: data }));
+    cultureApi.getAll().then(data => this.setState({ list: data, isLoading: false }));
   }
 
   render() {
-    const { list } = this.state;
-    if (list.length === 0) {
-      return null;
-    }
+    const { list, isLoading } = this.state;
     const { classes, handleClick } = this.props;
-    return (<MenuList
+    return (<MenuListWithLoading
+      isLoading={isLoading}
       heading="Cultures"
       classes={classes}
       list={list}
