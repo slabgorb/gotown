@@ -383,10 +383,7 @@ func (b *Being) Reproduce(with *Being) (*Being, error) {
 	child.Parents = []int{b.ID, with.ID}
 	child.Randomize()
 	child.Age = 0
-<<<<<<< HEAD
-=======
 	child.PopulationID = b.PopulationID
->>>>>>> master
 	chromosome, err := b.Chromosome.Combine(with.Chromosome)
 	if err != nil {
 		return nil, err
