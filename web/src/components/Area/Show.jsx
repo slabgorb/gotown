@@ -61,7 +61,13 @@ class AreaShow extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { name, image, residents, tab, icon } = this.state;
+    const {
+      name,
+      image,
+      residents,
+      tab,
+      icon,
+    } = this.state;
     /* eslint-disable no-param-reassign */
     const histogramReducer = (memo, current) => {
       if (current.age in memo) {
@@ -110,7 +116,7 @@ class AreaShow extends React.Component {
     ]);
     const radarCharts = radarDataSets.map((ds, i) =>
       (
-        <Grid item xs={12} sm={6} lg={3} key={ds.name}>
+        <Grid item xs={12} sm={6} key={traits[i]}>
           <Card className={classes.card}>
             <CardHeader title={inflection.titleize(traits[i])} />
             <CardContent>
