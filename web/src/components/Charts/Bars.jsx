@@ -6,6 +6,7 @@ const Bars = ({
   margins,
   data,
   svgDimensions,
+  orientation,
 }) => {
   const { xScale, yScale } = scales;
   const { height } = svgDimensions;
@@ -14,10 +15,10 @@ const Bars = ({
     data.map(datum =>
       (<rect
         key={datum.title}
-        x={xScale(datum.title)}
-        y={yScale(datum.value)}
-        height={height - margins.bottom - scales.yScale(datum.value)}
-        width={xScale.bandwidth()}
+        x={orientation === 'horizontal' ? xScale(datum.title) : yScale(datum.value)}
+        y={orientation === 'horizontal' ? yScale(datum.value) : xScale(datum.title)}
+        height={height - margins.bottom - (orientation === 'horizontal' ? scales.yScale(datum.value) : scales.yScale(datum.title))}
+        width={orientation === 'horizontal' ? xScale.bandwidth() : yScale.bandwidth()}
         fill="blue"
       />))
   );
@@ -33,6 +34,12 @@ Bars.propTypes = {
   scales: PropTypes.object.isRequired,
   margins: PropTypes.object.isRequired,
   svgDimensions: PropTypes.object.isRequired,
+  orientation: PropTypes.oneOf(['vertical', 'horizontal']),
+
 };
+
+Bars.defaultProps = {
+  orientation: 'vertical',
+}
 
 module.exports = Bars;

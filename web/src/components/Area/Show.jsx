@@ -8,11 +8,14 @@ import inflection from 'inflection';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { PageTitle, TabBar } from '../App';
+import WithLoading from '../App/WithLoading';
 import { BeingList } from '../Being';
-import { BarChart, RadarChart } from '../Charts/';
+import { PopulationPyramid, RadarChart } from '../Charts/';
 import { HeraldryShow } from '../Heraldry';
+import speciesApi from '../Species/api';
 import areaApi from './api';
 
+const PopulationPyramidWithLoading = WithLoading(PopulationPyramid);
 const _ = require('underscore');
 
 const styles = () => ({
@@ -39,6 +42,8 @@ class AreaShow extends React.Component {
       image: '',
       residents: [],
       tab: 0,
+      demography: [],
+      speciesIsLoading: true,
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -50,6 +55,14 @@ class AreaShow extends React.Component {
         image: data.image,
         residents: data.residents.beings,
         icon: data.icon,
+      });
+      return data;
+    }).then((data) => {
+      speciesApi.get(data.residents.beings[0].species_id).then((speciesData) => {
+        this.setState({
+          demography: _.values(speciesData.demography).map(d => ({ maxAge: d.max_age })),
+          speciesIsLoading: false,
+        });
       });
     });
   }
@@ -67,6 +80,8 @@ class AreaShow extends React.Component {
       residents,
       tab,
       icon,
+      demography,
+      speciesIsLoading,
     } = this.state;
     /* eslint-disable no-param-reassign */
     const histogramReducer = (memo, current) => {
@@ -126,8 +141,17 @@ class AreaShow extends React.Component {
         </Grid>
       ));
 
-    const tab1 = (<div><HeraldryShow src={image} size={270} /><BarChart data={histoData} /></div>);
-    const tab2 = (<div className={classes.root}><Grid container spacing={8}>{radarCharts}</Grid></div>);
+    const tab1 = (
+      <div className={classes.root}>
+        <HeraldryShow src={image} size={270} />
+        <PopulationPyramidWithLoading isLoading={speciesIsLoading} data={residents} segments={demography} />
+      </div>
+    );
+    const tab2 = (
+      <div className={classes.root}>
+        <Grid container spacing={8}>{radarCharts}</Grid>
+      </div>
+    );
     const tab3 = (<BeingList beings={residents} />);
 
     return (

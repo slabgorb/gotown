@@ -4,8 +4,20 @@ import React from 'react';
 import Axes from './Axes';
 import Bars from './Bars';
 
-const genderFilter = data => gender => data.filter(d => d.sex === gender);
-const mapToSegments = (data, segments) => segments.reduce()
+const genderFilter = data => gender => data.filter(d => d.gender === gender);
+const mapToSegments = (data, segments) => {
+  const endData = [];
+  let minAge = 0;
+  const filterFunc = (min, max) => d => d.age >= min && d.age <= max;
+  for (let i = 0; i < segments.length; i += 1) {
+    endData[i] = {
+      title: `${minAge} to ${segments[i].maxAge}`,
+      value: data.filter(filterFunc(minAge, segments[i].maxAge)).length,
+    };
+    minAge = segments[i].maxAge;
+  }
+  return endData;
+};
 
 class PopulationPyramid extends React.Component {
   constructor(props) {
@@ -38,6 +50,8 @@ class PopulationPyramid extends React.Component {
     const xScaleMale = this.xScaleMale
       .domain([0, maxValue('male')])
       .range([margins.left, width - margins.right]);
+    const maleData = mapToSegments(genderFilter(data)('male'), segments);
+    const femaleData = mapToSegments(genderFilter(data)('female'), segments);
     return (
       <svg width={width} height={height}>
         <Axes
@@ -53,20 +67,19 @@ class PopulationPyramid extends React.Component {
         <Bars
           scales={{ xScale: xScaleFemale, yScale }}
           margins={margins}
-          data={genderFilter(data)('female')}
+          data={femaleData}
           svgDimensions={{ width, height }}
         />
         <Bars
           scales={{ xScale: xScaleMale, yScale }}
           margins={margins}
-          data={genderFilter(data)('male')}
+          data={maleData}
           svgDimensions={{ width, height }}
         />
       </svg>
 
-    )
+    );
   }
-
 }
 
 PopulationPyramid.propTypes = {
@@ -74,11 +87,11 @@ PopulationPyramid.propTypes = {
   segments: PropTypes.array.isRequired,
   width: PropTypes.number,
   height: PropTypes.number,
-}
+};
 
 PopulationPyramid.defaultProps = {
   width: 300,
   height: 450,
-}
+};
 
 module.exports = PopulationPyramid;

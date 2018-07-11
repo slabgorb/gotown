@@ -441,7 +441,9 @@ type BeingAPI struct {
 	ID          int               `json:"id"`
 	Name        string            `json:"name"`
 	SpeciesName string            `json:"species"`
+	SpeciesID   int               `json:"species_id"`
 	CultureName string            `json:"culture"`
+	CultureID   int               `json:"culture_id"`
 	Parents     []string          `json:"parents"`
 	Children    []string          `json:"children"`
 	Spouses     []string          `json:"spouses"`
@@ -480,7 +482,9 @@ func (b *Being) API() (interface{}, error) {
 		Spouses:     getStrings(spouses),
 		Name:        b.Name.GetDisplay(),
 		SpeciesName: b.Species.Name,
+		SpeciesID:   b.Species.ID,
 		CultureName: b.Culture.Name,
+		CultureID:   b.Culture.ID,
 		Age:         b.Age,
 		Gender:      b.Gender.String(),
 		Chromosome:  b.Chromosome.String(),
