@@ -163,6 +163,10 @@ func (b *Being) Save() error {
 	return persist.Save(b)
 }
 
+func (b *Being) Update() error {
+	return persist.Update(b)
+}
+
 // Delete implements persist.Persistable
 func (b *Being) Delete() error {
 	return persist.Delete(b)

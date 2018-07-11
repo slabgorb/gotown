@@ -68,6 +68,10 @@ func Save(item Persistable) error {
 	return DB.Save(item)
 }
 
+func Update(item Persistable) error {
+	return DB.Update(item)
+}
+
 func Delete(item Persistable) error {
 	return DB.DeleteStruct(item)
 }
