@@ -17,7 +17,7 @@ func makePop(t *testing.T, count int) (*Population, []*Being) {
 	wg.Add(count)
 	for i := 0; i < count; i++ {
 		go func() {
-			bg := New(testSpecies, testCulture)
+			bg := New(testSpecies, testCulture, stubLogger{})
 			bg.Randomize()
 			if err := bg.Save(); err != nil {
 				t.Fatalf("could not save being:%s", err)
@@ -33,7 +33,7 @@ func makePop(t *testing.T, count int) (*Population, []*Being) {
 		}
 	}(&wg)
 	wg.Wait()
-	return NewPopulation(ids), beings
+	return NewPopulation(ids, stubLogger{}), beings
 }
 
 func TestPersist(t *testing.T) {

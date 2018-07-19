@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"gonaeo/logger"
 	"image/png"
 	"math/rand"
 	"net/http"
@@ -28,6 +29,8 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+	file, _ := os.OpenFile("debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, os.FileMode(0666))
+	logger.SetOutput(file)
 }
 
 type response interface {
@@ -353,7 +356,7 @@ func createTownHandler(c echo.Context) error {
 		go func(wg *sync.WaitGroup) {
 			wg.Add(1)
 			defer wg.Done()
-			being := being.New(s, cl)
+			being := being.New(s, cl, logger.Default)
 			being.Randomize()
 			being.Save()
 			area.Add(being)

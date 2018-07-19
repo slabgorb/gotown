@@ -2,6 +2,7 @@ package being_test
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"testing"
 
@@ -15,6 +16,14 @@ import (
 	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/words"
 )
+
+type stubLogger struct {
+}
+
+func (s stubLogger) Info(format string, v ...interface{})  {}
+func (s stubLogger) Debug(format string, v ...interface{}) {}
+func (s stubLogger) Error(format string, v ...interface{}) {}
+func (s stubLogger) SetOutput(out io.Writer)               {}
 
 type beingFixture map[string]*Being
 
@@ -137,13 +146,13 @@ func TestName(t *testing.T) {
 }
 
 func TestInheritedName(t *testing.T) {
-	m := New(testSpecies, testCulture)
+	m := New(testSpecies, testCulture, stubLogger{})
 	m.Gender = inhabitants.Male
 	m.RandomizeName()
 	if err := m.Save(); err != nil {
 		t.Fatal(err)
 	}
-	f := New(testSpecies, testCulture)
+	f := New(testSpecies, testCulture, stubLogger{})
 	f.Gender = inhabitants.Female
 	f.RandomizeName()
 	if err := f.Save(); err != nil {
@@ -217,7 +226,7 @@ func TestParents(t *testing.T) {
 	}
 }
 func TestDeath(t *testing.T) {
-	adam := New(testSpecies, testCulture)
+	adam := New(testSpecies, testCulture, stubLogger{})
 	if !adam.Alive() {
 		t.Fail()
 	}

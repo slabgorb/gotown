@@ -3,16 +3,25 @@ package being
 import (
 	//"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/slabgorb/gotown/inhabitants"
 	"github.com/slabgorb/gotown/inhabitants/culture"
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/inhabitants/species"
+	"github.com/slabgorb/gotown/logger"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/random"
 	"github.com/slabgorb/gotown/words"
 )
+
+type Logger interface {
+	Info(format string, v ...interface{})
+	Debug(format string, v ...interface{})
+	Error(format string, v ...interface{})
+	SetOutput(out io.Writer)
+}
 
 var randomizer random.Generator = random.Random
 
@@ -62,10 +71,11 @@ type Being struct {
 	Age          int                  `json:"age"`
 	Species      *species.Species     `json:"-"`
 	Culture      *culture.Culture     `json:"-"`
+	logger       Logger
 }
 
 // New initializes a being
-func New(s *species.Species, c *culture.Culture) *Being {
+func New(s *species.Species, c *culture.Culture, logger Logger) *Being {
 	return &Being{
 		Name:        &Name{},
 		SpeciesName: s.GetName(),
@@ -74,6 +84,7 @@ func New(s *species.Species, c *culture.Culture) *Being {
 		Culture:     c,
 		Chromosome:  genetics.RandomChromosome(30),
 		Gender:      inhabitants.Asexual,
+		logger:      logger,
 	}
 }
 
@@ -295,12 +306,12 @@ func (b *Being) Siblings() (*Population, error) {
 			sibs = append(sibs, s)
 		}
 	}
-	return NewPopulation(sibs), nil
+	return NewPopulation(sibs, b.logger), nil
 }
 
 // Piblings returns aunts and uncles of the receiver
 func (b *Being) Piblings() (*Population, error) {
-	parentSiblings := NewPopulation([]int{})
+	parentSiblings := NewPopulation([]int{}, b.logger)
 	parents, err := b.GetParents()
 	if err != nil {
 		return nil, err
@@ -321,7 +332,7 @@ func (b *Being) Cousins() (*Population, error) {
 	if err != nil {
 		return nil, err
 	}
-	cousins := NewPopulation([]int{})
+	cousins := NewPopulation([]int{}, b.logger)
 	pibBeings, err := piblings.Inhabitants()
 	if err != nil {
 		return nil, err
@@ -339,7 +350,7 @@ func (b *Being) Niblings() (*Population, error) {
 	if err != nil {
 		return nil, err
 	}
-	niblings := NewPopulation([]int{})
+	niblings := NewPopulation([]int{}, b.logger)
 	sibs, err := siblings.Inhabitants()
 	if err != nil {
 		return nil, err
@@ -379,7 +390,7 @@ func (b *Being) Reproduce(with *Being) (*Being, error) {
 	if with == nil && b.Sex() != inhabitants.Asexual {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
-	child := New(b.Species, b.Culture)
+	child := New(b.Species, b.Culture, b.logger)
 	child.Parents = []int{b.ID, with.ID}
 	child.Randomize()
 	child.Age = 0
@@ -430,10 +441,12 @@ func (b *Being) AddChildren(ids ...int) {
 }
 
 func saveAll(beings []*Being) error {
+	logger.TimeSet()
 	ps := []persist.Persistable{}
 	for _, b := range beings {
 		ps = append(ps, b)
 	}
+	logger.TimeElapsed("save all beings")
 	return persist.SaveAll(ps)
 }
 

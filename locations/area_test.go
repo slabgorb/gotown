@@ -7,6 +7,7 @@ import (
 
 	"github.com/slabgorb/gotown/inhabitants/being"
 	. "github.com/slabgorb/gotown/locations"
+	"github.com/slabgorb/gotown/logger"
 )
 
 func makePop(t *testing.T, count int) (*being.Population, []*being.Being) {
@@ -17,7 +18,7 @@ func makePop(t *testing.T, count int) (*being.Population, []*being.Being) {
 	wg.Add(count)
 	for i := 0; i < count; i++ {
 		go func() {
-			bg := being.New(testSpecies, testCulture)
+			bg := being.New(testSpecies, testCulture, logger.Default)
 			bg.Randomize()
 			if err := bg.Save(); err != nil {
 				t.Fatalf("could not save being:%s", err)
@@ -33,7 +34,7 @@ func makePop(t *testing.T, count int) (*being.Population, []*being.Being) {
 		}
 	}(&wg)
 	wg.Wait()
-	return being.NewPopulation(ids), beings
+	return being.NewPopulation(ids, logger.Default), beings
 }
 
 func TestJsonEncode(t *testing.T) {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/slabgorb/gotown/heraldry"
+	"github.com/slabgorb/gotown/logger"
 
 	"github.com/slabgorb/gotown/inhabitants/being"
 	"github.com/slabgorb/gotown/persist"
@@ -124,8 +125,8 @@ func (a *Area) Delete() error {
 // NewArea creates an area
 func NewArea(size AreaSize, location *Area, namer *words.Namer) *Area {
 	a := &Area{Size: size, Location: location}
-	a.Graveyard = being.NewPopulation([]int{})
-	a.Residents = being.NewPopulation([]int{})
+	a.Graveyard = being.NewPopulation([]int{}, logger.Default)
+	a.Residents = being.NewPopulation([]int{}, logger.Default)
 	a.EnclosureIDS = []int{}
 	a.Enclosures = make(map[int]*Area)
 	a.Name = namer.CreateName()

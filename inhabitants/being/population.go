@@ -11,9 +11,10 @@ import (
 
 // Population is a set of Being
 type Population struct {
-	mux sync.Mutex
-	ID  int              `json:"id" storm:"id,increment"`
-	IDS map[int]struct{} `json:"ids"`
+	mux    sync.Mutex
+	ID     int              `json:"id" storm:"id,increment"`
+	IDS    map[int]struct{} `json:"ids"`
+	logger Logger
 }
 
 // MaritalCandidate is a pair of being
@@ -38,8 +39,8 @@ func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 }
 
 // NewPopulation initializes a Population
-func NewPopulation(ids []int) *Population {
-	p := &Population{IDS: make(map[int]struct{})}
+func NewPopulation(ids []int, logger Logger) *Population {
+	p := &Population{IDS: make(map[int]struct{}), logger: logger}
 	p.appendIds(ids...)
 	return p
 }
