@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"gonaeo/logger"
 	"image/png"
 	"math/rand"
 	"net/http"
@@ -23,6 +22,7 @@ import (
 	"github.com/slabgorb/gotown/inhabitants/genetics"
 	"github.com/slabgorb/gotown/inhabitants/species"
 	"github.com/slabgorb/gotown/locations"
+	"github.com/slabgorb/gotown/logger"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/words"
 )
