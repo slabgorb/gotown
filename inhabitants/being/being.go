@@ -57,8 +57,8 @@ type Cultured interface {
 
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	ID           int                  `json:"id" storm:"id,increment"`
-	PopulationID int                  `json:"population_id" storm:"index"`
+	persist.IdentifiableImpl
+	PopulationID int                  `json:"population_id"`
 	Name         *Name                `json:"name"`
 	SpeciesName  string               `json:"species_name"`
 	CultureName  string               `json:"culture_name"`
@@ -88,10 +88,10 @@ func New(s *species.Species, c *culture.Culture, logger Logger) *Being {
 	}
 }
 
-func getBeingsFromIDS(IDS []int) ([]*Being, error) {
+func getBeingsFromIDS(IDS []string) ([]*Being, error) {
 	beings := []*Being{}
 	for _, id := range IDS {
-		b := &Being{ID: id}
+		b := &Being{IdentifiableImpl: persist.IdentifiableImpl{ID: id}}
 		if err := b.Read(); err != nil {
 			return nil, err
 		}
@@ -362,7 +362,7 @@ func (b *Being) Niblings() (*Population, error) {
 }
 
 // IsSiblingOf checks to see if the receiver is a sibling of the passed in being
-func (b *Being) IsSiblingOf(with int) bool {
+func (b *Being) IsSiblingOf(with persist.IdentifiableImpl) bool {
 	siblings, err := b.Siblings()
 	if err != nil {
 		return false
@@ -451,7 +451,7 @@ func saveAll(beings []*Being) error {
 }
 
 type BeingAPI struct {
-	ID          int               `json:"id"`
+	persist.IdentifiableImpl
 	Name        string            `json:"name"`
 	SpeciesName string            `json:"species"`
 	SpeciesID   int               `json:"species_id"`

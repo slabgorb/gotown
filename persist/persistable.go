@@ -3,28 +3,44 @@ package persist
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/asdine/storm"
+	"github.com/mediocregopher/radix.v2/pool"
+	"github.com/mediocregopher/radix.v2/redis"
+	"github.com/satori/go.uuid"
 )
 
-// DB is the storm database
-var DB *storm.DB
+var DB *pool.Pool
 
-// SetDB sets the storm (bolt) database for the package
-func SetDB(newDb *storm.DB) {
-	DB = newDb
+func getUUID() string {
+	u1 := uuid.Must(uuid.NewV4())
+	return u1.String()
+}
+
+func SetDB(p *pool.Pool) {
+	DB = p
 }
 
 type IDPair struct {
-	ID   int    `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type Identifiable interface {
-	GetName() string
-	GetID() int
+	GetID() string
+	SetID(string)
+}
+
+type IdentifiableImpl struct {
+	ID string
+}
+
+func (i *IdentifiableImpl) GetID() string {
+	return i.ID
+}
+
+func (i *IdentifiableImpl) SetID(id string) {
+	i.ID = id
 }
 
 // Persistable models database persistence
@@ -36,44 +52,77 @@ type Persistable interface {
 	Identifiable
 }
 
-// Read reads in by id or name
-func Read(p Identifiable) error {
-	if p.GetID() == 0 && p.GetName() == "" {
-		return fmt.Errorf("cannot read without id or name")
+func getConn(f func(conn *redis.Client) error) error {
+	conn, err := DB.Get()
+	if err != nil {
+		return fmt.Errorf("cannot get connection: %s", err)
 	}
-	if p.GetID() > 0 {
-		if err := DB.One("ID", p.GetID(), p); err != nil {
-			return fmt.Errorf("could not load id %d: %s", p.GetID(), err)
-		}
-	} else {
-		if err := DB.One("Name", p.GetName(), p); err != nil {
-			return fmt.Errorf("could not load name %s: %s", p.GetName(), err)
-		}
-	}
-	return nil
+	defer DB.Put(conn)
+	return f(conn)
 }
 
-// Open opens the connection to the database file
-func Open(path string) error {
-	session, err := storm.Open(path, storm.Batch())
-	if err != nil {
-		return fmt.Errorf("could not open database at %s: %s", path, err)
+// Read reads in by id or name
+func Read(i Identifiable) error {
+	if i.GetID() == "" {
+		return fmt.Errorf("cannot read without id")
 	}
-	SetDB(session)
+	return getConn(func(conn *redis.Client) error {
+		j, err := conn.Cmd("GET", i.GetID()).Bytes()
+		if err != nil {
+			return fmt.Errorf("could not get %s from cache: %s", i.GetID(), err)
+		}
+		err = json.Unmarshal(j, &i)
+		if err != nil {
+			return fmt.Errorf("could not unmarshal json: %s", err)
+		}
+		return nil
+	})
+}
+
+type operation func(client *redis.Client) error
+
+// Open opens the connection to the database file
+func Open() error {
+	p, err := pool.New("tcp", "localhost:6379", 10)
+	if err != nil {
+		return fmt.Errorf("could not open pool:%s", err)
+	}
+	if err != nil {
+		return fmt.Errorf("could not open database:%s", err)
+	}
+	SetDB(p)
 	return nil
 }
 
 // Save saves a Persistable
 func Save(item Persistable) error {
-	return DB.Save(item)
+	if item.GetID() == "" {
+		item.SetID(getUUID())
+	}
+	return getConn(func(conn *redis.Client) error {
+		j, err := json.Marshal(item)
+		if err != nil {
+			return fmt.Errorf("could not marshal item %s: %s", item.GetID(), err)
+		}
+		err = conn.Cmd("SET", item.GetID(), j).Err
+		if err != nil {
+			return fmt.Errorf("could not save item %s: %s", item.GetID(), err)
+		}
+		return nil
+	})
 }
 
 func Update(item Persistable) error {
-	return DB.Update(item)
+	return Save(item)
 }
 
 func Delete(item Persistable) error {
-	return DB.DeleteStruct(item)
+	if item.GetID() == "" {
+		return fmt.Errorf("cannot read without id")
+	}
+	return getConn(func(conn *redis.Client) error {
+		return conn.Cmd("DEL", item.GetID()).Err
+	})
 }
 
 // SaveAll saves a slice of persistables
@@ -113,12 +162,12 @@ func SaveAll(items []Persistable) error {
 
 // Close closes the connection to the database file
 func Close() error {
-	return DB.Close()
+	return nil
 }
 
 // OpenTestDB sets up a connection to a test db instance
 func OpenTestDB() {
-	err := Open("_gotown_test.db")
+	err := Open()
 	if err != nil {
 		panic(err)
 	}
@@ -126,16 +175,19 @@ func OpenTestDB() {
 
 // CloseTestDB closes the file and deletes it
 func CloseTestDB() {
-	defer os.Remove("_gotown_test.db")
-	DB.Close()
+}
+
+func deleteAll() error {
+	return getConn(func(conn *redis.Client) error {
+		return conn.Cmd("FLUSHALL").Err
+	})
 }
 
 func SeedHelper(pathname string, item Persistable) error {
 	bundle := PersistBundle
-	if err := DB.Drop(item); err != nil {
-		if err.Error() != "bucket not found" {
-			return fmt.Errorf("could not delete bucket %s:%s", pathname, err)
-		}
+	err := deleteAll()
+	if err != nil {
+		return err
 	}
 	for _, name := range bundle.Files() {
 		splits := strings.Split(name, "/")
@@ -146,11 +198,10 @@ func SeedHelper(pathname string, item Persistable) error {
 		if err := json.NewDecoder(r).Decode(item); err != nil {
 			return fmt.Errorf("could not decode %s/%s: %s", pathname, name, err)
 		}
-		if err := DB.Save(item); err != nil {
+		if err := Save(item); err != nil {
 			return fmt.Errorf("could not save %s/%s: %s", pathname, name, err)
 		}
 		item.Reset()
 	}
-
 	return nil
 }

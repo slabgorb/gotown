@@ -80,7 +80,7 @@ func defineStaticHandlers(e *echo.Echo) {
 }
 
 func main() {
-	err := persist.Open("gotown.db")
+	err := persist.Open()
 	if err != nil {
 		panic(err)
 	}

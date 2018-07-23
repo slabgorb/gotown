@@ -11,9 +11,9 @@ import (
 
 // Population is a set of Being
 type Population struct {
-	mux    sync.Mutex
-	ID     int              `json:"id" storm:"id,increment"`
-	IDS    map[int]struct{} `json:"ids"`
+	mux sync.Mutex
+	persist.IdentifiableImpl
+	IDS    map[string]struct{} `json:"ids"`
 	logger Logger
 }
 
@@ -175,7 +175,7 @@ func (p *Population) Len() int {
 	return len(p.IDS)
 }
 
-func (p *Population) addID(id int) bool {
+func (p *Population) addID(id string) bool {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 	_, found := p.IDS[id]
