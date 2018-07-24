@@ -121,14 +121,10 @@ func Seed() error {
 }
 
 // List returns species names from the database
-func List() ([]persist.IDPair, error) {
-	species := []Species{}
-	if err := persist.DB.All(&species); err != nil {
+func List() (map[string]string, error) {
+	items, err := persist.List("Species")
+	if err != nil {
 		return nil, err
 	}
-	names := []persist.IDPair{}
-	for _, c := range species {
-		names = append(names, persist.IDPair{Name: c.Name, ID: c.ID})
-	}
-	return names, nil
+	return items, nil
 }

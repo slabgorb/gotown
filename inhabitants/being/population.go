@@ -62,12 +62,12 @@ func (p *Population) Delete() error {
 			return err
 		}
 	}
-	return persist.DB.DeleteStruct(p)
+	return persist.Delete(p)
 }
 
 // Save implements persist.Persistable
 func (p *Population) Save() error {
-	return persist.DB.Save(p)
+	return persist.Save(p)
 }
 
 type PopulationAPI struct {
@@ -95,7 +95,6 @@ func (p *Population) API() (interface{}, error) {
 	}, nil
 }
 
-func (p *Population) GetID() int      { return p.ID }
 func (p *Population) GetName() string { return "" }
 
 // Read implements persist.Persistable

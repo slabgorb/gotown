@@ -3,6 +3,7 @@ package persist
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/mediocregopher/radix.v2/pool"
@@ -24,6 +25,10 @@ func SetDB(p *pool.Pool) {
 type IDPair struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+func getType(v interface{}) string {
+	return reflect.TypeOf(v).String()
 }
 
 type Identifiable interface {
@@ -48,8 +53,14 @@ type Persistable interface {
 	Save() error
 	Read() error
 	Delete() error
+	fmt.Stringer
 	Reset()
 	Identifiable
+}
+
+type PersistableImpl struct {
+	ID   string `json:"ID"`
+	Name string `json:"Name"`
 }
 
 func getConn(f func(conn *redis.Client) error) error {
@@ -61,7 +72,7 @@ func getConn(f func(conn *redis.Client) error) error {
 	return f(conn)
 }
 
-// Read reads in by id or name
+// Read reads in by id
 func Read(i Identifiable) error {
 	if i.GetID() == "" {
 		return fmt.Errorf("cannot read without id")
@@ -94,6 +105,57 @@ func Open() error {
 	return nil
 }
 
+func List(setKey string) (map[string]string, error) {
+	pairs := make(map[string]string)
+	keys := []interface{}{}
+	iter := 0
+	err := getConn(func(conn *redis.Client) error {
+		for {
+			s, err := conn.Cmd("SSCAN", setKey, iter).Array()
+			if err != nil {
+				return fmt.Errorf("could not scan %s: %s", setKey, err)
+			}
+			iter, err := s[0].Int()
+			if err != nil {
+				return fmt.Errorf("could not get cursor: %s", err)
+			}
+			for _, sc := range s[1:] {
+				str, err := sc.Str()
+				if err != nil {
+					return err
+				}
+				keys = append(keys, str)
+
+			}
+			if iter == 0 {
+				break
+			}
+		}
+		items, err := conn.Cmd("MGET", keys...).Array()
+		if err != nil {
+			return err
+		}
+		type nameAndId struct {
+			Name string `json:"name"`
+			ID   string `json:"id"`
+		}
+		for _, i := range items {
+			j, err := i.Bytes()
+			if err != nil {
+				return err
+			}
+			pair := nameAndId{}
+			err = json.Unmarshal(j, &pair)
+			if err != nil {
+				return err
+			}
+			pairs[pair.ID] = pair.Name
+		}
+		return nil
+	})
+	return pairs, err
+}
+
 // Save saves a Persistable
 func Save(item Persistable) error {
 	if item.GetID() == "" {
@@ -108,7 +170,7 @@ func Save(item Persistable) error {
 		if err != nil {
 			return fmt.Errorf("could not save item %s: %s", item.GetID(), err)
 		}
-		return nil
+		return conn.Cmd("SADD", getType(item)).Err
 	})
 }
 
@@ -121,7 +183,11 @@ func Delete(item Persistable) error {
 		return fmt.Errorf("cannot read without id")
 	}
 	return getConn(func(conn *redis.Client) error {
-		return conn.Cmd("DEL", item.GetID()).Err
+		err := conn.Cmd("DEL", item.GetID()).Err
+		if err != nil {
+			return fmt.Errorf("could not del item %s: %s", item.GetID(), err)
+		}
+		return conn.Cmd("SREM", getType(item), item.GetID()).Err
 	})
 }
 

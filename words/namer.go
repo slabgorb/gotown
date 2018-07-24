@@ -14,8 +14,8 @@ import (
 
 // Namer 'names' things using an underlying Words struct and a set of template patterns.
 type Namer struct {
-	Words        *Words
-	ID           int       `json:"id" storm:"increment"`
+	Words *Words
+	persist.IdentifiableImpl
 	Name         string    `json:"name" storm:"unique"`
 	Patterns     []Pattern `json:"patterns"`
 	WordsName    string    `json:"words"`
@@ -31,18 +31,18 @@ func (n *Namer) PatternList() []string {
 	return pl
 }
 
-func (n *Namer) GetID() int                { return n.ID }
 func (n *Namer) GetName() string           { return n.Name }
+func (n *Namer) String() string            { return n.Name }
 func (n *Namer) API() (interface{}, error) { return n, nil }
 
 // Save implements persist.Persistable
 func (n *Namer) Save() error {
-	return persist.DB.Save(n)
+	return persist.Save(n)
 }
 
 // Delete implements persist.Persistable
 func (n *Namer) Delete() error {
-	return persist.DB.DeleteStruct(n)
+	return persist.Delete(n)
 }
 
 // Fetch implements persist.Persistable
@@ -61,7 +61,7 @@ func (n *Namer) Read() error {
 // Reset implements persist.Persistable
 func (n *Namer) Reset() {
 	n.Words = nil
-	n.ID = 0
+	n.ID = ""
 	n.Name = ""
 	n.Patterns = []Pattern{}
 	n.WordsName = ""
@@ -136,14 +136,10 @@ func New(patterns []string, words string, nameStrategy string) *Namer {
 }
 
 // NamerList returns a list of namers (as []string)
-func NamerList() ([]persist.IDPair, error) {
-	ns := []Namer{}
-	if err := persist.DB.All(&ns); err != nil {
+func NamerList() (map[string]string, error) {
+	list, err := persist.List("Namer")
+	if err != nil {
 		return nil, err
 	}
-	names := []persist.IDPair{}
-	for _, n := range ns {
-		names = append(names, persist.IDPair{Name: n.Name, ID: n.ID})
-	}
-	return names, nil
+	return list, nil
 }

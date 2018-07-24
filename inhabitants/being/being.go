@@ -58,13 +58,13 @@ type Cultured interface {
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
 	persist.IdentifiableImpl
-	PopulationID int                  `json:"population_id"`
+	PopulationID string               `json:"population_id"`
 	Name         *Name                `json:"name"`
-	SpeciesName  string               `json:"species_name"`
-	CultureName  string               `json:"culture_name"`
-	Parents      []int                `json:"parents"`
-	Children     []int                `json:"children"`
-	Spouses      []int                `json:"spouses"`
+	SpeciesID    string               `json:"species_id"`
+	CultureID    string               `json:"culture_id"`
+	Parents      []string             `json:"parents"`
+	Children     []string             `json:"children"`
+	Spouses      []string             `json:"spouses"`
 	Gender       inhabitants.Gender   `json:"gender"`
 	Dead         bool                 `json:"dead"`
 	Chromosome   *genetics.Chromosome `json:"chromosome"`
@@ -77,14 +77,14 @@ type Being struct {
 // New initializes a being
 func New(s *species.Species, c *culture.Culture, logger Logger) *Being {
 	return &Being{
-		Name:        &Name{},
-		SpeciesName: s.GetName(),
-		CultureName: c.GetName(),
-		Species:     s,
-		Culture:     c,
-		Chromosome:  genetics.RandomChromosome(30),
-		Gender:      inhabitants.Asexual,
-		logger:      logger,
+		Name:       &Name{},
+		SpeciesID:  s.GetID(),
+		CultureID:  c.GetID(),
+		Species:    s,
+		Culture:    c,
+		Chromosome: genetics.RandomChromosome(30),
+		Gender:     inhabitants.Asexual,
+		logger:     logger,
 	}
 }
 
@@ -113,11 +113,6 @@ func (b *Being) getSpouses() ([]*Being, error) {
 	return getBeingsFromIDS(b.Spouses)
 }
 
-// GetID returns the id
-func (b *Being) GetID() int {
-	return b.ID
-}
-
 func (b *Being) GetNamer() *words.Namer {
 	return b.Culture.GetNamers()[b.Gender]
 }
@@ -137,32 +132,34 @@ func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
 
 // Reset sets the culture back to zero
 func (b *Being) Reset() {
-	b.ID = 0
+	b.ID = ""
 	b.Name = &Name{}
-	b.SpeciesName = ""
-	b.CultureName = ""
-	b.Spouses = []int{}
-	b.Children = []int{}
-	b.Parents = []int{}
+	b.SpeciesID = ""
+	b.Species = nil
+	b.CultureID = ""
+	b.Culture = nil
+	b.Spouses = []string{}
+	b.Children = []string{}
+	b.Parents = []string{}
 	b.Chromosome = genetics.RandomChromosome(30)
 	b.Gender = inhabitants.Asexual
 }
 
 // Read implements persist.Persistable
 func (b *Being) Read() error {
-	if b.ID == 0 {
+	if b.ID == "" {
 		return fmt.Errorf("cannot read being without id")
 	}
 	if err := persist.Read(b); err != nil {
 		return fmt.Errorf("could not load being %d: %s", b.ID, err)
 	}
-	b.Species = &species.Species{Name: b.SpeciesName}
+	b.Species = &species.Species{IdentifiableImpl: persist.IdentifiableImpl{ID: b.SpeciesID}}
 	if err := persist.Read(b.Species); err != nil {
-		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesName, b.ID, err)
+		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesID, b.ID, err)
 	}
-	b.Culture = &culture.Culture{Name: b.CultureName}
+	b.Culture = &culture.Culture{IdentifiableImpl: persist.IdentifiableImpl{ID: b.CultureID}}
 	if err := persist.Read(b.Culture); err != nil {
-		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureName, b.ID, err)
+		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureID, b.ID, err)
 	}
 	return nil
 }
