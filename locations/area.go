@@ -13,22 +13,22 @@ import (
 
 // Area represents a geographical area
 type Area struct {
-	ID           int                `json:"id" storm:"id,increment"`
+	persist.IdentifiableImpl
 	Name         string             `json:"name" storm:"index"`
-	PopulationID int                `json:"population_id"`
+	PopulationID string             `json:"population_id"`
 	Size         AreaSize           `json:"size"`
-	GraveyardID  int                `json:"graveyard_id"`
-	LocationID   int                `json:"location_id"`
-	EnclosureIDS []int              `json:"enclosure_ids"`
+	GraveyardID  string             `json:"graveyard_id"`
+	LocationID   string             `json:"location_id"`
+	EnclosureIDS []string           `json:"enclosure_ids"`
 	Residents    *being.Population  `json:"-"`
 	Graveyard    *being.Population  `json:"-"`
 	Location     *Area              `json:"-"`
-	Enclosures   map[int]*Area      `json:"-"`
+	Enclosures   map[string]*Area   `json:"-"`
 	Heraldry     *heraldry.Heraldry `json:"heraldry"`
 }
 
 type AreaAPI struct {
-	ID        int         `json:"id"`
+	ID        string      `json:"id"`
 	Name      string      `json:"name"`
 	Residents interface{} `json:"residents"`
 	Size      string      `json:"size"`
@@ -43,7 +43,7 @@ func (a *Area) API() (interface{}, error) {
 		return nil, fmt.Errorf("could not load population api %d for area %d", a.PopulationID, a.ID)
 	}
 	api := &AreaAPI{
-		ID:        a.ID,
+		ID:        a.GetID(),
 		Name:      a.Name,
 		Residents: populationAPI,
 		Size:      a.Size.String(),
@@ -68,15 +68,15 @@ func (a *Area) Save() error {
 	// 	return err
 	// }
 	// a.GraveyardID = a.Graveyard.ID
-	return persist.DB.Save(a)
+	return persist.Save(a)
 }
 
 // Read implements persist.Persistable
 func (a *Area) Read() error {
-	if a.ID == 0 {
+	if a.GetID() == "" {
 		return fmt.Errorf("need id for area")
 	}
-	if err := persist.DB.One("ID", a.ID, a); err != nil {
+	if err := persist.Read(a); err != nil {
 		return err
 	}
 	// if err := a.readGraveyard(); err != nil {
@@ -92,17 +92,17 @@ func (a *Area) Read() error {
 	return nil
 }
 
-func (a *Area) GetID() int      { return a.ID }
+func (a *Area) GetID() string   { return a.ID }
 func (a *Area) GetName() string { return a.Name }
 
 func (a *Area) Reset() {
 	a.Name = ""
-	a.ID = 0
+	a.ID = ""
 	a.Residents = nil
 	a.Graveyard = nil
-	a.GraveyardID = 0
-	a.PopulationID = 0
-	a.EnclosureIDS = []int{}
+	a.GraveyardID = ""
+	a.PopulationID = ""
+	a.EnclosureIDS = []string{}
 }
 
 // Delete implements persist.Persistable
@@ -119,16 +119,16 @@ func (a *Area) Delete() error {
 		}
 	}
 
-	return persist.DB.DeleteStruct(a)
+	return persist.Delete(a)
 }
 
 // NewArea creates an area
 func NewArea(size AreaSize, location *Area, namer *words.Namer) *Area {
 	a := &Area{Size: size, Location: location}
-	a.Graveyard = being.NewPopulation([]int{}, logger.Default)
-	a.Residents = being.NewPopulation([]int{}, logger.Default)
-	a.EnclosureIDS = []int{}
-	a.Enclosures = make(map[int]*Area)
+	a.Graveyard = being.NewPopulation([]string{}, logger.Default)
+	a.Residents = being.NewPopulation([]string{}, logger.Default)
+	a.EnclosureIDS = []string{}
+	a.Enclosures = make(map[string]*Area)
 	a.Name = namer.CreateName()
 	e := heraldry.RandomEscutcheon("square", true)
 	a.Heraldry = heraldry.New(e)
@@ -215,7 +215,7 @@ func (a *Area) AttachTo(area *Area) bool {
 		a.DetachFrom(a.Location)
 	}
 	if area.Enclosures == nil {
-		area.Enclosures = make(map[int]*Area)
+		area.Enclosures = make(map[string]*Area)
 	}
 	area.EnclosureIDS = append(area.EnclosureIDS, a.ID)
 	area.Enclosures[a.ID] = a
@@ -230,12 +230,12 @@ func (a *Area) String() string {
 }
 
 func (a *Area) readResidents() error {
-	p := &being.Population{ID: a.PopulationID}
+	p := &being.Population{IdentifiableImpl: persist.IdentifiableImpl{ID: a.PopulationID}}
 	a.Residents = p
 	return p.Read()
 }
 func (a *Area) readGraveyard() error {
-	p := &being.Population{ID: a.GraveyardID}
+	p := &being.Population{IdentifiableImpl: persist.IdentifiableImpl{ID: a.GraveyardID}}
 	a.Graveyard = p
 	return p.Read()
 }

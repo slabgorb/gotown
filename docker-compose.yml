@@ -6,5 +6,7 @@ services:
       - "8003:8003"
     volumes:
       - .:/go/src/github.com/slabgorb/gotown
+    links:
+      - redis
   redis:
     image: "redis:alpine"

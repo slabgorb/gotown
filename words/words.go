@@ -110,10 +110,10 @@ func (w *Words) loadBackup() error {
 	if err := persist.Read(backupWords); err != nil {
 		return err
 	}
-	if &backupWords == nil {
+	if backupWords == nil {
 		return fmt.Errorf("could not load backup words %s", w.BackupName)
 	}
-	w.backup = &backupWords
+	w.backup = backupWords
 	return nil
 }
 

@@ -24,8 +24,8 @@ type Marriageable interface {
 	GetAge() int
 	Alive() bool
 	Sex() inhabitants.Gender
-	IsCloseRelativeOf(with int) bool
-	GetID() int
+	IsCloseRelativeOf(with string) bool
+	GetID() string
 }
 
 // MaritalStrategy is a function which indicates whether the two beings are
