@@ -11,9 +11,9 @@ import (
 
 // Population is a set of Being
 type Population struct {
-	mux    sync.Mutex
-	ID     int              `json:"id" storm:"id,increment"`
-	IDS    map[int]struct{} `json:"ids"`
+	mux sync.Mutex
+	persist.IdentifiableImpl
+	IDS    map[string]struct{} `json:"ids"`
 	logger Logger
 }
 
@@ -39,16 +39,20 @@ func (mc *MaritalCandidate) Pair() (*Being, *Being) {
 }
 
 // NewPopulation initializes a Population
-func NewPopulation(ids []int, logger Logger) *Population {
-	p := &Population{IDS: make(map[int]struct{}), logger: logger}
+func NewPopulation(ids []string, logger Logger) *Population {
+	p := &Population{IDS: make(map[string]struct{}), logger: logger}
 	p.appendIds(ids...)
 	return p
 }
 
 // Reset implements persist.Persistable
 func (p *Population) Reset() {
-	p.ID = 0
-	p.IDS = make(map[int]struct{})
+	p.ID = ""
+	p.IDS = make(map[string]struct{})
+}
+
+func (p *Population) String() string {
+	return p.ID
 }
 
 // Delete implements persist.Persistable
@@ -62,16 +66,16 @@ func (p *Population) Delete() error {
 			return err
 		}
 	}
-	return persist.DB.DeleteStruct(p)
+	return persist.Delete(p)
 }
 
 // Save implements persist.Persistable
 func (p *Population) Save() error {
-	return persist.DB.Save(p)
+	return persist.Save(p)
 }
 
 type PopulationAPI struct {
-	ID     int           `json:"id"`
+	ID     string        `json:"id"`
 	Beings []interface{} `json:"beings"`
 }
 
@@ -95,15 +99,14 @@ func (p *Population) API() (interface{}, error) {
 	}, nil
 }
 
-func (p *Population) GetID() int      { return p.ID }
 func (p *Population) GetName() string { return "" }
 
 // Read implements persist.Persistable
 func (p *Population) Read() error {
-	if p.ID == 0 {
+	if p.ID == "" {
 		return fmt.Errorf("need id for population")
 	}
-	return persist.DB.One("ID", p.ID, p)
+	return persist.Read(p)
 }
 
 func marry(p *Population, c Cultured) timeline.Callback {
@@ -127,7 +130,7 @@ func reproduction(p *Population) timeline.Callback {
 				// if b is married, choose spouse?
 				if r.b.Spouses != nil && len(r.b.Spouses) > 0 {
 					withID := r.b.Spouses[0]
-					with := &Being{ID: withID}
+					with := &Being{IdentifiableImpl: persist.IdentifiableImpl{ID: withID}}
 					with.Read()
 				} else {
 					// choose random guy for now, will work on the choice later
@@ -148,7 +151,7 @@ func (p *Population) Inhabitants() ([]*Being, error) {
 	bs := make([]*Being, p.Len())
 	i := 0
 	for id := range p.IDS {
-		b := &Being{ID: id}
+		b := &Being{IdentifiableImpl: persist.IdentifiableImpl{ID: id}}
 		if err := b.Read(); err != nil {
 			return nil, err
 		}
@@ -175,7 +178,7 @@ func (p *Population) Len() int {
 	return len(p.IDS)
 }
 
-func (p *Population) addID(id int) bool {
+func (p *Population) addID(id string) bool {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 	_, found := p.IDS[id]
@@ -190,15 +193,15 @@ func (p *Population) Add(b *Being) bool {
 	return p.addID(b.ID)
 }
 
-func (p *Population) getIds() []int {
-	out := []int{}
+func (p *Population) getIds() []string {
+	out := []string{}
 	for id := range p.IDS {
 		out = append(out, id)
 	}
 	return out
 }
 
-func (p *Population) appendIds(ids ...int) {
+func (p *Population) appendIds(ids ...string) {
 	for _, i := range ids {
 		p.addID(i)
 	}

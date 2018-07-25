@@ -22,25 +22,25 @@ func chooseRandomString(s []string) string {
 }
 
 type Words struct {
-	ID         int                 `json:"id" storm:"increment"`
+	persist.IdentifiableImpl
 	Name       string              `json:"name" storm:"unique"`
 	Dictionary map[string][]string `json:"dictionary"`
 	backup     *Words
 	BackupName string `json:"backup"`
 }
 
-func (w *Words) GetID() int                { return w.ID }
 func (w *Words) GetName() string           { return w.Name }
+func (w *Words) String() string            { return w.Name }
 func (w *Words) API() (interface{}, error) { return w, nil }
 
 // Save implements persist.Persistable
 func (w *Words) Save() error {
-	return persist.DB.Save(w)
+	return persist.Save(w)
 }
 
 // Delete implements persist.Persistable
 func (w *Words) Delete() error {
-	return persist.DB.DeleteStruct(w)
+	return persist.Delete(w)
 }
 
 // Fetch implements persist.Persistable
@@ -52,7 +52,7 @@ func (w *Words) Read() error {
 }
 
 func (w *Words) Reset() {
-	w.ID = 0
+	w.ID = ""
 	w.Name = ""
 	w.Dictionary = make(map[string][]string)
 	w.backup = nil
@@ -103,17 +103,17 @@ func shortFilter(list []string) []string {
 }
 
 func (w *Words) loadBackup() error {
-	var backupWords Words
+	backupWords := &Words{IdentifiableImpl: persist.IdentifiableImpl{ID: w.BackupName}}
 	if w.BackupName == "" {
 		return nil
 	}
-	if err := persist.DB.One("Name", w.BackupName, &backupWords); err != nil {
+	if err := persist.Read(backupWords); err != nil {
 		return err
 	}
-	if &backupWords == nil {
+	if backupWords == nil {
 		return fmt.Errorf("could not load backup words %s", w.BackupName)
 	}
-	w.backup = &backupWords
+	w.backup = backupWords
 	return nil
 }
 
@@ -211,16 +211,12 @@ func Seed() {
 	}
 }
 
-func WordsList() ([]persist.IDPair, error) {
-	wds := []Words{}
-	if err := persist.DB.All(&wds); err != nil {
+func WordsList() (map[string]string, error) {
+	list, err := persist.List("Words")
+	if err != nil {
 		return nil, err
 	}
-	names := []persist.IDPair{}
-	for _, w := range wds {
-		names = append(names, persist.IDPair{Name: w.Name, ID: w.ID})
-	}
-	return names, nil
+	return list, err
 }
 
 func seedWords() error {

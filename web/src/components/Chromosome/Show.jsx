@@ -1,16 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import AutoRenewIcon from '@material-ui/icons/Autorenew';
-import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 import Grid from '@material-ui/core/Grid';
-import Gene from './Gene';
-import chromosomeApi from './api';
+import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from '@material-ui/core/styles';
+import AutoRenewIcon from '@material-ui/icons/Autorenew';
+import PropTypes from 'prop-types';
+import React from 'react';
 import speciesApi from '../Species/api';
+import chromosomeApi from './api';
 import Expression from './Expression';
+import Gene from './Gene';
 
 const _ = require('underscore');
 
@@ -44,8 +44,8 @@ class Show extends React.Component {
   }
 
   getExpression() {
-    const { speciesName } = this.props;
-    return speciesApi.getExpression(speciesName, this.state.genes)
+    const { speciesID } = this.props;
+    return speciesApi.getExpression(speciesID, this.state.genes)
       .then(expressionMap => this.setState({ expressionMap }));
   }
 
@@ -149,6 +149,7 @@ class Show extends React.Component {
 Show.propTypes = {
   classes: PropTypes.object.isRequired,
   speciesName: PropTypes.string.isRequired,
+  speciesID: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(Show);

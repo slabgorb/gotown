@@ -11,8 +11,8 @@ import (
 // Culture represents the culture of a population, such as the naming schemes,
 // marriage customs, etc.
 type Culture struct {
-	ID                int                                 `json:"id" storm:"id,increment"`
-	Name              string                              `json:"name" storm:"unique"`
+	persist.IdentifiableImpl
+	Name              string                              `json:"name"`
 	MaritalStrategies []string                            `json:"marital_strategies"`
 	Namers            map[inhabitants.Gender]*words.Namer `json:"namers"`
 	NamerNames        map[inhabitants.Gender]string       `json:"namer_names"`
@@ -24,8 +24,8 @@ type Marriageable interface {
 	GetAge() int
 	Alive() bool
 	Sex() inhabitants.Gender
-	IsCloseRelativeOf(with int) bool
-	GetID() int
+	IsCloseRelativeOf(with string) bool
+	GetID() string
 }
 
 // MaritalStrategy is a function which indicates whether the two beings are
@@ -78,12 +78,12 @@ func (c *Culture) String() string {
 
 // Save implements persist.Persistable
 func (c *Culture) Save() error {
-	return persist.DB.Save(c)
+	return persist.Save(c)
 }
 
 // Delete implements persist.Persistable
 func (c *Culture) Delete() error {
-	return persist.DB.DeleteStruct(c)
+	return persist.Delete(c)
 }
 
 // Fetch implements persist.Persistable
@@ -105,7 +105,7 @@ func (c *Culture) Read() error {
 
 // Reset sets the culture back to zero
 func (c *Culture) Reset() {
-	c.ID = 0
+	c.ID = ""
 	c.Name = ""
 	c.MaritalStrategies = []string{}
 	c.Namers = make(map[inhabitants.Gender]*words.Namer)
@@ -129,9 +129,6 @@ func (c *Culture) GetNamers() map[inhabitants.Gender]*words.Namer {
 // GetName returns the name of the culture
 func (c *Culture) GetName() string { return c.Name }
 
-// GetID returns the id of the culture
-func (c *Culture) GetID() int { return c.ID }
-
 // Seed seeds the database with initial cultures.
 func Seed() error {
 	var culture = &Culture{}
@@ -139,14 +136,10 @@ func Seed() error {
 }
 
 // List returns the names of the cultures already in tha database
-func List() ([]persist.IDPair, error) {
-	cultures := []Culture{}
-	if err := persist.DB.All(&cultures); err != nil {
+func List() (map[string]string, error) {
+	items, err := persist.List("Culture")
+	if err != nil {
 		return nil, err
-	}
-	items := []persist.IDPair{}
-	for _, c := range cultures {
-		items = append(items, persist.IDPair{Name: c.Name, ID: c.ID})
 	}
 	return items, nil
 }

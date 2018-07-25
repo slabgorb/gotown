@@ -57,14 +57,14 @@ type Cultured interface {
 
 // Being represents any being, like a human, a vampire, whatever.
 type Being struct {
-	ID           int                  `json:"id" storm:"id,increment"`
-	PopulationID int                  `json:"population_id" storm:"index"`
+	persist.IdentifiableImpl
+	PopulationID string               `json:"population_id"`
 	Name         *Name                `json:"name"`
-	SpeciesName  string               `json:"species_name"`
-	CultureName  string               `json:"culture_name"`
-	Parents      []int                `json:"parents"`
-	Children     []int                `json:"children"`
-	Spouses      []int                `json:"spouses"`
+	SpeciesID    string               `json:"species_id"`
+	CultureID    string               `json:"culture_id"`
+	Parents      []string             `json:"parents"`
+	Children     []string             `json:"children"`
+	Spouses      []string             `json:"spouses"`
 	Gender       inhabitants.Gender   `json:"gender"`
 	Dead         bool                 `json:"dead"`
 	Chromosome   *genetics.Chromosome `json:"chromosome"`
@@ -77,21 +77,21 @@ type Being struct {
 // New initializes a being
 func New(s *species.Species, c *culture.Culture, logger Logger) *Being {
 	return &Being{
-		Name:        &Name{},
-		SpeciesName: s.GetName(),
-		CultureName: c.GetName(),
-		Species:     s,
-		Culture:     c,
-		Chromosome:  genetics.RandomChromosome(30),
-		Gender:      inhabitants.Asexual,
-		logger:      logger,
+		Name:       &Name{},
+		SpeciesID:  s.GetID(),
+		CultureID:  c.GetID(),
+		Species:    s,
+		Culture:    c,
+		Chromosome: genetics.RandomChromosome(30),
+		Gender:     inhabitants.Asexual,
+		logger:     logger,
 	}
 }
 
-func getBeingsFromIDS(IDS []int) ([]*Being, error) {
+func getBeingsFromIDS(IDS []string) ([]*Being, error) {
 	beings := []*Being{}
 	for _, id := range IDS {
-		b := &Being{ID: id}
+		b := &Being{IdentifiableImpl: persist.IdentifiableImpl{ID: id}}
 		if err := b.Read(); err != nil {
 			return nil, err
 		}
@@ -113,11 +113,6 @@ func (b *Being) getSpouses() ([]*Being, error) {
 	return getBeingsFromIDS(b.Spouses)
 }
 
-// GetID returns the id
-func (b *Being) GetID() int {
-	return b.ID
-}
-
 func (b *Being) GetNamer() *words.Namer {
 	return b.Culture.GetNamers()[b.Gender]
 }
@@ -137,40 +132,42 @@ func (b *Being) genderedParent(gender inhabitants.Gender) (*Being, error) {
 
 // Reset sets the culture back to zero
 func (b *Being) Reset() {
-	b.ID = 0
+	b.ID = ""
 	b.Name = &Name{}
-	b.SpeciesName = ""
-	b.CultureName = ""
-	b.Spouses = []int{}
-	b.Children = []int{}
-	b.Parents = []int{}
+	b.SpeciesID = ""
+	b.Species = nil
+	b.CultureID = ""
+	b.Culture = nil
+	b.Spouses = []string{}
+	b.Children = []string{}
+	b.Parents = []string{}
 	b.Chromosome = genetics.RandomChromosome(30)
 	b.Gender = inhabitants.Asexual
 }
 
 // Read implements persist.Persistable
 func (b *Being) Read() error {
-	if b.ID == 0 {
+	if b.ID == "" {
 		return fmt.Errorf("cannot read being without id")
 	}
 	if err := persist.Read(b); err != nil {
 		return fmt.Errorf("could not load being %d: %s", b.ID, err)
 	}
-	b.Species = &species.Species{Name: b.SpeciesName}
+	b.Species = &species.Species{IdentifiableImpl: persist.IdentifiableImpl{ID: b.SpeciesID}}
 	if err := persist.Read(b.Species); err != nil {
-		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesName, b.ID, err)
+		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesID, b.ID, err)
 	}
-	b.Culture = &culture.Culture{Name: b.CultureName}
+	b.Culture = &culture.Culture{IdentifiableImpl: persist.IdentifiableImpl{ID: b.CultureID}}
 	if err := persist.Read(b.Culture); err != nil {
-		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureName, b.ID, err)
+		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureID, b.ID, err)
 	}
 	return nil
 }
 
 // Save implements persist.Persistable
 func (b *Being) Save() error {
-	b.CultureName = b.Culture.GetName()
-	b.SpeciesName = b.Species.GetName()
+	b.CultureID = b.Culture.GetID()
+	b.SpeciesID = b.Species.GetID()
 	return persist.Save(b)
 }
 
@@ -205,7 +202,7 @@ func (b *Being) Mother() (*Being, error) {
 
 // Randomize scrambles a Being randomly
 func (b *Being) Randomize() error {
-	if b.SpeciesName == "" {
+	if b.SpeciesID == "" {
 		return fmt.Errorf("Cannot randomize a being without a species")
 	}
 	b.RandomizeChromosome()
@@ -253,7 +250,7 @@ func (b *Being) Marry(with *Being) {
 }
 
 // IsParentOf returns true of the receiver is the parent of the passed in being
-func (b *Being) IsParentOf(with int) bool {
+func (b *Being) IsParentOf(with string) bool {
 	for _, id := range b.Children {
 		if id == with {
 			return true
@@ -264,7 +261,7 @@ func (b *Being) IsParentOf(with int) bool {
 
 // IsChildOf returns true if the receiver being is a child of the passed in
 // being
-func (b *Being) IsChildOf(with int) bool {
+func (b *Being) IsChildOf(with string) bool {
 	parents, err := b.GetParents()
 	if err != nil {
 		return false
@@ -289,8 +286,8 @@ func (b *Being) Unmarried() bool {
 
 // Siblings gets all siblings (half and full) of the receiver
 func (b *Being) Siblings() (*Population, error) {
-	children := make(map[int]struct{})
-	sibs := []int{}
+	children := make(map[string]struct{})
+	sibs := []string{}
 
 	parents, err := b.GetParents()
 	if err != nil {
@@ -311,7 +308,7 @@ func (b *Being) Siblings() (*Population, error) {
 
 // Piblings returns aunts and uncles of the receiver
 func (b *Being) Piblings() (*Population, error) {
-	parentSiblings := NewPopulation([]int{}, b.logger)
+	parentSiblings := NewPopulation([]string{}, b.logger)
 	parents, err := b.GetParents()
 	if err != nil {
 		return nil, err
@@ -332,7 +329,7 @@ func (b *Being) Cousins() (*Population, error) {
 	if err != nil {
 		return nil, err
 	}
-	cousins := NewPopulation([]int{}, b.logger)
+	cousins := NewPopulation([]string{}, b.logger)
 	pibBeings, err := piblings.Inhabitants()
 	if err != nil {
 		return nil, err
@@ -350,7 +347,7 @@ func (b *Being) Niblings() (*Population, error) {
 	if err != nil {
 		return nil, err
 	}
-	niblings := NewPopulation([]int{}, b.logger)
+	niblings := NewPopulation([]string{}, b.logger)
 	sibs, err := siblings.Inhabitants()
 	if err != nil {
 		return nil, err
@@ -362,7 +359,7 @@ func (b *Being) Niblings() (*Population, error) {
 }
 
 // IsSiblingOf checks to see if the receiver is a sibling of the passed in being
-func (b *Being) IsSiblingOf(with int) bool {
+func (b *Being) IsSiblingOf(with string) bool {
 	siblings, err := b.Siblings()
 	if err != nil {
 		return false
@@ -377,7 +374,7 @@ func (b *Being) IsSiblingOf(with int) bool {
 
 // IsCloseRelativeOf returns true if the receiver is a close relative of the
 // passed in being
-func (b *Being) IsCloseRelativeOf(with int) bool {
+func (b *Being) IsCloseRelativeOf(with string) bool {
 	close := false
 	close = close || b.IsChildOf(with)
 	close = close || b.IsParentOf(with)
@@ -391,7 +388,7 @@ func (b *Being) Reproduce(with *Being) (*Being, error) {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
 	child := New(b.Species, b.Culture, b.logger)
-	child.Parents = []int{b.ID, with.ID}
+	child.Parents = []string{b.ID, with.ID}
 	child.Randomize()
 	child.Age = 0
 	child.PopulationID = b.PopulationID
@@ -451,12 +448,12 @@ func saveAll(beings []*Being) error {
 }
 
 type BeingAPI struct {
-	ID          int               `json:"id"`
+	ID          string            `json:"id"`
 	Name        string            `json:"name"`
 	SpeciesName string            `json:"species"`
-	SpeciesID   int               `json:"species_id"`
+	SpeciesID   string            `json:"species_id"`
 	CultureName string            `json:"culture"`
-	CultureID   int               `json:"culture_id"`
+	CultureID   string            `json:"culture_id"`
 	Parents     []string          `json:"parents"`
 	Children    []string          `json:"children"`
 	Spouses     []string          `json:"spouses"`
@@ -506,14 +503,10 @@ func (b *Being) API() (interface{}, error) {
 }
 
 // List returns the names of the beings already in the database
-func List() ([]persist.IDPair, error) {
-	beings := []Being{}
-	if err := persist.DB.All(&beings); err != nil {
+func List() (map[string]string, error) {
+	list, err := persist.List("Being")
+	if err != nil {
 		return nil, err
 	}
-	items := []persist.IDPair{}
-	for _, c := range beings {
-		items = append(items, persist.IDPair{Name: c.Name.Display, ID: c.ID})
-	}
-	return items, nil
+	return list, nil
 }

@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -12,6 +13,7 @@ const (
 	DebugLevel = 1 << iota
 	InfoLevel
 	ErrorLevel
+	FatalLevel
 	NoneLevel
 )
 
@@ -26,6 +28,7 @@ type Logger interface {
 	Info(format string, v ...interface{})
 	Debug(format string, v ...interface{})
 	Error(format string, v ...interface{})
+	Fatal(format string, v ...interface{})
 	SetOutput(out io.Writer)
 }
 
@@ -38,8 +41,8 @@ func (l logger) Info(format string, v ...interface{}) {
 	if level < InfoLevel {
 		return
 	}
-	l.SetPrefix("INFO")
-	l.Logger.Printf(addReturn(format), v)
+	l.SetPrefix("INFO ")
+	l.Logger.Printf(addReturn(format), v...)
 }
 
 // Debug logs at the Debug level
@@ -47,8 +50,8 @@ func (l logger) Debug(format string, v ...interface{}) {
 	if level < DebugLevel {
 		return
 	}
-	l.SetPrefix("DEBUG")
-	l.Logger.Printf(addReturn(format), v)
+	l.SetPrefix("DEBUG ")
+	l.Logger.Printf(addReturn(format), v...)
 }
 
 // Error logs at the Error level
@@ -56,8 +59,18 @@ func (l logger) Error(format string, v ...interface{}) {
 	if level < ErrorLevel {
 		return
 	}
-	l.SetPrefix("ERROR")
-	l.Logger.Printf(addReturn(format), v)
+	l.SetPrefix("ERROR ")
+	l.Logger.Printf(addReturn(format), v...)
+}
+
+// Fatal logs at the Fatal level, then crashes and burns with the heat of 1000 suns
+func (l logger) Fatal(format string, v ...interface{}) {
+	if level < FatalLevel {
+		return
+	}
+	l.SetPrefix("FATAL ")
+	l.Logger.Printf(addReturn(format), v...)
+	panic(fmt.Sprintf(format, v))
 }
 
 func (l logger) SetOutput(out io.Writer) {
@@ -66,7 +79,7 @@ func (l logger) SetOutput(out io.Writer) {
 
 // New returns a new Logger
 func New(out io.Writer) Logger {
-	return &logger{log.New(out, "", log.Ldate|log.Ltime|log.Llongfile)}
+	return &logger{log.New(out, "", log.Ldate|log.Lshortfile|log.Ltime)}
 }
 
 // SetOutput sets the output for the default logger
@@ -116,5 +129,5 @@ func init() {
 }
 
 func addReturn(format string) string {
-	return format + "/n"
+	return format + "\n"
 }

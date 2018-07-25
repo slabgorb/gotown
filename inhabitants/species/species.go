@@ -21,7 +21,7 @@ func SetRandomizer(g random.Generator) {
 
 // Species represents a species or a race.
 type Species struct {
-	ID                int                  `json:"id" storm:"id,increment"`
+	persist.IdentifiableImpl
 	Name              string               `json:"name" storm:"index,unique"`
 	Genders           []inhabitants.Gender `json:"genders"`
 	GeneticExpression genetics.Expression  `json:"expression"`
@@ -54,13 +54,13 @@ func (s *Species) API() (interface{}, error) {
 
 // Save implements persist.Persistable
 func (s *Species) Save() error {
-	return persist.DB.Save(s)
+	return persist.Save(s)
 }
 
 // Reset implements persist.Persistable
 func (s *Species) Reset() {
 	s.Name = ""
-	s.ID = 0
+	s.IdentifiableImpl = persist.IdentifiableImpl{ID: ""}
 	s.Genders = []inhabitants.Gender{}
 	s.GeneticExpression = genetics.Expression{}
 	s.Demography = make(map[int]Demo)
@@ -68,7 +68,7 @@ func (s *Species) Reset() {
 
 // Delete implements persist.Persistable
 func (s *Species) Delete() error {
-	return persist.DB.DeleteStruct(s)
+	return persist.Delete(s)
 }
 
 // Fetch implements persist.Persistable
@@ -78,9 +78,6 @@ func (s *Species) Read() error {
 	}
 	return nil
 }
-
-// GetID returns the ID
-func (s *Species) GetID() int { return s.ID }
 
 // GetGenders returns the genders appropriate for this species
 func (s *Species) GetGenders() []inhabitants.Gender {
@@ -124,14 +121,10 @@ func Seed() error {
 }
 
 // List returns species names from the database
-func List() ([]persist.IDPair, error) {
-	species := []Species{}
-	if err := persist.DB.All(&species); err != nil {
+func List() (map[string]string, error) {
+	items, err := persist.List("Species")
+	if err != nil {
 		return nil, err
 	}
-	names := []persist.IDPair{}
-	for _, c := range species {
-		names = append(names, persist.IDPair{Name: c.Name, ID: c.ID})
-	}
-	return names, nil
+	return items, nil
 }

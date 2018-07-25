@@ -80,7 +80,7 @@ func defineStaticHandlers(e *echo.Echo) {
 }
 
 func main() {
-	err := persist.Open("gotown.db")
+	err := persist.Open()
 	if err != nil {
 		panic(err)
 	}
@@ -102,31 +102,45 @@ func main() {
 		Format: "${time_rfc3339} ${remote_ip} ${method} ${uri}\t=>\t${status}\t${latency_human}\n${query} ${form} ",
 	}))
 	e.Logger.SetLevel(log.DEBUG)
+	e.HTTPErrorHandler = customHTTPErrorHandler(e.DefaultHTTPErrorHandler)
 	definePprofHandlers(e)
 	e.Start(":8003")
 }
 
+func customHTTPErrorHandler(f echo.HTTPErrorHandler) echo.HTTPErrorHandler {
+	return func(err error, c echo.Context) {
+		c.Logger().Error(err)
+		f(err, c)
+	}
+}
+
 func seedHandler(c echo.Context) error {
+	persist.DeleteAll()
 	species.Seed()
 	culture.Seed()
 	words.Seed()
 	return nil
 }
 
-func getID(c echo.Context) int {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return 0
-	}
-	return id
+func getID(c echo.Context) string {
+	return c.Param("id")
 }
 
-func list(c echo.Context, f func() ([]persist.IDPair, error)) error {
+func list(c echo.Context, f func() (map[string]string, error)) error {
 	names, err := f()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, names)
+	type pair struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+	pairs := []pair{}
+
+	for k, v := range names {
+		pairs = append(pairs, pair{ID: k, Name: v})
+	}
+	return c.JSON(http.StatusOK, pairs)
 }
 
 func show(c echo.Context, item response) error {
@@ -145,7 +159,9 @@ func listCulturesHandler(c echo.Context) error {
 }
 
 func showCulturesHandler(c echo.Context) error {
-	return show(c, &culture.Culture{ID: getID(c)})
+	cu := &culture.Culture{}
+	cu.SetID(getID(c))
+	return show(c, cu)
 }
 
 func listSpeciesHandler(c echo.Context) error {
@@ -153,15 +169,25 @@ func listSpeciesHandler(c echo.Context) error {
 }
 
 func showSpeciesHandler(c echo.Context) error {
-	fmt.Fprintln(os.Stderr, c.ParamNames())
-	return show(c, &species.Species{ID: getID(c)})
+	s := &species.Species{}
+	s.SetID(getID(c))
+	return show(c, s)
 }
 
 func listPopulationHandler(c echo.Context) error {
-	pops := []being.Population{}
-	err := persist.DB.All(&pops)
+	pops := []*being.Population{}
+	list, err := persist.List("Population")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	for _, v := range list {
+		p := &being.Population{}
+		p.SetID(v)
+		err := p.Read()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		pops = append(pops, p)
 	}
 	apis := []interface{}{}
 	for _, p := range pops {
@@ -175,15 +201,14 @@ func listPopulationHandler(c echo.Context) error {
 }
 
 func showPopulationHandler(c echo.Context) error {
-	return show(c, &being.Population{ID: getID(c)})
+	p := &being.Population{}
+	p.SetID(getID(c))
+	return show(c, p)
 }
 
 func expressSpeciesHandler(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not convert %s into a valid int: %s", c.Param("id"), err))
-	}
-	item := &species.Species{ID: id}
+	item := &species.Species{}
+	item.SetID(getID(c))
 	if err := item.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -200,11 +225,14 @@ func expressSpeciesHandler(c echo.Context) error {
 
 func listNamersHandler(c echo.Context) error { return list(c, words.NamerList) }
 func showNamersHandler(c echo.Context) error {
-	return show(c, &words.Namer{ID: getID(c), Name: c.Param("id")})
+	n := &words.Namer{}
+	n.SetID(getID(c))
+	return show(c, n)
 }
 
 func randomNameHandler(c echo.Context) error {
-	n := &words.Namer{ID: getID(c)}
+	n := &words.Namer{}
+	n.SetID(getID(c))
 	if err := n.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -213,10 +241,16 @@ func randomNameHandler(c echo.Context) error {
 
 func listWordsHandler(c echo.Context) error { return list(c, words.WordsList) }
 func showWordsHandler(c echo.Context) error {
-	return show(c, &words.Words{ID: getID(c), Name: c.Param("id")})
+	w := &words.Words{}
+	w.SetID(getID(c))
+	return show(c, w)
 }
 
-func showBeingHandler(c echo.Context) error  { return show(c, &being.Being{ID: getID(c)}) }
+func showBeingHandler(c echo.Context) error {
+	b := &being.Being{}
+	b.SetID(getID(c))
+	return show(c, b)
+}
 func listBeingsHandler(c echo.Context) error { return list(c, being.List) }
 
 type lister interface {
@@ -226,18 +260,20 @@ type lister interface {
 
 type listItem struct {
 	S     string `json:"name"`
-	ID    int    `json:"id"`
+	ID    string `json:"id"`
 	Icon  string `json:"icon"`
 	Image string `json:"image"`
 }
 
 func listAreasHandler(c echo.Context) error {
-	all := []*locations.Area{}
-	if err := persist.DB.All(&all); err != nil {
+	list, err := persist.List("Area")
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	names := []interface{}{}
-	for _, a := range all {
+	for _, v := range list {
+		a := &locations.Area{}
+		a.SetID(v)
 		if err := a.Read(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -255,7 +291,8 @@ func deleteAreaHandler(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	a := &locations.Area{ID: req.ID}
+	a := &locations.Area{}
+	a.SetID(req.ID)
 
 	if err := a.Delete(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -264,7 +301,8 @@ func deleteAreaHandler(c echo.Context) error {
 }
 
 func showAreaHandler(c echo.Context) error {
-	a := &locations.Area{ID: getID(c), Name: c.Param("id")}
+	a := &locations.Area{}
+	a.SetID(getID(c))
 	if err := a.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -319,7 +357,7 @@ type townHandlerRequest struct {
 	Culture string `json:"culture" form:"culture" query:"culture"`
 	Species string `json:"species" form:"species" query:"species"`
 	Name    string `json:"name" form:"name" query:"name"`
-	ID      int    `json:"id" form:"id" query:"id"`
+	ID      string `json:"id" form:"id" query:"id"`
 	Size    int    `json:"size" form:"size" query:"size"`
 }
 
@@ -398,7 +436,20 @@ func createTownHandler(c echo.Context) error {
 }
 
 func townNameHandler(c echo.Context) error {
-	namer := words.Namer{Name: "english towns"}
+	list, err := persist.List("Namer")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	namerID := ""
+	for k, v := range list {
+		if v == "english towns" {
+			namerID = k
+			break
+		}
+	}
+
+	namer := &words.Namer{}
+	namer.SetID(namerID)
 	if err := namer.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
