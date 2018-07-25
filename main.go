@@ -102,8 +102,16 @@ func main() {
 		Format: "${time_rfc3339} ${remote_ip} ${method} ${uri}\t=>\t${status}\t${latency_human}\n${query} ${form} ",
 	}))
 	e.Logger.SetLevel(log.DEBUG)
+	e.HTTPErrorHandler = customHTTPErrorHandler(e.DefaultHTTPErrorHandler)
 	definePprofHandlers(e)
 	e.Start(":8003")
+}
+
+func customHTTPErrorHandler(f echo.HTTPErrorHandler) echo.HTTPErrorHandler {
+	return func(err error, c echo.Context) {
+		c.Logger().Error(err)
+		f(err, c)
+	}
 }
 
 func seedHandler(c echo.Context) error {
@@ -428,7 +436,20 @@ func createTownHandler(c echo.Context) error {
 }
 
 func townNameHandler(c echo.Context) error {
-	namer := words.Namer{Name: "english towns"}
+	list, err := persist.List("Namer")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	namerID := ""
+	for k, v := range list {
+		if v == "english towns" {
+			namerID = k
+			break
+		}
+	}
+
+	namer := &words.Namer{}
+	namer.SetID(namerID)
 	if err := namer.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
