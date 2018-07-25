@@ -16,6 +16,7 @@ class Species extends React.Component {
     super(props);
     this.state = {
       name: '',
+      id: '',
       genetics: { traits: [] },
       value: 1,
     };
@@ -36,7 +37,7 @@ class Species extends React.Component {
   get({ id }) {
     speciesApi.get(id)
       .then((s) => {
-        this.setState({ name: s.name, genetics: s.expression });
+        this.setState({ name: s.name, genetics: s.expression, id: s.id });
       });
   }
 
@@ -47,7 +48,7 @@ class Species extends React.Component {
 
 
   render() {
-    const { genetics, value, name } = this.state;
+    const { genetics, value, name, id } = this.state;
     if (genetics.traits.length === 0) {
       return (<div />);
     }
@@ -56,7 +57,7 @@ class Species extends React.Component {
       <div className={classes.root}>
         <PageTitle title={name} capitalize subtitle="Species" />
         <TabBar onChange={this.handleChange} tabs={['example', 'expression', 'map']} />
-        { value === 0 && (<ChromosomeShow speciesName={name} />) }
+        { value === 0 && (<ChromosomeShow speciesName={name} speciesID={id}/>) }
         { value === 1 && (<Genetics traits={genetics.traits} />) }
         { value === 2 && (<GeneticsMap traits={genetics.traits} />) }
       </div>
