@@ -3,7 +3,6 @@ package persist
 import (
 	"encoding/json"
 	"fmt"
-	"gonaeo/logger"
 	"reflect"
 	"strings"
 
@@ -118,17 +117,14 @@ func List(setKey string) (map[string]string, error) {
 			if err != nil {
 				return fmt.Errorf("could not scan %s: %s", setKey, err)
 			}
-			logger.Debug("%s", s)
 			iter, err = s[0].Int()
 			if err != nil {
 				return fmt.Errorf("could not get cursor: %s", err)
 			}
-			logger.Debug("iter %d", iter)
 			ary, err := s[1].Array()
 			if err != nil {
 				return fmt.Errorf("could not get array: %s", err)
 			}
-			logger.Debug("set: %s", ary)
 			for _, sc := range ary {
 				str, err := sc.Str()
 				if err != nil {
@@ -142,7 +138,6 @@ func List(setKey string) (map[string]string, error) {
 			}
 
 		}
-		logger.Debug("keys: %s", keys)
 		if len(keys) == 0 {
 			return nil
 		}
