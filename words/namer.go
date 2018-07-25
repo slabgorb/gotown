@@ -20,6 +20,7 @@ type Namer struct {
 	Patterns     []Pattern `json:"patterns"`
 	WordsName    string    `json:"words"`
 	NameStrategy string    `json:"name_strategy"`
+	WordsID      string    `json:"words_id"`
 }
 
 // PatternList returns the set of patterns as a slice of string
@@ -50,7 +51,20 @@ func (n *Namer) Read() error {
 	if err := persist.Read(n); err != nil {
 		return fmt.Errorf("could not read namer: %s", err)
 	}
+	if n.WordsID != "" {
+		wordsList, err := persist.List("Words")
+		if err != nil {
+			return err
+		}
+		for k, v := range wordsList {
+			if v == n.WordsName {
+				n.WordsID = k
+				break
+			}
+		}
+	}
 	w := Words{Name: n.WordsName}
+	w.SetID(n.WordsID)
 	if err := w.Read(); err != nil {
 		return err
 	}
