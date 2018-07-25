@@ -2,14 +2,14 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    app: './web/src/app.jsx',
+    app: '/opt/app/src/app.jsx',
   },
   output: {
     filename: 'bundle.js',
-    path: path.join(__dirname, './web/scripts'),
+    path: path.join(__dirname, '/opt/app/scripts'),
   },
   resolve: {
-    modules: [path.resolve('web/src'), 'node_modules'],
+    modules: [path.resolve('/opt/app'), 'node_modules'],
     extensions: ['.js', '.jsx'],
 
   },

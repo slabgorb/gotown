@@ -6,3 +6,11 @@ services:
       - "8003:8003"
   redis:
     image: "redis:alpine"
+    ports: 
+      - 6379
+
+  frontend: 
+    build: ./web
+    volumes: 
+      - ./web:/app
+
