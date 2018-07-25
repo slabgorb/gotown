@@ -14,7 +14,7 @@ import (
 
 // Namer 'names' things using an underlying Words struct and a set of template patterns.
 type Namer struct {
-	Words *Words
+	Words *Words `json:"-"`
 	persist.IdentifiableImpl
 	Name         string    `json:"name" storm:"unique"`
 	Patterns     []Pattern `json:"patterns"`

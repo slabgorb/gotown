@@ -3,6 +3,7 @@ package persist
 import (
 	"encoding/json"
 	"fmt"
+	"gonaeo/logger"
 	"reflect"
 	"strings"
 
@@ -28,7 +29,9 @@ type IDPair struct {
 }
 
 func getType(v interface{}) string {
-	return reflect.TypeOf(v).String()
+	rawType := reflect.TypeOf(v).String()
+	splits := strings.Split(rawType, ".")
+	return splits[len(splits)-1]
 }
 
 type Identifiable interface {
@@ -37,7 +40,7 @@ type Identifiable interface {
 }
 
 type IdentifiableImpl struct {
-	ID string
+	ID string `json:"id"`
 }
 
 func (i *IdentifiableImpl) GetID() string {
@@ -115,14 +118,21 @@ func List(setKey string) (map[string]string, error) {
 			if err != nil {
 				return fmt.Errorf("could not scan %s: %s", setKey, err)
 			}
-			iter, err := s[0].Int()
+			logger.Debug("%s", s)
+			iter, err = s[0].Int()
 			if err != nil {
 				return fmt.Errorf("could not get cursor: %s", err)
 			}
-			for _, sc := range s[1:] {
+			logger.Debug("iter %d", iter)
+			ary, err := s[1].Array()
+			if err != nil {
+				return fmt.Errorf("could not get array: %s", err)
+			}
+			logger.Debug("set: %s", ary)
+			for _, sc := range ary {
 				str, err := sc.Str()
 				if err != nil {
-					return err
+					return fmt.Errorf("could not get string: %s", err)
 				}
 				keys = append(keys, str)
 
@@ -130,10 +140,15 @@ func List(setKey string) (map[string]string, error) {
 			if iter == 0 {
 				break
 			}
+
+		}
+		logger.Debug("keys: %s", keys)
+		if len(keys) == 0 {
+			return nil
 		}
 		items, err := conn.Cmd("MGET", keys...).Array()
 		if err != nil {
-			return err
+			return fmt.Errorf("could not get array: %s", err)
 		}
 		type nameAndId struct {
 			Name string `json:"name"`
@@ -147,7 +162,7 @@ func List(setKey string) (map[string]string, error) {
 			pair := nameAndId{}
 			err = json.Unmarshal(j, &pair)
 			if err != nil {
-				return err
+				return fmt.Errorf("could not unmarshal json: %s", err)
 			}
 			pairs[pair.ID] = pair.Name
 		}
@@ -170,7 +185,7 @@ func Save(item Persistable) error {
 		if err != nil {
 			return fmt.Errorf("could not save item %s: %s", item.GetID(), err)
 		}
-		return conn.Cmd("SADD", getType(item)).Err
+		return conn.Cmd("SADD", getType(item), item.GetID()).Err
 	})
 }
 
@@ -243,7 +258,7 @@ func OpenTestDB() {
 func CloseTestDB() {
 }
 
-func deleteAll() error {
+func DeleteAll() error {
 	return getConn(func(conn *redis.Client) error {
 		return conn.Cmd("FLUSHALL").Err
 	})
@@ -251,10 +266,6 @@ func deleteAll() error {
 
 func SeedHelper(pathname string, item Persistable) error {
 	bundle := PersistBundle
-	err := deleteAll()
-	if err != nil {
-		return err
-	}
 	for _, name := range bundle.Files() {
 		splits := strings.Split(name, "/")
 		if splits[0] != pathname {

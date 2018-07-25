@@ -107,6 +107,7 @@ func main() {
 }
 
 func seedHandler(c echo.Context) error {
+	persist.DeleteAll()
 	species.Seed()
 	culture.Seed()
 	words.Seed()
@@ -122,7 +123,16 @@ func list(c echo.Context, f func() (map[string]string, error)) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, names)
+	type pair struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+	pairs := []pair{}
+
+	for k, v := range names {
+		pairs = append(pairs, pair{ID: k, Name: v})
+	}
+	return c.JSON(http.StatusOK, pairs)
 }
 
 func show(c echo.Context, item response) error {
