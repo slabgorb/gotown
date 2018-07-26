@@ -1,5 +1,5 @@
 FROM node:6.9.5-alpine AS build-node
-ADD ./package.json ./yarn.lock ./webpack.config.js /opt/app/
+ADD ./package.json ./yarn.lock ./webpack.config.js .babelrc .eslintrc /opt/app/
 RUN npm install -g -s --no-progress yarn && \
     mkdir -p /opt/app && \
     cd /opt/app && \

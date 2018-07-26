@@ -96,7 +96,7 @@ type operation func(client *redis.Client) error
 
 // Open opens the connection to the database file
 func Open() error {
-	p, err := pool.New("tcp", "localhost:6379", 10)
+	p, err := pool.New("tcp", "redis:6379", 10)
 	if err != nil {
 		return fmt.Errorf("could not open pool:%s", err)
 	}
