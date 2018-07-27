@@ -39,6 +39,7 @@ func TestBackup(t *testing.T) {
 	if err := persist.ReadByName(n.Name, "Namer", &n); err != nil {
 		t.Fail()
 	}
+	t.Logf("%#v", n)
 	name := n.CreateName()
 	if name == "" {
 		t.Errorf("Got empty string from n.Name(), got nothing from backup")

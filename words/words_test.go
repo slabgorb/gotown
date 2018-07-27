@@ -29,13 +29,12 @@ func TestWords(t *testing.T) {
 			found = true
 		}
 	}
-	t.Log(list)
 	if !found {
 		t.Fatal("english town names not seeded")
 	}
 
 	w := &Words{Name: "english town names"}
-	if err := w.Read(); err != nil {
+	if err := persist.ReadByName(w.Name, "Words", w); err != nil {
 		t.Fatal(err)
 	}
 	noun := w.Noun()
@@ -59,9 +58,10 @@ var testRandomStringTable = []struct {
 
 func TestStrings(t *testing.T) {
 	w := &Words{Name: "english town names"}
-	if err := w.Read(); err != nil {
+	if err := persist.ReadByName(w.Name, "Words", w); err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("%#v", w.GetBackup())
 	for _, ts := range testRandomStringTable {
 		test := ts.f(w)
 		if test != ts.expected {
@@ -72,8 +72,8 @@ func TestStrings(t *testing.T) {
 
 func TestNameWords(t *testing.T) {
 	w := &Words{Name: "viking male names"}
-	if err := w.Read(); err != nil {
-		t.Fail()
+	if err := persist.ReadByName(w.Name, "Words", w); err != nil {
+		t.Fatal(err)
 	}
 	t.Log(w.Dictionary)
 	pt := w.Patronymic()

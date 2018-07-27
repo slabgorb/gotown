@@ -132,7 +132,7 @@ func (w *Words) withBackup(f func(w *Words) string) string {
 	if s := f(w); s != "" {
 		return s
 	}
-	if w.backup != nil {
+	if w.backup != nil && w.backup.ID != "" {
 		return w.backup.withBackup(f)
 	}
 	return ""

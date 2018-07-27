@@ -20,7 +20,6 @@ type Namer struct {
 	Patterns     []Pattern `json:"patterns"`
 	WordsName    string    `json:"words"`
 	NameStrategy string    `json:"name_strategy"`
-	WordsID      string    `json:"words_id"`
 }
 
 // PatternList returns the set of patterns as a slice of string
@@ -54,6 +53,9 @@ func (n *Namer) Read() error {
 	w := &Words{}
 	if err := persist.ReadByName(n.WordsName, "Words", w); err != nil {
 		return err
+	}
+	if w.ID == "" {
+		return fmt.Errorf("unable to get underlying words for namer %s", n.ID)
 	}
 	n.Words = w
 	return nil

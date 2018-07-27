@@ -199,7 +199,7 @@ func ReadByName(name string, set string, item Persistable) error {
 		}
 	}
 	item.SetID(id)
-	return Read(item)
+	return item.Read()
 }
 
 func Update(item Persistable) error {
