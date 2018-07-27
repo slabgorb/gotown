@@ -11,7 +11,7 @@ import (
 )
 
 func makePop(t *testing.T, count int) (*being.Population, []*being.Being) {
-	ids := []int{}
+	ids := []string{}
 	beings := []*being.Being{}
 	var wg sync.WaitGroup
 	beingQueue := make(chan *being.Being, count)
@@ -111,11 +111,8 @@ func TestAPI(t *testing.T) {
 	if err := persistRoundtripArea(area); err != nil {
 		t.Fatal(err)
 	}
-	api, err := area.API()
+	_, err := area.API()
 	if err != nil {
 		t.Fatal(err)
-	}
-	if len(api.Residents) != 10 {
-		t.Errorf("did not create residents in api")
 	}
 }

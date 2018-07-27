@@ -156,7 +156,7 @@ func (a *Area) Population() (int, error) {
 
 // IsEnclosedBy returns whether the receiver is enclosed by the parameter
 func (a *Area) IsEnclosedBy(area *Area) bool {
-	loc := a
+	var loc *Area
 
 	for {
 		loc = a.Location

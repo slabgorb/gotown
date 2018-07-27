@@ -3,6 +3,8 @@ package words_test
 import (
 	"testing"
 
+	"github.com/slabgorb/gotown/persist"
+
 	. "github.com/slabgorb/gotown/words"
 )
 
@@ -18,7 +20,7 @@ func TestSeed(t *testing.T) {
 
 func TestPatterns(t *testing.T) {
 	n := Namer{Name: "english towns"}
-	if err := n.Read(); err != nil {
+	if err := persist.ReadByName(n.Name, "Namer", &n); err != nil {
 		t.Fail()
 	}
 	if len(n.Patterns) == 0 {
@@ -34,7 +36,7 @@ func TestPatterns(t *testing.T) {
 
 func TestBackup(t *testing.T) {
 	n := Namer{Name: "english towns"}
-	if err := n.Read(); err != nil {
+	if err := persist.ReadByName(n.Name, "Namer", &n); err != nil {
 		t.Fail()
 	}
 	name := n.CreateName()

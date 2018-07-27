@@ -6,12 +6,14 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/alicebob/miniredis"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
 	"github.com/satori/go.uuid"
 )
 
 var DB *pool.Pool
+var Test *miniredis.Miniredis
 
 func getUUID() string {
 	u1 := uuid.Must(uuid.NewV4())
@@ -259,14 +261,23 @@ func Close() error {
 
 // OpenTestDB sets up a connection to a test db instance
 func OpenTestDB() {
-	err := Open()
+	Test, err := miniredis.Run()
 	if err != nil {
 		panic(err)
 	}
+	p, err := pool.New("tcp", Test.Addr(), 10)
+	if err != nil {
+		panic(fmt.Errorf("could not open pool:%s", err))
+	}
+	if err != nil {
+		panic(fmt.Errorf("could not open database:%s", err))
+	}
+	SetDB(p)
 }
 
 // CloseTestDB closes the file and deletes it
 func CloseTestDB() {
+	Test.Close()
 }
 
 func DeleteAll() error {

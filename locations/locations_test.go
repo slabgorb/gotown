@@ -23,13 +23,13 @@ func testMainWrapped(m *testing.M) int {
 	species.Seed()
 	culture.Seed()
 	words.Seed()
-	if err := testNamer.Read(); err != nil {
+	if err := persist.ReadByName(testNamer.Name, "Namer", testNamer); err != nil {
 		panic(err)
 	}
-	if err := testCulture.Read(); err != nil {
+	if err := persist.ReadByName(testCulture.Name, "Culture", testCulture); err != nil {
 		panic(err)
 	}
-	if err := testSpecies.Read(); err != nil {
+	if err := persist.ReadByName(testSpecies.Name, "Species", testSpecies); err != nil {
 		panic(err)
 	}
 
