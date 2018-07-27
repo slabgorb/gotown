@@ -52,7 +52,7 @@ func TestSeed(t *testing.T) {
 	}
 
 	w := &Species{Name: "elf"}
-	if err := w.Read(); err != nil {
+	if err := persist.ReadByName(w.Name, "Species", w); err != nil {
 		t.Fatal(err)
 	}
 

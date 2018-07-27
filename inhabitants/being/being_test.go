@@ -57,11 +57,11 @@ func testMainWrapped(m *testing.M) int {
 	words.Seed()
 	species.Seed()
 	culture.Seed()
-	if err := testCulture.Read(); err != nil {
+	if err := persist.ReadByName(testCulture.Name, "Culture", testCulture); err != nil {
 		list, _ := culture.List()
 		panic(fmt.Sprintf("could not load test culture %s, have %#v: %s", testCulture.Name, list, err))
 	}
-	if err := testSpecies.Read(); err != nil {
+	if err := persist.ReadByName(testSpecies.Name, "Species", testSpecies); err != nil {
 		panic(fmt.Sprintf("could not load test species: %s", err))
 	}
 	beingFixtureRaw := []rawBeingFixture{
@@ -170,10 +170,10 @@ func TestInheritedName(t *testing.T) {
 func TestSiblings(t *testing.T) {
 	bf := beingFixtures
 	bf["adam"].Marry(bf["eve"])
-	bf["adam"].Children = []int{bf["cain"].ID, bf["abel"].ID}
-	bf["eve"].Children = []int{bf["cain"].ID, bf["abel"].ID}
-	bf["cain"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
-	bf["abel"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	bf["adam"].Children = []string{bf["cain"].ID, bf["abel"].ID}
+	bf["eve"].Children = []string{bf["cain"].ID, bf["abel"].ID}
+	bf["cain"].Parents = []string{bf["adam"].ID, bf["eve"].ID}
+	bf["abel"].Parents = []string{bf["adam"].ID, bf["eve"].ID}
 	for _, b := range bf {
 		b.Save()
 	}
@@ -196,10 +196,10 @@ func TestSiblings(t *testing.T) {
 func TestParents(t *testing.T) {
 	bf := beingFixtures
 	bf["adam"].Marry(bf["eve"])
-	bf["adam"].Children = []int{bf["cain"].ID, bf["abel"].ID}
-	bf["eve"].Children = []int{bf["cain"].ID, bf["abel"].ID}
-	bf["cain"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
-	bf["abel"].Parents = []int{bf["adam"].ID, bf["eve"].ID}
+	bf["adam"].Children = []string{bf["cain"].ID, bf["abel"].ID}
+	bf["eve"].Children = []string{bf["cain"].ID, bf["abel"].ID}
+	bf["cain"].Parents = []string{bf["adam"].ID, bf["eve"].ID}
+	bf["abel"].Parents = []string{bf["adam"].ID, bf["eve"].ID}
 	beings, err := bf["abel"].GetParents()
 	if err != nil {
 		t.Fail()
@@ -253,8 +253,8 @@ func TestRepro(t *testing.T) {
 		t.Errorf("expected 0 for age, got %v", child.Age)
 	}
 
-	if child.ID == 0 {
-		t.Errorf("expected child to have a non-zero id")
+	if child.ID == "" {
+		t.Errorf("expected child to have a non-empty id")
 	}
 
 	for _, g := range child.Chromosome.Genes {

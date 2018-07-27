@@ -10,7 +10,7 @@ import (
 )
 
 func makePop(t *testing.T, count int) (*Population, []*Being) {
-	ids := []int{}
+	ids := []string{}
 	beings := []*Being{}
 	var wg sync.WaitGroup
 	beingQueue := make(chan *Being, count)

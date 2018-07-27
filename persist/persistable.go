@@ -261,7 +261,8 @@ func Close() error {
 
 // OpenTestDB sets up a connection to a test db instance
 func OpenTestDB() {
-	Test, err := miniredis.Run()
+	var err error
+	Test, err = miniredis.Run()
 	if err != nil {
 		panic(err)
 	}

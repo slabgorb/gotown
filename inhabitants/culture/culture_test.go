@@ -23,7 +23,7 @@ func testMainWrapped(m *testing.M) int {
 	words.Seed()
 	species.Seed()
 	Seed()
-	if err := testSpecies.Read(); err != nil {
+	if err := persist.ReadByName(testSpecies.Name, "Species", testSpecies); err != nil {
 		panic(err)
 	}
 	return m.Run()
@@ -74,7 +74,7 @@ func TestSeed(t *testing.T) {
 	}
 
 	w := &Culture{Name: "italianate"}
-	if err := w.Read(); err != nil {
+	if err := persist.ReadByName(w.Name, "Culture", w); err != nil {
 		t.Fatal(err)
 	}
 	t.Log(w.NamerNames)
