@@ -18,4 +18,3 @@ services:
     build: ./web
     volumes: 
       - ./web:/web
-
