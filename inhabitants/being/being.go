@@ -153,11 +153,13 @@ func (b *Being) Read() error {
 	if err := persist.Read(b); err != nil {
 		return fmt.Errorf("could not load being %d: %s", b.ID, err)
 	}
-	b.Species = &species.Species{IdentifiableImpl: persist.IdentifiableImpl{ID: b.SpeciesID}}
+	b.Species = &species.Species{}
+	b.Species.SetID(b.SpeciesID)
 	if err := persist.Read(b.Species); err != nil {
 		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesID, b.ID, err)
 	}
-	b.Culture = &culture.Culture{IdentifiableImpl: persist.IdentifiableImpl{ID: b.CultureID}}
+	b.Culture = &culture.Culture{}
+	b.Culture.SetID(b.CultureID)
 	if err := persist.Read(b.Culture); err != nil {
 		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureID, b.ID, err)
 	}

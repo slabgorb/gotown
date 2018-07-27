@@ -184,6 +184,22 @@ func Save(item Persistable) error {
 	})
 }
 
+func ReadByName(name string, set string, item Persistable) error {
+	list, err := List(set)
+	if err != nil {
+		return err
+	}
+	id := ""
+	for k, v := range list {
+		if v == name {
+			id = k
+			break
+		}
+	}
+	item.SetID(id)
+	return Read(item)
+}
+
 func Update(item Persistable) error {
 	return Save(item)
 }

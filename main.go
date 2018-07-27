@@ -366,16 +366,21 @@ func createTownHandler(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	cl := &culture.Culture{Name: req.Culture}
+	cl := &culture.Culture{}
+	cl.SetID(req.Culture)
 	if err := cl.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load culture %s: %s", req.Culture, err))
 	}
-	s := &species.Species{Name: req.Species}
+	s := &species.Species{}
+	s.SetID(req.Species)
 	if err := s.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load species %s: %s", req.Species, err))
 	}
 
-	namer := &words.Namer{Name: "english towns"}
+	namer, err := getDefaultNamer()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	if err := namer.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load namer %s: %s", namer.Name, err))
 	}
@@ -435,10 +440,10 @@ func createTownHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, api)
 }
 
-func townNameHandler(c echo.Context) error {
+func getDefaultNamer() (*words.Namer, error) {
 	list, err := persist.List("Namer")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	namerID := ""
 	for k, v := range list {
@@ -450,6 +455,15 @@ func townNameHandler(c echo.Context) error {
 
 	namer := &words.Namer{}
 	namer.SetID(namerID)
+	return namer, nil
+}
+
+func townNameHandler(c echo.Context) error {
+
+	namer, err := getDefaultNamer()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	if err := namer.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

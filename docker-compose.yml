@@ -6,7 +6,7 @@ services:
       - "8003:8003"
     volumes:
       - .:/go/src/github.com/slabgorb/gotown
-      - ./web:./web
+      - ./web:/go/src/github.com/slabgorb/gotown/web
     links:
       - redis
   redis:
@@ -17,5 +17,5 @@ services:
   frontend: 
     build: ./web
     volumes: 
-      - ./web:/app
+      - ./web:/web
 

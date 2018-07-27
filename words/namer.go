@@ -51,24 +51,11 @@ func (n *Namer) Read() error {
 	if err := persist.Read(n); err != nil {
 		return fmt.Errorf("could not read namer: %s", err)
 	}
-	if n.WordsID != "" {
-		wordsList, err := persist.List("Words")
-		if err != nil {
-			return err
-		}
-		for k, v := range wordsList {
-			if v == n.WordsName {
-				n.WordsID = k
-				break
-			}
-		}
-	}
-	w := Words{Name: n.WordsName}
-	w.SetID(n.WordsID)
-	if err := w.Read(); err != nil {
+	w := &Words{}
+	if err := persist.ReadByName(n.WordsName, "Words", w); err != nil {
 		return err
 	}
-	n.Words = &w
+	n.Words = w
 	return nil
 }
 

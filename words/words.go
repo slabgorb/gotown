@@ -103,12 +103,12 @@ func shortFilter(list []string) []string {
 }
 
 func (w *Words) loadBackup() error {
-	backupWords := &Words{IdentifiableImpl: persist.IdentifiableImpl{ID: w.BackupName}}
+	backupWords := &Words{}
 	if w.BackupName == "" {
 		return nil
 	}
-	if err := persist.Read(backupWords); err != nil {
-		return err
+	if err := persist.ReadByName(w.BackupName, "Words", backupWords); err != nil {
+		return fmt.Errorf("could not load backup words %s: %s", w.BackupName, err)
 	}
 	if backupWords == nil {
 		return fmt.Errorf("could not load backup words %s", w.BackupName)

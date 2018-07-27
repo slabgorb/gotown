@@ -94,9 +94,9 @@ func (c *Culture) Read() error {
 
 	c.Namers = make(map[inhabitants.Gender]*words.Namer)
 	for gender, namerName := range c.NamerNames {
-		n := &words.Namer{Name: namerName}
-		if err := n.Read(); err != nil {
-			return fmt.Errorf("could not load namer %s: %s", n.Name, err)
+		n := &words.Namer{}
+		if err := persist.ReadByName(namerName, "Namer", n); err != nil {
+			return fmt.Errorf("could not load namer %s: %s", namerName, err)
 		}
 		c.Namers[gender] = n
 	}
