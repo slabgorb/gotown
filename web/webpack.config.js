@@ -1,17 +1,21 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   entry: {
     app: '/web/src/app.jsx',
   },
   output: {
     filename: 'bundle.js',
-    path: path.join(__dirname, '/web/scripts'),
+    path: '/app/scripts',
   },
   resolve: {
-    modules: [path.resolve('/web'), 'node_modules'],
+    modules: [path.resolve('/app'), 'node_modules'],
     extensions: ['.js', '.jsx'],
 
+  },
+  resolveLoader: {
+    modules: [path.resolve('/app'), 'node_modules'],
   },
   watch: true,
   module: {

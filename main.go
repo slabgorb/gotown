@@ -71,12 +71,12 @@ func defineAPIHandlers(e *echo.Echo) {
 }
 
 func defineStaticHandlers(e *echo.Echo) {
-	e.Static("/fonts", "web/fonts")
-	e.Static("/styles", "web/styles")
-	e.Static("/scripts", "web/scripts")
-	e.Static("/data", "web/data")
-	e.File("/manifest.json", "web/manifest.json")
-	e.File("/", "web")
+	e.Static("/fonts", "/docroot/fonts")
+	e.Static("/styles", "/docroot/styles")
+	e.Static("/scripts", "/docroot/scripts")
+	e.Static("/data", "/docroot/data")
+	e.File("/manifest.json", "/docroot/manifest.json")
+	e.File("/", "/docroot")
 }
 
 func main() {
@@ -266,18 +266,24 @@ type listItem struct {
 }
 
 func listAreasHandler(c echo.Context) error {
+	logger.TimeSet()
 	list, err := persist.List("Area")
+	logger.TimeElapsed("loading area list")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	names := []interface{}{}
-	for _, v := range list {
+	for k, v := range list {
+		logger.TimeSet()
 		a := &locations.Area{}
-		a.SetID(v)
+		a.SetID(k)
+		logger.TimeElapsed(fmt.Sprintf("getting details for list %s", v))
 		if err := a.Read(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		t, err := a.API()
+		logger.TimeSet()
+		t, err := a.ListItemAPI()
+		logger.TimeElapsed(fmt.Sprintf("api for %s", v))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -333,7 +339,7 @@ func renameHandler(c echo.Context) error {
 // 	if err != nil {
 // 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 // 	}
-// 	r, err := os.Open(fmt.Sprintf("./web/data/%s.json", "human"))
+// 	r, err := os.Open(fmt.Sprintf("./docroot/data/%s.json", "human"))
 // 	if err != nil {
 // 		return echo.NewHTTPError(http.StatusInternalServerError, "could not parse json file")
 // 	}
@@ -366,14 +372,12 @@ func createTownHandler(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	cl := &culture.Culture{}
-	cl.SetID(req.Culture)
-	if err := cl.Read(); err != nil {
+	cl := &culture.Culture{Name: req.Culture}
+	if err := persist.ReadByName(cl.Name, "Culture", cl); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load culture %s: %s", req.Culture, err))
 	}
-	s := &species.Species{}
-	s.SetID(req.Species)
-	if err := s.Read(); err != nil {
+	s := &species.Species{Name: req.Species}
+	if err := persist.ReadByName(s.Name, "Species", s); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("could not load species %s: %s", req.Species, err))
 	}
 
@@ -386,7 +390,7 @@ func createTownHandler(c echo.Context) error {
 	}
 
 	area := locations.NewArea(locations.Town, nil, namer)
-
+	logger.TimeSet()
 	if req.Name != "" {
 		area.Name = req.Name
 	}
@@ -406,7 +410,8 @@ func createTownHandler(c echo.Context) error {
 		}(&wg)
 	}
 	wg.Wait()
-
+	logger.TimeElapsed("creation")
+	logger.TimeSet()
 	for i := 0; i < 10; i++ {
 		if err := area.Residents.Age(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed aging population in year  %d: %s", i+1, err))
@@ -424,6 +429,7 @@ func createTownHandler(c echo.Context) error {
 		// 	rc
 		// }
 	}
+	logger.TimeElapsed("aging")
 	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}

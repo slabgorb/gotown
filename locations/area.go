@@ -36,6 +36,14 @@ type AreaAPI struct {
 	Icon      string      `json:"icon"`
 }
 
+type AreaListItem struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Size  string `json:"size"`
+	Image string `json:"image"`
+	Icon  string `json:"icon"`
+}
+
 func (a *Area) API() (interface{}, error) {
 
 	populationAPI, err := a.Residents.API()
@@ -49,6 +57,18 @@ func (a *Area) API() (interface{}, error) {
 		Size:      a.Size.String(),
 		Icon:      a.Heraldry.Icon,
 		Image:     a.Heraldry.Image,
+	}
+	return api, nil
+}
+
+func (a *Area) ListItemAPI() (interface{}, error) {
+
+	api := &AreaListItem{
+		ID:    a.GetID(),
+		Name:  a.Name,
+		Size:  a.Size.String(),
+		Icon:  a.Heraldry.Icon,
+		Image: a.Heraldry.Image,
 	}
 	return api, nil
 }

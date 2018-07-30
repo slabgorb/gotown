@@ -8,6 +8,7 @@ COPY . /go/src/github.com/slabgorb/gotown
 RUN go get -d -v ./...
 RUN go install -v ./...
 RUN go get github.com/codegangsta/gin
+RUN mkdir -p /docroot
 
 CMD gin --port 3001 --appPort 8003 -i run main.go
 

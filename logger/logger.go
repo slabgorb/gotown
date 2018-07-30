@@ -90,17 +90,17 @@ func SetOutput(out io.Writer) {
 
 // Info logs using the default logger as a convenience function
 func Info(format string, v ...interface{}) {
-	Default.Info(format, v)
+	Default.Info(format, v...)
 }
 
 // Debug logs using the default logger as a convenience function
 func Debug(format string, v ...interface{}) {
-	Default.Debug(format, v)
+	Default.Debug(format, v...)
 }
 
 // Error logs using the default logger as a convenience function
 func Error(format string, v ...interface{}) {
-	Default.Error(format, v)
+	Default.Error(format, v...)
 }
 
 // TimeSet resets the 'stopwatch'. It is used to mark elapsed time along with
