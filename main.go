@@ -266,7 +266,7 @@ type listItem struct {
 }
 
 func listAreasHandler(c echo.Context) error {
-	logger.TimeSet()
+	logger.TimeSet("loading area list")
 	list, err := persist.List("Area")
 	logger.TimeElapsed("loading area list")
 	if err != nil {
@@ -274,14 +274,14 @@ func listAreasHandler(c echo.Context) error {
 	}
 	names := []interface{}{}
 	for k, v := range list {
-		logger.TimeSet()
+		logger.TimeSet(fmt.Sprintf("getting details for list %s", v))
 		a := &locations.Area{}
 		a.SetID(k)
 		logger.TimeElapsed(fmt.Sprintf("getting details for list %s", v))
 		if err := a.Read(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		logger.TimeSet()
+		logger.TimeSet(fmt.Sprintf("api for %s", v))
 		t, err := a.ListItemAPI()
 		logger.TimeElapsed(fmt.Sprintf("api for %s", v))
 		if err != nil {
@@ -368,6 +368,7 @@ type townHandlerRequest struct {
 }
 
 func createTownHandler(c echo.Context) error {
+	logger.TimeSet("total town creation")
 	req := new(townHandlerRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -390,7 +391,7 @@ func createTownHandler(c echo.Context) error {
 	}
 
 	area := locations.NewArea(locations.Town, nil, namer)
-	logger.TimeSet()
+	logger.TimeSet("creation")
 	if req.Name != "" {
 		area.Name = req.Name
 	}
@@ -411,11 +412,13 @@ func createTownHandler(c echo.Context) error {
 	}
 	wg.Wait()
 	logger.TimeElapsed("creation")
-	logger.TimeSet()
+	logger.TimeSet("aging")
 	for i := 0; i < 10; i++ {
+		logger.TimeSet(fmt.Sprintf("age %v", i))
 		if err := area.Residents.Age(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed aging population in year  %d: %s", i+1, err))
 		}
+		logger.TimeElapsed(fmt.Sprintf("age %v", i))
 		mcs, err := area.Residents.MaritalCandidates(cl)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed getting marital candidates year  %d: %s", i+1, err))
@@ -430,19 +433,29 @@ func createTownHandler(c echo.Context) error {
 		// }
 	}
 	logger.TimeElapsed("aging")
+	k := fmt.Sprintf("saving %s", area.Name)
+	logger.TimeSet(k)
 	if err := area.Save(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not save created area: %s", err))
 	}
+	logger.TimeElapsed(k)
 	id := area.ID
 	area.Reset()
+	k = fmt.Sprintf("saving %s", area.Name)
+	logger.TimeSet(k)
 	area.ID = id
 	if err := area.Read(); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not read area %d: %s", area.ID, err))
 	}
+	logger.TimeElapsed(k)
+	k = fmt.Sprintf("creating %s", area.Name)
+	logger.TimeSet(k)
 	api, err := area.API()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create area api for %d: %s", area.ID, err))
 	}
+	logger.TimeElapsed(k)
+	logger.TimeElapsed("total town creation")
 	return c.JSON(http.StatusOK, api)
 }
 

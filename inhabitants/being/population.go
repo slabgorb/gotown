@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/logger"
 	"github.com/slabgorb/gotown/persist"
 	"github.com/slabgorb/gotown/timeline"
 )
@@ -13,8 +14,10 @@ import (
 type Population struct {
 	mux sync.Mutex
 	persist.IdentifiableImpl
-	IDS    map[string]struct{} `json:"ids"`
-	logger Logger
+	IDS         map[string]struct{} `json:"ids"`
+	logger      Logger
+	inhabitants []*Being
+	stale       bool
 }
 
 // MaritalCandidate is a pair of being
@@ -145,19 +148,34 @@ func reproduction(p *Population) timeline.Callback {
 
 // Inhabitants returns the beings in the population
 func (p *Population) Inhabitants() ([]*Being, error) {
+	logger.TimeSet("loading inhabitants")
+	if p.stale == false && len(p.inhabitants) > 0 {
+		return p.inhabitants, nil
+	}
 	if p == nil {
 		return nil, fmt.Errorf("nil population")
 	}
 	bs := make([]*Being, p.Len())
-	i := 0
+	// i := 0
+	// for id := range p.IDS {
+	// 	b := &Being{}
+	// 	b.SetID(id)
+	// 	if err := b.Read(); err != nil {
+	// 		return nil, err
+	// 	}
+	// 	bs[i] = b
+	// 	i++
+	// }
+	ids := []string{}
 	for id := range p.IDS {
-		b := &Being{IdentifiableImpl: persist.IdentifiableImpl{ID: id}}
-		if err := b.Read(); err != nil {
-			return nil, err
-		}
-		bs[i] = b
-		i++
+		ids = append(ids, id)
 	}
+	if err := readAll(ids, bs); err != nil {
+		return nil, err
+	}
+	p.inhabitants = bs
+	p.stale = false
+	logger.TimeElapsed("loading inhabitants")
 	return bs, nil
 }
 
@@ -170,6 +188,7 @@ func (p *Population) Age() error {
 	for _, b := range beings {
 		b.Age = b.Age + 1
 	}
+	p.stale = true
 	return saveAll(beings)
 }
 

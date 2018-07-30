@@ -10,6 +10,7 @@ import (
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
 	"github.com/satori/go.uuid"
+	"github.com/slabgorb/gotown/logger"
 )
 
 var DB *pool.Pool
@@ -89,6 +90,38 @@ func Read(i Identifiable) error {
 		err = json.Unmarshal(j, &i)
 		if err != nil {
 			return fmt.Errorf("could not unmarshal json: %s", err)
+		}
+		return nil
+	})
+}
+
+func Mread(ids []string, items map[string]Persistable) error {
+	return getConn(func(conn *redis.Client) error {
+		js, err := conn.Cmd("MGET", ids).Array()
+		if err != nil {
+			return fmt.Errorf("could not mget: %s", err)
+		}
+		for _, r := range js {
+			logger.Debug("%#s", r.String())
+			j, err := r.Bytes()
+			if err != nil {
+				return err
+			}
+
+			type ider struct {
+				ID string `json:"id"`
+			}
+
+			iding := &ider{}
+			err = json.Unmarshal(j, iding)
+			if err != nil {
+				return fmt.Errorf("could not unmarshal json: %s", err)
+			}
+			item := items[iding.ID]
+			err = json.Unmarshal(j, item)
+			if err != nil {
+				return fmt.Errorf("could not unmarshal json: %s", err)
+			}
 		}
 		return nil
 	})

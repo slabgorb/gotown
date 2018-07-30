@@ -20,7 +20,7 @@ const (
 var level = DebugLevel
 var Default Logger
 var defaultOut io.Writer = os.Stdout
-var currentTime = time.Now()
+var currentTime = make(map[string]time.Time)
 
 // Logger is a convenience interface in case packages want to pass around a
 // logger themselves, rather than just using the package level functions.
@@ -29,11 +29,21 @@ type Logger interface {
 	Debug(format string, v ...interface{})
 	Error(format string, v ...interface{})
 	Fatal(format string, v ...interface{})
+	TimeSet(key string)
+	TimeElapsed(key string)
 	SetOutput(out io.Writer)
 }
 
 type logger struct {
 	*log.Logger
+}
+
+func (l logger) TimeSet(key string) {
+	TimeSet(key)
+}
+
+func (l logger) TimeElapsed(key string) {
+	TimeElapsed(key)
 }
 
 // Info logs at the Info level
@@ -51,7 +61,7 @@ func (l logger) Debug(format string, v ...interface{}) {
 		return
 	}
 	l.SetPrefix("DEBUG ")
-	l.Logger.Printf(addReturn(format), v...)
+	l.Logger.Output(2, fmt.Sprintf(addReturn(format), v...))
 }
 
 // Error logs at the Error level
@@ -60,7 +70,7 @@ func (l logger) Error(format string, v ...interface{}) {
 		return
 	}
 	l.SetPrefix("ERROR ")
-	l.Logger.Printf(addReturn(format), v...)
+	l.Logger.Output(2, fmt.Sprintf(addReturn(format), v...))
 }
 
 // Fatal logs at the Fatal level, then crashes and burns with the heat of 1000 suns
@@ -69,7 +79,7 @@ func (l logger) Fatal(format string, v ...interface{}) {
 		return
 	}
 	l.SetPrefix("FATAL ")
-	l.Logger.Printf(addReturn(format), v...)
+	l.Logger.Output(2, fmt.Sprintf(addReturn(format), v...))
 	panic(fmt.Sprintf(format, v))
 }
 
@@ -79,7 +89,7 @@ func (l logger) SetOutput(out io.Writer) {
 
 // New returns a new Logger
 func New(out io.Writer) Logger {
-	return &logger{log.New(out, "", log.Ldate|log.Lshortfile|log.Ltime)}
+	return &logger{log.New(out, "", log.Ldate|log.Ltime)}
 }
 
 // SetOutput sets the output for the default logger
@@ -105,15 +115,15 @@ func Error(format string, v ...interface{}) {
 
 // TimeSet resets the 'stopwatch'. It is used to mark elapsed time along with
 // the TimeElapsed function
-func TimeSet() {
-	currentTime = time.Now()
+func TimeSet(key string) {
+	currentTime[key] = time.Now()
 }
 
 // TimeElapsed messages the duration since the last TimeSet call. It always logs
 // at Debug level.
-func TimeElapsed(name string) {
-	elapsed := time.Since(currentTime)
-	Debug("%s took %s", name, elapsed)
+func TimeElapsed(key string) {
+	elapsed := time.Since(currentTime[key])
+	Debug("%s took %s", key, elapsed)
 }
 
 // SetLogLevel sets the current logging level

@@ -21,6 +21,8 @@ type Logger interface {
 	Debug(format string, v ...interface{})
 	Error(format string, v ...interface{})
 	SetOutput(out io.Writer)
+	TimeSet(key string)
+	TimeElapsed(key string)
 }
 
 var randomizer random.Generator = random.Random
@@ -440,13 +442,75 @@ func (b *Being) AddChildren(ids ...int) {
 }
 
 func saveAll(beings []*Being) error {
-	logger.TimeSet()
+	k := fmt.Sprintf("saving %d beings", len(beings))
+	logger.TimeSet(k)
 	ps := []persist.Persistable{}
 	for _, b := range beings {
 		ps = append(ps, b)
 	}
-	logger.TimeElapsed("save all beings")
+	defer func() { logger.TimeElapsed(k) }()
 	return persist.SaveAll(ps)
+}
+
+func readAll(ids []string, beings []*Being) error {
+	m := make(map[string]*Being)
+	for _, s := range ids {
+		m[s] := &Being{}
+		m[s].SetID(s)
+	}
+	ps := []persist.Persistable{}
+	for _, b := range m {
+		ps = append(ps, b)
+	}
+	if err := persist.Mread(ids, ps); err != nil {
+		return err
+	}
+
+	for _, v := range m {
+		beings = append(beings, v)
+	}
+
+
+	speciesCache := make(map[string]*species.Species)
+	cultureCache := make(map[string]*culture.Culture)
+
+	getSpecies := func(id string) (*species.Species, error) {
+		if s, ok := speciesCache[id]; ok {
+			return s, nil
+		}
+		item := &species.Species{}
+		item.SetID(id)
+		if err := item.Read(); err != nil {
+			return nil, err
+		}
+		return item, nil
+	}
+
+	getCulture := func(id string) (*culture.Culture, error) {
+		if s, ok := cultureCache[id]; ok {
+			return s, nil
+		}
+		item := &culture.Culture{}
+		item.SetID(id)
+		if err := item.Read(); err != nil {
+			return nil, err
+		}
+		return item, nil
+	}
+
+	for _, b := range beings {
+		s, err := getSpecies(b.SpeciesID)
+		if err != nil {
+			return err
+		}
+		c, err := getCulture(b.CultureID)
+		if err != nil {
+			return err
+		}
+		b.Species = s
+		b.Culture = c
+	}
+	return nil
 }
 
 type BeingAPI struct {
