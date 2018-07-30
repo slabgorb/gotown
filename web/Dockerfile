@@ -4,8 +4,8 @@ WORKDIR /web
 COPY . /web
 RUN npm install -g -s --no-progress yarn webpack webpack-cli && \
     cd /web && \
-    yarn install --modules-folder /app/node_modules
-RUN ln -s /app/node_modules /web/node_modules
-RUN ln -s /web/styles /app/styles
-RUN ln -s /web/index.html /app/index.html
+    yarn install --modules-folder /app/node_modules && \
+    ln -s /app/node_modules /web && \
+    ln -s /web/styles /app && \
+    ln -s /web/index.html /app 
 CMD webpack --hot; tail -f /dev/null 
