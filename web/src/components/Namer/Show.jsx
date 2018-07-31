@@ -60,7 +60,7 @@ class Namer extends React.Component {
         this.setState({
           name: s.name,
           id: s.id,
-          wordsName: s.words,
+          wordsID: s.words_id,
           patterns: s.patterns,
           loaded: true,
         });
@@ -78,8 +78,8 @@ class Namer extends React.Component {
       patterns,
       name,
       value,
-      wordsName,
       id,
+      wordsID,
     } = this.state;
     if (!loaded) {
       return (<div>loading</div>);
@@ -94,7 +94,7 @@ class Namer extends React.Component {
         <TabBar onChange={this.handleChange} tabs={['patterns', 'words', 'test']} />
         { value === 0 && patternChips}
         { value === 1 &&
-          (<WordsShow showAppBar={false} match={{ params: { name: wordsName } }} />)
+          (<WordsShow showAppBar={false} match={{ params: { name: wordsID } }} />)
         }
         { value === 2 && (<Random id={id} />)}
       </div>

@@ -24,6 +24,8 @@ func (s stubLogger) Info(format string, v ...interface{})  {}
 func (s stubLogger) Debug(format string, v ...interface{}) {}
 func (s stubLogger) Error(format string, v ...interface{}) {}
 func (s stubLogger) SetOutput(out io.Writer)               {}
+func (s stubLogger) TimeElapsed(f string)                  {}
+func (s stubLogger) TimeSet(f string)                      {}
 
 type beingFixture map[string]*Being
 
