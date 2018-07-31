@@ -149,33 +149,24 @@ func reproduction(p *Population) timeline.Callback {
 // Inhabitants returns the beings in the population
 func (p *Population) Inhabitants() ([]*Being, error) {
 	logger.TimeSet("loading inhabitants")
+	defer func() { logger.TimeElapsed("loading inhabitants") }()
 	if p.stale == false && len(p.inhabitants) > 0 {
 		return p.inhabitants, nil
 	}
 	if p == nil {
 		return nil, fmt.Errorf("nil population")
 	}
-	bs := make([]*Being, p.Len())
-	// i := 0
-	// for id := range p.IDS {
-	// 	b := &Being{}
-	// 	b.SetID(id)
-	// 	if err := b.Read(); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	bs[i] = b
-	// 	i++
-	// }
 	ids := []string{}
 	for id := range p.IDS {
 		ids = append(ids, id)
 	}
-	if err := readAll(ids, bs); err != nil {
+	bs, err := readAll(ids)
+	if err != nil {
 		return nil, err
 	}
 	p.inhabitants = bs
+	logger.Debug("population %d", len(bs))
 	p.stale = false
-	logger.TimeElapsed("loading inhabitants")
 	return bs, nil
 }
 
@@ -204,6 +195,7 @@ func (p *Population) addID(id string) bool {
 	if !found {
 		p.IDS[id] = struct{}{}
 	}
+	p.stale = true
 	return !found
 }
 

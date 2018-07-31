@@ -452,24 +452,27 @@ func saveAll(beings []*Being) error {
 	return persist.SaveAll(ps)
 }
 
-func readAll(ids []string, beings []*Being) error {
+func readAll(ids []string) ([]*Being, error) {
+	beings := []*Being{}
 	m := make(map[string]*Being)
 	for _, s := range ids {
-		m[s] := &Being{}
+		m[s] = &Being{}
 		m[s].SetID(s)
 	}
-	ps := []persist.Persistable{}
-	for _, b := range m {
-		ps = append(ps, b)
+	ps := make(map[string]persist.Persistable)
+	for k, v := range m {
+		ps[k] = v
 	}
+	logger.TimeSet("mread")
 	if err := persist.Mread(ids, ps); err != nil {
-		return err
+		return nil, err
 	}
+	logger.TimeElapsed("mread")
 
-	for _, v := range m {
-		beings = append(beings, v)
+	for _, v := range ps {
+		b := v.(*Being)
+		beings = append(beings, b)
 	}
-
 
 	speciesCache := make(map[string]*species.Species)
 	cultureCache := make(map[string]*culture.Culture)
@@ -483,6 +486,7 @@ func readAll(ids []string, beings []*Being) error {
 		if err := item.Read(); err != nil {
 			return nil, err
 		}
+		speciesCache[id] = item
 		return item, nil
 	}
 
@@ -495,22 +499,24 @@ func readAll(ids []string, beings []*Being) error {
 		if err := item.Read(); err != nil {
 			return nil, err
 		}
+		cultureCache[id] = item
 		return item, nil
 	}
-
+	logger.TimeSet("getting species/culture")
 	for _, b := range beings {
 		s, err := getSpecies(b.SpeciesID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		c, err := getCulture(b.CultureID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		b.Species = s
 		b.Culture = c
 	}
-	return nil
+	logger.TimeElapsed("getting species/culture")
+	return beings, nil
 }
 
 type BeingAPI struct {

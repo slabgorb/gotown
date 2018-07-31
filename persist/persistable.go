@@ -10,7 +10,6 @@ import (
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
 	"github.com/satori/go.uuid"
-	"github.com/slabgorb/gotown/logger"
 )
 
 var DB *pool.Pool
@@ -102,7 +101,6 @@ func Mread(ids []string, items map[string]Persistable) error {
 			return fmt.Errorf("could not mget: %s", err)
 		}
 		for _, r := range js {
-			logger.Debug("%#s", r.String())
 			j, err := r.Bytes()
 			if err != nil {
 				return err
