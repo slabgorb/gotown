@@ -74,7 +74,6 @@ func defineStaticHandlers(e *echo.Echo) {
 	e.Static("/fonts", "/docroot/fonts")
 	e.Static("/styles", "/docroot/styles")
 	e.Static("/scripts", "/docroot/scripts")
-	e.Static("/data", "/docroot/data")
 	e.File("/manifest.json", "/docroot/manifest.json")
 	e.File("/", "/docroot")
 }

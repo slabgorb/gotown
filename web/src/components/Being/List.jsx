@@ -9,6 +9,7 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import inflection from 'inflection';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 
 const styles = () => ({
   root: {},
@@ -47,6 +48,7 @@ class List extends React.Component {
     this.header = this.header.bind(this);
     this.headers = this.headers.bind(this);
     this.handleChangeSortFactory = this.handleChangeSortFactory.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleChangePage(event, page) {
@@ -63,6 +65,13 @@ class List extends React.Component {
         {headerEntries.map(he => this.header(he))}
       </TableRow>
     );
+  }
+
+  handleClick(value) {
+    const { history } = this.props;
+    return () => {
+      history.push(`/beings/${value}`);
+    };
   }
 
   handleChangeSortFactory(orderBy) {
@@ -104,7 +113,7 @@ class List extends React.Component {
     beings.sort(sorter(orderBy, dir));
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, (beings.length - page) * rowsPerPage);
     const table = beings.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(b => (
-      <TableRow key={b.id}>
+      <TableRow onClick={this.handleClick(b.id)} key={b.id}>
         <TableCell>{b.name}</TableCell>
         <TableCell>{inflection.titleize(b.gender)}</TableCell>
         <TableCell>{b.age}</TableCell>
@@ -145,7 +154,8 @@ class List extends React.Component {
 
 
 List.propTypes = {
+  history: PropTypes.object.isRequired,
   beings: PropTypes.array.isRequired,
 };
 
-export default withStyles(styles)(List);
+export default withRouter(withStyles(styles)(List));

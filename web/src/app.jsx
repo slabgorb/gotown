@@ -7,6 +7,7 @@ import { applyMiddleware, createStore } from 'redux';
 import thunk from 'redux-thunk';
 import { App, Home } from './components/App';
 import { AreaShow, TownForm } from './components/Area';
+import { BeingShow } from './components/Being';
 import { CulturesShow } from './components/Culture';
 import { NamersShow } from './components/Namer';
 import { SpeciesShow } from './components/Species';
@@ -30,6 +31,7 @@ render(
             <Route exact path="/cultures/:id" component={CulturesShow} />
             <Route exact path="/create/town" component={TownForm} />
             <Route exact path="/towns/:id" component={AreaShow} />
+            <Route exact path="/beings/:id" component={BeingShow} />
           </App>
         </BrowserRouter>
       </Provider>
