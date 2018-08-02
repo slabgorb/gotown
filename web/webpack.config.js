@@ -18,6 +18,11 @@ module.exports = {
     modules: [path.resolve('/app'), 'node_modules'],
   },
   watch: true,
+  devServer: {
+    contentBase: path.join(__dirname, 'script'),
+    compress: true,
+    port: 9090,
+  },
   module: {
     rules: [
       {
