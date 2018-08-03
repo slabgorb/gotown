@@ -25,6 +25,10 @@ type MaritalCandidate struct {
 	male, female *Being
 }
 
+func (m *MaritalCandidate) String() string {
+	return fmt.Sprintf("%s <-> %s", m.female.String(), m.male.String())
+}
+
 // ReproductionCandidate blah blah (maybe should be unexported)
 type ReproductionCandidate struct {
 	b     *Being
@@ -290,12 +294,15 @@ func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) 
 	females, _ := p.ByGender(inhabitants.Female)
 	// loop through the population, taking each member and looking for candidates
 	maritalStrategies := c.GetMaritalStrategies()
+	logger.Debug("%#v", maritalStrategies)
 	for _, a := range males {
 		for _, b := range females {
 			m := MaritalCandidate{male: a, female: b}
+			logger.Debug("%s", m.String())
 			if _, ok := mc[m]; ok {
 				continue
 			}
+			mc[m] = true
 			for _, f := range maritalStrategies {
 				mc[m] = mc[m] && f(a, b)
 			}
@@ -305,7 +312,6 @@ func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) 
 	for k, v := range mc {
 		if v {
 			result = append(result, &k)
-
 		}
 	}
 	return result, nil

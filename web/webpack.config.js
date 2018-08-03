@@ -7,22 +7,17 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: '/app/scripts',
+    path: '/web/scripts',
   },
   resolve: {
-    modules: [path.resolve('/app'), 'node_modules'],
+    modules: ['/web/node_modules'],
     extensions: ['.js', '.jsx'],
 
   },
   resolveLoader: {
-    modules: [path.resolve('/app'), 'node_modules'],
+    modules: ['/web/node_modules'],
   },
   watch: true,
-  devServer: {
-    contentBase: path.join(__dirname, 'script'),
-    compress: true,
-    port: 9090,
-  },
   module: {
     rules: [
       {
