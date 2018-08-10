@@ -76,6 +76,7 @@ func defineStaticHandlers(e *echo.Echo) {
 	e.Static("/scripts", "/docroot/scripts")
 	e.File("/manifest.json", "/docroot/manifest.json")
 	e.File("/", "/docroot")
+	e.Static("/favicon.ico", "/docroot/favicon.ico")
 }
 
 func main() {
