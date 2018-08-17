@@ -20,15 +20,6 @@ type Population struct {
 	stale       bool
 }
 
-// MaritalCandidate is a pair of being
-type MaritalCandidate struct {
-	male, female *Being
-}
-
-func (m *MaritalCandidate) String() string {
-	return fmt.Sprintf("%s <-> %s", m.female.String(), m.male.String())
-}
-
 // ReproductionCandidate blah blah (maybe should be unexported)
 type ReproductionCandidate struct {
 	b     *Being
@@ -38,11 +29,6 @@ type ReproductionCandidate struct {
 // String implements fmt.Stringer
 func (rc ReproductionCandidate) String() string {
 	return fmt.Sprintf("%s (score %f)", rc.b, rc.score)
-}
-
-// Pair returns the underlying beings of a marital candidate pair
-func (mc *MaritalCandidate) Pair() (*Being, *Being) {
-	return mc.male, mc.female
 }
 
 // NewPopulation initializes a Population
@@ -286,6 +272,18 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 
 type maritalStrategy func(a, b Marriageable) bool
 
+func contains(mc []*MaritalCandidate, blist ...*Being) bool {
+	logger.Debug("%d", len(mc))
+	for _, k := range mc {
+		for _, b := range blist {
+			if k.Contains(b) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // MaritalCandidates scans the population for potential candidates for marrying
 // one another.
 func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) {
@@ -294,23 +292,20 @@ func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) 
 	females, _ := p.ByGender(inhabitants.Female)
 	// loop through the population, taking each member and looking for candidates
 	maritalStrategies := c.GetMaritalStrategies()
-	logger.Debug("%#v", maritalStrategies)
 	for _, a := range males {
 		for _, b := range females {
 			m := MaritalCandidate{male: a, female: b}
-			logger.Debug("%s", m.String())
-			if _, ok := mc[m]; ok {
-				continue
-			}
 			mc[m] = true
 			for _, f := range maritalStrategies {
-				mc[m] = mc[m] && f(a, b)
+				mc[m] = mc[m] && f(m.male, m.female)
 			}
 		}
 	}
+
 	result := []*MaritalCandidate{}
-	for k, v := range mc {
-		if v {
+	for k := range mc {
+		if mc[k] && !contains(result, k.female) {
+			logger.Debug("%s", k.String())
 			result = append(result, &k)
 		}
 	}

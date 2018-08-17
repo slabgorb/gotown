@@ -16,6 +16,7 @@ import (
 	"github.com/slabgorb/gotown/words"
 )
 
+// Logger is a logging interface (TODO: am I really using this?)
 type Logger interface {
 	Info(format string, v ...interface{})
 	Debug(format string, v ...interface{})
@@ -102,6 +103,7 @@ func getBeingsFromIDS(IDS []string) ([]*Being, error) {
 	return beings, nil
 }
 
+// GetParents returns the parents for this being
 func (b *Being) GetParents() ([]*Being, error) {
 	return getBeingsFromIDS(b.Parents)
 }
@@ -115,6 +117,7 @@ func (b *Being) getSpouses() ([]*Being, error) {
 	return getBeingsFromIDS(b.Spouses)
 }
 
+// GetNamer returns the namer for this being from the associated culture
 func (b *Being) GetNamer() *words.Namer {
 	return b.Culture.GetNamers()[b.Gender]
 }
@@ -153,17 +156,17 @@ func (b *Being) Read() error {
 		return fmt.Errorf("cannot read being without id")
 	}
 	if err := persist.Read(b); err != nil {
-		return fmt.Errorf("could not load being %d: %s", b.ID, err)
+		return fmt.Errorf("could not load being %s: %s", b.ID, err)
 	}
 	b.Species = &species.Species{}
 	b.Species.SetID(b.SpeciesID)
 	if err := persist.Read(b.Species); err != nil {
-		return fmt.Errorf("could not load species %s for being %d: %s", b.SpeciesID, b.ID, err)
+		return fmt.Errorf("could not load species %s for being %s: %s", b.SpeciesID, b.ID, err)
 	}
 	b.Culture = &culture.Culture{}
 	b.Culture.SetID(b.CultureID)
 	if err := persist.Read(b.Culture); err != nil {
-		return fmt.Errorf("could not load culture %s for being %d: %s", b.CultureID, b.ID, err)
+		return fmt.Errorf("could not load culture %s for being %s: %s", b.CultureID, b.ID, err)
 	}
 	return nil
 }
