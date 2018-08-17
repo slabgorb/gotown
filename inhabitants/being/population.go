@@ -272,8 +272,7 @@ func (p *Population) ReproductionCandidates() []*ReproductionCandidate {
 
 type maritalStrategy func(a, b Marriageable) bool
 
-func contains(mc []*MaritalCandidate, blist ...*Being) bool {
-	logger.Debug("%d", len(mc))
+func contains(mc []MaritalCandidate, blist ...*Being) bool {
 	for _, k := range mc {
 		for _, b := range blist {
 			if k.Contains(b) {
@@ -286,7 +285,7 @@ func contains(mc []*MaritalCandidate, blist ...*Being) bool {
 
 // MaritalCandidates scans the population for potential candidates for marrying
 // one another.
-func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) {
+func (p *Population) MaritalCandidates(c Cultured) ([]MaritalCandidate, error) {
 	mc := make(map[MaritalCandidate]bool)
 	males, _ := p.ByGender(inhabitants.Male)
 	females, _ := p.ByGender(inhabitants.Female)
@@ -301,12 +300,10 @@ func (p *Population) MaritalCandidates(c Cultured) ([]*MaritalCandidate, error) 
 			}
 		}
 	}
-
-	result := []*MaritalCandidate{}
+	result := []MaritalCandidate{}
 	for k := range mc {
 		if mc[k] && !contains(result, k.female) {
-			logger.Debug("%s", k.String())
-			result = append(result, &k)
+			result = append(result, k)
 		}
 	}
 	return result, nil

@@ -11,7 +11,6 @@ func TestContains(t *testing.T) {
 	adam := bf["adam"]
 	eve := bf["eve"]
 	mc := NewMaritalCandidate(adam, eve)
-	t.Log(mc)
 	cain := bf["cain"]
 	if mc.Contains(cain) {
 		t.Error("failed, should not contain Cain")

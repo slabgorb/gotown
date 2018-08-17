@@ -423,12 +423,11 @@ func createTownHandler(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed getting marital candidates year  %d: %s", i+1, err))
 		}
-		logger.Debug("%d", len(mcs))
-		// for _, mc := range mcs {
-		// 	a, b := mc.Pair()
-		// 	logger.Debug("%s <-> %s", a, b)
-		// 	//a.Marry(b)
-		// }
+		for _, mc := range mcs {
+			a, b := mc.Pair()
+			logger.Debug("%s <-> %s", a, b)
+			a.Marry(b)
+		}
 		// rcs := area.Residents.ReproductionCandidates()
 		// for _, rc := range rcs {
 		// 	rc
