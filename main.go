@@ -70,6 +70,16 @@ func defineAPIHandlers(e *echo.Echo) {
 
 }
 
+func definePassthroughHandlers(e *echo.Echo) {
+	e.File("/towns/:id", "/docroot/index.html")
+	e.File("/cultures/:id", "/docroot/index.html")
+	e.File("/species/:id", "/docroot/index.html")
+	e.File("/beings/:id", "/docroot/index.html")
+	e.File("/words/:id", "/docroot/index.html")
+	e.File("/namers/:id", "/docroot/index.html")
+
+}
+
 func defineStaticHandlers(e *echo.Echo) {
 	e.Static("/fonts", "/docroot/fonts")
 	e.Static("/styles", "/docroot/styles")
@@ -89,6 +99,7 @@ func main() {
 	e := echo.New()
 	defineAPIHandlers(e)
 	defineStaticHandlers(e)
+	definePassthroughHandlers(e)
 
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize: 6 << 10,
