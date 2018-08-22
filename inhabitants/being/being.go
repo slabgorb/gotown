@@ -529,13 +529,18 @@ type BeingAPI struct {
 	SpeciesID   string            `json:"species_id"`
 	CultureName string            `json:"culture"`
 	CultureID   string            `json:"culture_id"`
-	Parents     []string          `json:"parents"`
-	Children    []string          `json:"children"`
-	Spouses     []string          `json:"spouses"`
+	Parents     []BeingAPIPair    `json:"parents"`
+	Children    []BeingAPIPair    `json:"children"`
+	Spouses     []BeingAPIPair    `json:"spouses"`
 	Gender      string            `json:"gender"`
 	Age         int               `json:"age"`
 	Chromosome  string            `json:"chromosome"`
 	Expression  map[string]string `json:"expression"`
+}
+
+type BeingAPIPair struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func getStrings(beings []*Being) []string {
@@ -544,6 +549,14 @@ func getStrings(beings []*Being) []string {
 		display = append(display, b.Name.GetDisplay())
 	}
 	return display
+}
+
+func getAPIPairs(beings []*Being) []BeingAPIPair {
+	result := []BeingAPIPair{}
+	for _, b := range beings {
+		result = append(result, BeingAPIPair{Name: b.Name.GetDisplay(), ID: b.ID})
+	}
+	return result
 }
 
 func (b *Being) API() (interface{}, error) {
@@ -562,9 +575,9 @@ func (b *Being) API() (interface{}, error) {
 	expression := b.Expression()
 	return &BeingAPI{
 		ID:          b.ID,
-		Parents:     getStrings(parents),
-		Children:    getStrings(children),
-		Spouses:     getStrings(spouses),
+		Parents:     getAPIPairs(parents),
+		Children:    getAPIPairs(children),
+		Spouses:     getAPIPairs(spouses),
 		Name:        b.Name.GetDisplay(),
 		SpeciesName: b.Species.Name,
 		SpeciesID:   b.Species.ID,
