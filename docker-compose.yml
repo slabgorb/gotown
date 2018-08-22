@@ -18,6 +18,8 @@ services:
     build: ./web
     volumes: 
       - ./web:/web
+    ports: 
+      - "35729:35729"
 
 
 
