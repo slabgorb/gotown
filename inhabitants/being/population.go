@@ -20,12 +20,6 @@ type Population struct {
 	stale       bool
 }
 
-// ReproductionCandidate blah blah (maybe should be unexported)
-type ReproductionCandidate struct {
-	b     *Being
-	score float64
-}
-
 // String implements fmt.Stringer
 func (rc ReproductionCandidate) String() string {
 	return fmt.Sprintf("%s (score %f)", rc.b, rc.score)
