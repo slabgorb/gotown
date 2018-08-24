@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -20,7 +21,28 @@ const (
 var level = DebugLevel
 var Default Logger
 var defaultOut io.Writer = os.Stdout
-var currentTime = make(map[string]time.Time)
+var currentTime = newCurrentTimeHolder()
+
+type currentTimeHolder struct {
+	mux         sync.Mutex
+	currentTime map[string]time.Time
+}
+
+func newCurrentTimeHolder() *currentTimeHolder {
+	return &currentTimeHolder{
+		currentTime: make(map[string]time.Time),
+	}
+}
+
+func (ct *currentTimeHolder) setTime(key string) {
+	ct.mux.Lock()
+	ct.currentTime[key] = time.Now()
+	ct.mux.Unlock()
+}
+
+func (ct *currentTimeHolder) getTimeSince(key string) time.Duration {
+	return time.Since(ct.currentTime[key])
+}
 
 // Logger is a convenience interface in case packages want to pass around a
 // logger themselves, rather than just using the package level functions.
@@ -116,13 +138,13 @@ func Error(format string, v ...interface{}) {
 // TimeSet resets the 'stopwatch'. It is used to mark elapsed time along with
 // the TimeElapsed function
 func TimeSet(key string) {
-	currentTime[key] = time.Now()
+	currentTime.setTime(key)
 }
 
-// TimeElapsed messages the duration since the last TimeSet call. It always logs
-// at Debug level.
+// TimeElapsed messages the duration since the last TimeSet call. It always log s
+// at Debug level. NOT THREADSAFE
 func TimeElapsed(key string) {
-	elapsed := time.Since(currentTime[key])
+	elapsed := currentTime.getTimeSince(key)
 	Debug("%s took %s", key, elapsed)
 }
 
