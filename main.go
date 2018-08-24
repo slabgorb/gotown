@@ -277,24 +277,18 @@ type listItem struct {
 }
 
 func listAreasHandler(c echo.Context) error {
-	logger.TimeSet("loading area list")
 	list, err := persist.List("Area")
-	logger.TimeElapsed("loading area list")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	names := []interface{}{}
-	for k, v := range list {
-		logger.TimeSet(fmt.Sprintf("getting details for list %s", v))
+	for k := range list {
 		a := &locations.Area{}
 		a.SetID(k)
-		logger.TimeElapsed(fmt.Sprintf("getting details for list %s", v))
 		if err := a.Read(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		logger.TimeSet(fmt.Sprintf("api for %s", v))
 		t, err := a.ListItemAPI()
-		logger.TimeElapsed(fmt.Sprintf("api for %s", v))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -439,10 +433,11 @@ func createTownHandler(c echo.Context) error {
 			logger.Debug("%s <-> %s", a, b)
 			a.Marry(b)
 		}
-		// rcs := area.Residents.ReproductionCandidates()
-		// for _, rc := range rcs {
-		// 	rc
-		// }
+		rcs := area.Residents.ReproductionCandidates()
+		logger.Debug("%#v", rcs)
+		for _, rc := range rcs {
+			logger.Debug("%s %f", rc.Being().String(), rc.Score())
+		}
 	}
 	logger.TimeElapsed("aging")
 	k := fmt.Sprintf("saving %s", area.Name)
