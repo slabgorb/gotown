@@ -40,7 +40,7 @@ class Show extends React.Component {
   }
 
   componentDidMount() {
-
+    this.clickRandomChromosome()
   }
 
   getExpression() {
