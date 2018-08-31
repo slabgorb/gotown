@@ -86,7 +86,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, b := range beings {
 		if !p.Exists(b) {
-			t.Errorf("expected being %d to exist in population", b.ID)
+			t.Errorf("expected being %s to exist in population", b.ID)
 		}
 	}
 }

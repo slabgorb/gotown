@@ -113,7 +113,7 @@ func (b *Being) GetChildren() ([]*Being, error) {
 	return getBeingsFromIDS(b.Children)
 }
 
-func (b *Being) getSpouses() ([]*Being, error) {
+func (b *Being) GetSpouses() ([]*Being, error) {
 	return getBeingsFromIDS(b.Spouses)
 }
 
@@ -233,8 +233,9 @@ func (b *Being) RandomizeGender() {
 
 // RandomizeName creates a new random name based on the being's culture.
 func (b *Being) RandomizeName() {
-	namer := b.Culture.GetNamers()[b.Sex()]
+	namer := b.GetNamer()
 	b.Name = NameStrategies[namer.NameStrategy](b)
+	logger.Debug("%#V", b.Name)
 }
 
 // RandomizeChromosome randomizes the being's chromosome.
@@ -395,8 +396,12 @@ func (b *Being) Reproduce(with *Being) (*Being, error) {
 		return nil, fmt.Errorf("Being %s cannot reproduce asexually", b)
 	}
 	child := New(b.Species, b.Culture, b.logger)
+	child.Species = b.Species
+	child.Culture = b.Culture
 	child.Parents = []string{b.ID, with.ID}
-	child.Randomize()
+	child.RandomizeGender()
+	child.RandomizeName()
+	logger.Debug("%#V", child.Name)
 	child.Age = 0
 	child.PopulationID = b.PopulationID
 	chromosome, err := b.Chromosome.Combine(with.Chromosome)
@@ -409,6 +414,8 @@ func (b *Being) Reproduce(with *Being) (*Being, error) {
 	}
 	b.Children = append(b.Children, child.ID)
 	with.Children = append(with.Children, child.ID)
+	b.Save()
+	with.Save()
 	return child, nil
 }
 
@@ -445,13 +452,10 @@ func (b *Being) AddChildren(ids ...int) {
 }
 
 func saveAll(beings []*Being) error {
-	k := fmt.Sprintf("saving %d beings", len(beings))
-	logger.TimeSet(k)
 	ps := []persist.Persistable{}
 	for _, b := range beings {
 		ps = append(ps, b)
 	}
-	defer func() { logger.TimeElapsed(k) }()
 	return persist.SaveAll(ps)
 }
 
@@ -466,11 +470,9 @@ func readAll(ids []string) ([]*Being, error) {
 	for k, v := range m {
 		ps[k] = v
 	}
-	logger.TimeSet("mread")
 	if err := persist.Mread(ids, ps); err != nil {
 		return nil, err
 	}
-	logger.TimeElapsed("mread")
 
 	for _, v := range ps {
 		b := v.(*Being)
@@ -505,7 +507,6 @@ func readAll(ids []string) ([]*Being, error) {
 		cultureCache[id] = item
 		return item, nil
 	}
-	logger.TimeSet("getting species/culture")
 	for _, b := range beings {
 		s, err := getSpecies(b.SpeciesID)
 		if err != nil {
@@ -518,7 +519,6 @@ func readAll(ids []string) ([]*Being, error) {
 		b.Species = s
 		b.Culture = c
 	}
-	logger.TimeElapsed("getting species/culture")
 	return beings, nil
 }
 
@@ -568,7 +568,7 @@ func (b *Being) API() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	spouses, err := b.getSpouses()
+	spouses, err := b.GetSpouses()
 	if err != nil {
 		return nil, err
 	}

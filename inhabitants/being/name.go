@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/slabgorb/gotown/inhabitants"
+	"github.com/slabgorb/gotown/logger"
 	"github.com/slabgorb/gotown/words"
 )
 
@@ -85,7 +86,10 @@ var NameStrategies = map[string]NameStrategy{
 			return name
 		}
 		name.FamilyName = namer.Words.FamilyName()
-		display, _ := namer.Execute(name)
+		display, err := namer.Execute(name)
+		if err != nil {
+			logger.Error("Error executing template: %s", err.Error())
+		}
 		name.Display = display
 		return name
 	},

@@ -319,7 +319,7 @@ func showAreaHandler(c echo.Context) error {
 	}
 	api, err := a.API()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load api for area %d: %s", a.ID, err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not load api for area %s: %s", a.ID, err))
 	}
 	return c.JSON(http.StatusOK, api)
 }
@@ -434,11 +434,23 @@ func createTownHandler(c echo.Context) error {
 			a.Marry(b)
 		}
 		rcs := area.Residents.ReproductionCandidates()
-		logger.Debug("%#v", rcs)
 		for _, rc := range rcs {
-			logger.Debug("%s %f", rc.Being().String(), rc.Score())
+			if rc.Score() > 0.15 {
+				logger.Debug("thinking of having a child")
+				spouses, _ := rc.Being().GetSpouses()
+				if len(spouses) > 0 {
+					logger.Debug("%s and %s  having a child", rc.Being().String(), spouses[0].String())
+
+					child, err := rc.Being().Reproduce(spouses[0])
+					if err != nil {
+						return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed reproducing %s: %s", rc.Being().String(), err))
+					}
+					area.Residents.Add(child)
+				}
+			}
 		}
 	}
+
 	logger.TimeElapsed("aging")
 	k := fmt.Sprintf("saving %s", area.Name)
 	logger.TimeSet(k)
@@ -452,14 +464,14 @@ func createTownHandler(c echo.Context) error {
 	logger.TimeSet(k)
 	area.ID = id
 	if err := area.Read(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not read area %d: %s", area.ID, err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not read area %s: %s", area.ID, err))
 	}
 	logger.TimeElapsed(k)
 	k = fmt.Sprintf("creating %s", area.Name)
 	logger.TimeSet(k)
 	api, err := area.API()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create area api for %d: %s", area.ID, err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("could not create area api for %s: %s", area.ID, err))
 	}
 	logger.TimeElapsed(k)
 	logger.TimeElapsed("total town creation")

@@ -59,6 +59,7 @@ func testMainWrapped(m *testing.M) int {
 	words.Seed()
 	species.Seed()
 	culture.Seed()
+	words.SetRandomizer(random.NewMock())
 	if err := persist.ReadByName(testCulture.Name, "Culture", testCulture); err != nil {
 		list, _ := culture.List()
 		panic(fmt.Sprintf("could not load test culture %s, have %#v: %s", testCulture.Name, list, err))
@@ -134,10 +135,10 @@ func TestMain(m *testing.M) {
 	os.Exit(testMainWrapped(m))
 }
 
-func TestName(t *testing.T) {
+func testName(t *testing.T) {
 	expected := "Leone Giovanelli"
 	being := &Being{Species: testSpecies, Culture: testCulture, Gender: inhabitants.Male}
-	words.SetRandomizer(random.NewMock())
+
 	being.RandomizeName()
 	if being.Sex() != inhabitants.Male {
 		t.Errorf("Expected Male got %s", being.Sex())
@@ -147,29 +148,33 @@ func TestName(t *testing.T) {
 	}
 }
 
-func TestInheritedName(t *testing.T) {
-	m := New(testSpecies, testCulture, stubLogger{})
-	m.Gender = inhabitants.Male
+func testInheritedName(t *testing.T) {
+	m := &Being{Species: testSpecies, Culture: testCulture, Gender: inhabitants.Male}
 	m.RandomizeName()
+	m.RandomizeChromosome()
 	if err := m.Save(); err != nil {
 		t.Fatal(err)
 	}
-	f := New(testSpecies, testCulture, stubLogger{})
-	f.Gender = inhabitants.Female
+	f := &Being{Species: testSpecies, Culture: testCulture, Gender: inhabitants.Female}
 	f.RandomizeName()
+	f.RandomizeChromosome()
 	if err := f.Save(); err != nil {
 		t.Fatal(err)
+	}
+	nmr := f.GetNamer()
+	if nmr == nil {
+		t.Errorf("no namer for f")
 	}
 	child, err := f.Reproduce(m)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
-	if child.Name.GetFamilyName() != f.Name.GetFamilyName() {
+	if child.Name.GetFamilyName() != f.Name.GetFamilyName() || (child.String() == "") {
 		t.Errorf("expected %s got %s", f.Name.GetFamilyName(), child.Name.GetFamilyName())
 	}
 }
 
-func TestSiblings(t *testing.T) {
+func testSiblings(t *testing.T) {
 	bf := beingFixtures
 	bf["adam"].Marry(bf["eve"])
 	bf["adam"].Children = []string{bf["cain"].ID, bf["abel"].ID}
@@ -195,7 +200,7 @@ func TestSiblings(t *testing.T) {
 	}
 }
 
-func TestParents(t *testing.T) {
+func testParents(t *testing.T) {
 	bf := beingFixtures
 	bf["adam"].Marry(bf["eve"])
 	bf["adam"].Children = []string{bf["cain"].ID, bf["abel"].ID}
@@ -257,6 +262,10 @@ func TestRepro(t *testing.T) {
 
 	if child.ID == "" {
 		t.Errorf("expected child to have a non-empty id")
+	}
+
+	if child.String() == "" {
+		t.Errorf("I went through the desert with a horse with no name")
 	}
 
 	for _, g := range child.Chromosome.Genes {
