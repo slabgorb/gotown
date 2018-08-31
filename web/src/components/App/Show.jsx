@@ -4,7 +4,6 @@ import React from 'react';
 
 
 const ralewayFF = ({ fontFamily: 'Raleway' });
-const montserratFF = ({ fontFamily: 'Montserrat' });
 
 const styles = () => ({
   flex: { flex: 1 },
@@ -41,8 +40,8 @@ const theme = createMuiTheme({
     display3: ralewayFF,
     display4: ralewayFF,
     caption: ralewayFF,
-    headline: montserratFF,
-    title: montserratFF,
+    headline: ralewayFF,
+    title: ralewayFF,
   },
 });
 
