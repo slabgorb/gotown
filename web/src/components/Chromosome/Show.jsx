@@ -51,7 +51,7 @@ class Show extends React.Component {
 
   changeGene(index) {
     if (this.state.changing) {
-      return () => {};
+      return () => { };
     }
     const f = (event) => {
       const { value } = event.target;
@@ -83,65 +83,66 @@ class Show extends React.Component {
       .then(() => this.setState({ changing: false }));
   }
   render() {
-    const { classes } = this.props;
+    const { classes, traits } = this.props;
     return (
-
       <Grid
         container
         spacing={24}
         className={classes.root}
-        justify="center"
+        xs={9}
+        sm={9}
+        lg={9}
       >
-        <Grid item xs={12}>
-          <Grid container>
-            <Grid item xs={2} sm={1}>
-              <IconButton
-                className={classes.avatar}
-                onClick={this.clickRandomChromosome}
-                onKeyUp={this.checkHex}
-              >
-                <AutoRenewIcon />
-              </IconButton>
-            </Grid>
-            <Grid item xs={10} sm={8} className={classes.chromosomeFull}>
-              <div className="gene-table">
-                { this.state.genes.length > 0
-                  ? this.state.genes.map((g, i) => (
-                    <Button
-                      onClick={this.clickGeneInMap(i)}
-                      className="gene"
-                      style={{
-                        borderBottomColor: `#${g}`,
-                        borderBottomWidth: '2px',
-                        borderBottomStyle: 'solid',
-                      }}
-                      key={g}
-                    >
-                      {g}
-                    </Button>))
-                  : ''
-                }
-              </div>
-            </Grid>
+        <Grid container item xs={12}>
+          <Grid item xs={2} sm={1}>
+            <IconButton
+              className={classes.avatar}
+              onClick={this.clickRandomChromosome}
+              onKeyUp={this.checkHex}
+            >
+              <AutoRenewIcon />
+            </IconButton>
+          </Grid>
+          <Grid item xs={10} sm={8} className={classes.chromosomeFull}>
+            <div className="gene-table">
+              {this.state.genes.length == 0 ? "" :
+                this.state.genes.map((g, i) => (
+                  <Button
+                    onClick={this.clickGeneInMap(i)}
+                    className="gene"
+                    style={{
+                      borderBottomColor: `#${g}`,
+                      borderBottomWidth: '2px',
+                      borderBottomStyle: 'solid',
+                    }}
+                    key={g}
+                  >
+                    {g}
+                  </Button>))
+              }
+            </div>
           </Grid>
         </Grid>
-        <Grid item xs={12} sm={2}>
-          <FormControl>
-            <FormLabel label="check genetics" />
-            { _.map(this.state.genes, (g, i) => (
-              <Gene
-                value={g}
-                key={i}
-                hasFocus={i === this.state.focusedGene}
-                onChange={this.changeGene(i)}
-              />
-            ))}
-          </FormControl>
+        <Grid container xs={12}>
+          <Grid item xs={4} sm={3}>
+            <FormControl>
+              <FormLabel label="check genetics" />
+              {_.map(this.state.genes, (g, i) => (
+                <Gene
+                  value={g}
+                  key={i}
+                  hasFocus={i === this.state.focusedGene}
+                  onChange={this.changeGene(i)}
+                />
+              ))}
+            </FormControl>
+          </Grid>
+          <Grid item xs={8} sm={9}>
+            <Expression expressionMap={this.state.expressionMap} traits={traits} />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={8}>
-          <Expression expressionMap={this.state.expressionMap} />
-        </Grid>
-      </Grid>
+
+      </Grid >
     );
   }
 }
@@ -150,6 +151,7 @@ Show.propTypes = {
   classes: PropTypes.object.isRequired,
   speciesName: PropTypes.string.isRequired,
   speciesID: PropTypes.string.isRequired,
+  traits: PropTypes.array.isRequired,
 };
 
 export default withStyles(styles)(Show);

@@ -4,8 +4,9 @@ import React from 'react';
 import { PageTitle, TabBar } from '../App';
 import { ChromosomeShow } from '../Chromosome';
 import speciesApi from './api';
-import Genetics from './Genetics';
+import Genetics from '../Chromosome/Genetics';
 import GeneticsMap from './GeneticsMap';
+import { Grid, Paper, Typography } from '@material-ui/core';
 
 const styles = () => ({
   root: {},
@@ -56,10 +57,7 @@ class Species extends React.Component {
     return (
       <div className={classes.root}>
         <PageTitle title={name} capitalize subtitle="Species" />
-        <TabBar onChange={this.handleChange} tabs={['example', 'expression', 'map']} />
-        { value === 0 && (<ChromosomeShow speciesName={name} speciesID={id}/>) }
-        { value === 1 && (<Genetics traits={genetics.traits} />) }
-        { value === 2 && (<GeneticsMap traits={genetics.traits} />) }
+        <ChromosomeShow speciesName={name} speciesID={id} traits={genetics.traits}/> 
       </div>
     );
   }

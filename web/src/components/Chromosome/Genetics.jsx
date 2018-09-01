@@ -6,7 +6,7 @@ const Genetics = ({ traits }) =>
   (
     <div>
       { traits.map(trait =>
-        (<Trait name={trait.name} key={trait.name} variants={trait.variants} />))
+        (<Trait key={trait.name} {...trait} />))
       }
     </div>
   );

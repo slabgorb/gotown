@@ -10,15 +10,18 @@ import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Variant from './Variant';
+import { Typography } from '@material-ui/core';
 
 const styles = theme => ({
   card: {
     fontFamily: 'Montserrat',
   },
   cardHeaderRoot: { padding: 4 },
-  cardHeaderTitle: { fontSize: 14 },
+  cardHeaderTitle: { 
+    borderBottom: '1px solid #ccc',
+   },
   cardActionRoot: {
-    marginTop: -37,
+    marginTop: -67,
     display: 'flex',
   },
 
@@ -46,28 +49,39 @@ class Trait extends React.Component {
   }
 
   render() {
-    const { name, variants, classes } = this.props;
+    const { name, variants, classes, value } = this.props;
+    const title = (
+      <div>
+        <Typography variant="title" component="h3">
+          {name}
+        </Typography>
+        <Typography variant="subheading" component="h3">
+          {value}
+        </Typography>
+      </div>
+    );
     return (
       <Card className={classes.card}>
         <CardHeader
-          title={name}
+          title={title}
           classes={{
                   root: classes.cardHeaderRoot,
                   title: classes.cardHeaderTitle,
                 }}
         />
+
         <CardActions classes={{ root: classes.cardActionRoot }} disableActionSpacing>
-          <IconButton
-            className={classnames(classes.expand, {
-                [classes.expandOpen]: this.state.expanded,
-              })}
-            onClick={this.handleExpandClick}
-            aria-expanded={this.state.expanded}
-            aria-label="Show more"
-          >
-            <ExpandMoreIcon />
-          </IconButton>
-        </CardActions>
+            <IconButton
+              className={classnames(classes.expand, {
+                  [classes.expandOpen]: this.state.expanded,
+                })}
+              onClick={this.handleExpandClick}
+              aria-expanded={this.state.expanded}
+              aria-label="Show more"
+            >
+              <ExpandMoreIcon />
+            </IconButton>
+          </CardActions>
         <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
           <CardContent>
             {
@@ -85,6 +99,7 @@ Trait.propTypes = {
   name: PropTypes.string.isRequired,
   variants: PropTypes.array.isRequired,
   classes: PropTypes.object.isRequired,
+  value: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(Trait);
