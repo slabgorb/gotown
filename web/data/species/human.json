@@ -491,7 +491,7 @@
           },
           {
             "name":"triangular",
-            "match":"c9,c9"
+            "match":"c8,c9"
           }
         ]
       },
@@ -609,7 +609,7 @@
           },
           {
             "name":"albino",
-            "match":"d00"
+            "match":"d001"
           }
         ]
       },
