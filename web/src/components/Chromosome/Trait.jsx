@@ -18,7 +18,6 @@ const styles = theme => ({
   },
   cardHeaderRoot: { padding: 4 },
   cardHeaderTitle: { 
-    borderBottom: '1px solid #ccc',
    },
   cardActionRoot: {
     marginTop: -67,
