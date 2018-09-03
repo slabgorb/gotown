@@ -251,10 +251,21 @@ func randomNameHandler(c echo.Context) error {
 }
 
 func listWordsHandler(c echo.Context) error { return list(c, words.WordsList) }
+
 func showWordsHandler(c echo.Context) error {
-	w := &words.Words{}
-	w.SetID(getID(c))
-	return show(c, w)
+	id := getID(c)
+	w := &words.Words{Name: id}
+	w.SetID(id)
+	if err := w.Read(); err != nil {
+		if err := persist.ReadByName(w.Name, "Words", w); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
+	api, err := w.API()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	return c.JSON(http.StatusOK, api)
 }
 
 func showBeingHandler(c echo.Context) error {

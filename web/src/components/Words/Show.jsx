@@ -1,23 +1,17 @@
-import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { PageTitle, TabBar } from '../App';
-import NameList from '../NameList';
+
 import wordsApi from './api';
+import { Typography } from '@material-ui/core';
+import Dictionary from './Dictionary';
 
 const _ = require('underscore');
 
 const styles = theme => ({
   root: {
     backgroundColor: theme.palette.background.paper,
-  },
-  cardHeader: {
-    fontFamily: 'Raleway',
-    fontSize: '14',
-    subheader: {
-      fontFamily: 'Raleway',
-    },
   },
   list: {
   },
@@ -65,6 +59,7 @@ class Words extends React.Component {
 
 
   getBackup({ backupName }) {
+    console.log({ backupName })
     wordsApi.get(backupName)
       .then((s) => {
         const dictionary = Object.assign(s.dictionary, this.state.dictionary);
@@ -95,7 +90,6 @@ class Words extends React.Component {
     const { classes, showAppBar } = this.props;
     const {
       loaded,
-      value,
       name,
       dictionary,
     } = this.state;
@@ -105,26 +99,13 @@ class Words extends React.Component {
     return (
       <div>
         { showAppBar && (<PageTitle title={name} titleize />) }
-        <TabBar onChange={this.handleChange} tabs={_.keys(dictionary)} />
-        <Paper classes={{ root: classes.root }}>
-          { _.map(_.keys(dictionary), (k, i) => {
-              if (i === value) {
-                return (
-                  <NameList
-                    key={k}
-                    title={k}
-                    listItems={dictionary[k]}
-                  />
-                );
-              }
-              return '';
-            })
-          }
-        </Paper>
+        { _.map(_.keys(dictionary), k => (<Dictionary k={k} classes={classes} key={k} dictionary={dictionary[k]}/>)) }
       </div>
     );
   }
 }
+
+
 
 Words.propTypes = {
   match: PropTypes.object.isRequired,
