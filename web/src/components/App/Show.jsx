@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 
-const ralewayFF = ({ fontFamily: 'Raleway' });
+const vollkornFF = ({ fontFamily: 'Vollkorn' });
 
 const styles = () => ({
   flex: { flex: 1 },
@@ -28,20 +28,18 @@ const theme = createMuiTheme({
       dark: '#34000d',
       contrastText: '#000',
     },
-
-
   },
   typography: {
-    fontFamily: 'Raleway',
-    body1: ralewayFF,
-    body2: ralewayFF,
-    display1: ralewayFF,
-    display2: ralewayFF,
-    display3: ralewayFF,
-    display4: ralewayFF,
-    caption: ralewayFF,
-    headline: ralewayFF,
-    title: ralewayFF,
+    fontFamily: 'Vollkorn',
+    body1: vollkornFF,
+    body2: vollkornFF,
+    display1: vollkornFF,
+    display2: vollkornFF,
+    display3: vollkornFF,
+    display4: vollkornFF,
+    caption: vollkornFF,
+    headline: vollkornFF,
+    title: vollkornFF,
   },
 });
 

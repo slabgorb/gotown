@@ -14,7 +14,7 @@ const style = () => ({
   },
   box: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
 });
@@ -43,26 +43,30 @@ class Random extends React.Component {
     const { classes } = this.props;
     return (
       <Grid container className={classes.box}>
-        <Typography
-          variant="display2"
-          align="center"
-          color="secondary"
-        >
-          {name}
-        </Typography>
-        <IconButton
-          className={classes.avatar}
-          onClick={this.get}
-        >
-          <AutoRenewIcon />
-        </IconButton>
+        <Grid item>
+          <IconButton
+            className={classes.avatar}
+            onClick={this.get}
+          >
+            <AutoRenewIcon />
+          </IconButton>
+        </Grid>
+        <Grid item>
+          <Typography
+            variant="display2"
+            align="center"
+            color="secondary"
+          >
+            {name}
+          </Typography>
+        </Grid>
       </Grid>
     );
   }
 }
 
 Random.propTypes = {
-  id: PropTypes.number.isRequired,
+  id: PropTypes.string.isRequired,
   name: PropTypes.string,
   classes: PropTypes.object.isRequired,
 };

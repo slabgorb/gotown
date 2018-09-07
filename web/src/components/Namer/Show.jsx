@@ -6,6 +6,7 @@ import { WordsShow } from '../Words';
 import namerApi from './api';
 import PatternChipper from './PatternChipper';
 import Random from './Random';
+import { Grid, Card, CardContent, CardActionArea, Typography, CardHeader } from '@material-ui/core';
 
 const _ = require('underscore');
 
@@ -27,6 +28,9 @@ const styles = theme => ({
     fontSize: '12',
   },
   tabs: { marginTop: 72 },
+  leftGrid: {
+    
+  },
 });
 
 class Namer extends React.Component {
@@ -41,7 +45,6 @@ class Namer extends React.Component {
       id: 0,
     };
     this.get = this.get.bind(this);
-    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -67,9 +70,6 @@ class Namer extends React.Component {
       });
   }
 
-  handleChange(value) {
-    this.setState({ value });
-  }
 
   render() {
     const { classes, showAppBar } = this.props;
@@ -77,7 +77,6 @@ class Namer extends React.Component {
       loaded,
       patterns,
       name,
-      value,
       id,
       wordsID,
     } = this.state;
@@ -91,12 +90,24 @@ class Namer extends React.Component {
     return (
       <div>
         { showAppBar && (<PageTitle title={name} classes={classes} titleize subtitle="Namer" />) }
-        <TabBar onChange={this.handleChange} tabs={['patterns', 'words', 'test']} />
-        { value === 0 && patternChips}
-        { value === 1 &&
-          (<WordsShow showAppBar={false} match={{ params: { name: wordsID } }} />)
-        }
-        { value === 2 && (<Random id={id} />)}
+        <Grid container>
+          <Grid item xs={6}>
+            <Card>
+              <CardContent>
+                <Random id={id} />
+                { patternChips }
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card>
+              <CardHeader title="Words" />
+              <CardContent>
+                <WordsShow showAppBar={false} match={{ params: { name: wordsID } }} />
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </div>
     );
   }

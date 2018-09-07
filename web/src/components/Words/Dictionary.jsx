@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Card, CardContent, CardHeader, CardActions, IconButton, Collapse, Typography } from '@material-ui/core';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import NameList from '../NameList';
 import classnames from 'classnames';
 import inflection from 'inflection';
@@ -41,8 +41,10 @@ class Dictionary extends React.Component {
   }
 
   render() {
-    const { k, dictionary, classes } = this.props;
+    const { k, dictionary, classes, titleVariant } = this.props;
     const { expanded } = this.state;
+    const eless = (<ExpandLess />);
+    const emore = (<ExpandMore />);
     const title = (
       <div className={classes.titleRoot}>
         <IconButton
@@ -53,9 +55,9 @@ class Dictionary extends React.Component {
           aria-expanded={this.state.expanded}
           aria-label="Show more"
         >
-          <ExpandMore />
+          { expanded ? eless : emore    } 
         </IconButton>
-        <Typography variant="display1" key={k}>{inflection.titleize(k)}</Typography>
+        <Typography variant={titleVariant} key={k}>{inflection.titleize(k)}</Typography>
       </div>
     )
     return (<Card className={classes.root}>
@@ -76,6 +78,11 @@ Dictionary.propTypes = {
   k: PropTypes.string.isRequired,
   dictionary: PropTypes.array.isRequired,
   classes: PropTypes.object.isRequired,
+  titleVariant:PropTypes.string,
+}
+
+Dictionary.defaultProps = {
+  titleVariant: 'display1',
 }
 
 module.exports = withStyles(styles)(Dictionary);

@@ -30,7 +30,7 @@
     "redux-thunk": "^2.2.0",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
-    "typeface-raleway": "^0.0.54",
+    "typeface-vollkorn": "^0.0.54",
     "typeface-roboto": "^0.0.35",
     "underscore": "^1.8.3",
     "webpack": "^3.5.5",
