@@ -1,15 +1,10 @@
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
+import { Card, Grid, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 const styles = theme => ({
   root: {},
-  paper: {
-    margin: [theme.spacing.unit, theme.spacing.unit * 2].join(' '),
-  },
   header: {
     padding: theme.spacing.unit * 2,
   },
@@ -31,7 +26,7 @@ const Info = ({
   children,
 }) => (
   <Grid item className={classes.root} xs={xs} sm={sm} md={md}>
-    <Paper className={classes.paper}>
+    <Card className={classes.card}>
       <Typography variant="headline" className={classes.header}>
         {header}
       </Typography>
@@ -43,7 +38,7 @@ const Info = ({
           {p}
         </Typography>
       ))}
-    </Paper>
+    </Card>
   </Grid>
 );
 

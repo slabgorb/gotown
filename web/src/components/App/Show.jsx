@@ -1,9 +1,9 @@
-import { MuiThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 
-const ralewayFF = ({ fontFamily: 'Raleway' });
+const ralewayFF = (size, weight) => ({ fontFamily: 'Raleway', fontSize: size, fontWeight: weight });
 
 const styles = () => ({
   flex: { flex: 1 },
@@ -33,15 +33,15 @@ const theme = createMuiTheme({
   },
   typography: {
     fontFamily: 'Raleway',
-    body1: ralewayFF,
-    body2: ralewayFF,
-    display1: ralewayFF,
-    display2: ralewayFF,
-    display3: ralewayFF,
-    display4: ralewayFF,
-    caption: ralewayFF,
-    headline: ralewayFF,
-    title: ralewayFF,
+    body1: ralewayFF(16, 400),
+    body2: ralewayFF(18, 600),
+    display1: ralewayFF(32, 500),
+    display2: ralewayFF(28, 500),
+    display3: ralewayFF(24, 500),
+    display4: ralewayFF(20, 500),
+    caption: ralewayFF(14, 500),
+    headline: ralewayFF(22, 600),
+    title: ralewayFF(24, 500),
   },
 });
 

@@ -27,6 +27,7 @@ class BarChart extends React.Component {
     const yScale = this.yScale
       .domain([0, maxValue])
       .range([svgDimensions.height - margins.bottom, margins.top]);
+    console.log(yScale)
     return (
       <svg width={svgDimensions.width} height={svgDimensions.height}>
         <Axes

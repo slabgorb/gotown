@@ -2302,6 +2302,10 @@ fbjs@^0.8.16:
     setimmediate "^1.0.5"
     ua-parser-js "^0.7.9"
 
+fetch-hoc@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/fetch-hoc/-/fetch-hoc-0.4.0.tgz#ca08439cc203ff763cc6f9adf74fb9d7681e34a1"
+
 figures@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/figures/-/figures-2.0.0.tgz#3ab1a2d2a62c8bfb431a0c94cb797a2fce27c962"

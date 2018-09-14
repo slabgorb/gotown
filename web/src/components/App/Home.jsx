@@ -2,6 +2,7 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { SpeciesCard } from '../Species';
 import Info from './Info';
 import PageTitle from './PageTitle';
 
@@ -31,6 +32,12 @@ const Home = ({ classes }) => {
       paras: [
         'Species and subraces can be defined with individualized traits.'
       ],
+      children: (
+        <Grid container>
+          <SpeciesCard id="d54f106f-d65e-4ead-93f9-3dd775be95ce" />
+        </Grid>
+
+      ),
     },
     'Genetics and Stereotypes': { 
       paras: [

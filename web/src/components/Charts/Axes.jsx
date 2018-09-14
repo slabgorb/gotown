@@ -2,7 +2,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Axis from './Axis';
 
-const Axes = ({ scales, margins, svgDimensions }) => {
+const Axes = ({
+  scales,
+  margins,
+  svgDimensions,
+  ...props
+}) => {
   const { height, width } = svgDimensions;
 
   const xProps = {
@@ -20,7 +25,7 @@ const Axes = ({ scales, margins, svgDimensions }) => {
   };
 
   return (
-    <g>
+    <g {...props} >
       <Axis {...xProps} />
       <Axis {...yProps} />
     </g>

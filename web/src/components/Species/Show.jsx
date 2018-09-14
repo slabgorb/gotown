@@ -1,12 +1,9 @@
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { PageTitle, TabBar } from '../App';
+import { PageTitle } from '../App';
 import { ChromosomeShow } from '../Chromosome';
 import speciesApi from './api';
-import Genetics from '../Chromosome/Genetics';
-import GeneticsMap from './GeneticsMap';
-import { Grid, Paper, Typography } from '@material-ui/core';
 
 const styles = () => ({
   root: {},
