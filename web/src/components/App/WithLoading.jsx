@@ -11,16 +11,16 @@ const styles = theme => ({
 
 const WithLoading = (Component) => {
   const wrapped = (props) => {
-    const { isLoading, classes } = props;
-    if (!isLoading) return (<Component { ...props } />);
+    const { loading, classes } = props;
+    if (!loading) return (<Component {...props} />);
     return (<CircularProgress className={classes.progress} />);
   };
   wrapped.propTypes = {
-    isLoading: PropTypes.bool,
+    loading: PropTypes.bool,
     classes: PropTypes.object.isRequired,
   };
   wrapped.defaultProps = {
-    isLoading: true,
+    loading: true,
   };
   return withStyles(styles)(wrapped);
 };

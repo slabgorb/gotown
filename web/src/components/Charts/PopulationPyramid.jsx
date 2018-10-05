@@ -52,29 +52,38 @@ class PopulationPyramid extends React.Component {
       .range([margins.left, width - margins.right]);
     const maleData = mapToSegments(genderFilter(data)('male'), segments);
     const femaleData = mapToSegments(genderFilter(data)('female'), segments);
-    return (
-      <svg width={width} height={height}>
+    console.log(maleData)
+    console.log(femaleData)
+    const axes = (
+      <g>
         <Axes
           scales={{ xScale: xScaleFemale, yScale }}
           margins={margins}
-          svgDimensions={{ width, height }}
+          svgDimensions={{ width: width / 2, height }}
+          transform={`translate(${width / 2}, 0)`}
         />
         <Axes
           scales={{ xScale: xScaleMale, yScale }}
           margins={margins}
-          svgDimensions={{ width, height }}
+          svgDimensions={{ width: width / 2, height }}
         />
+      </g>
+    );
+    return (
+      <svg width={width} height={height}>
+        {axes}
         <Bars
           scales={{ xScale: xScaleFemale, yScale }}
           margins={margins}
           data={femaleData}
-          svgDimensions={{ width, height }}
+          svgDimensions={{ width: width / 2, height }}
+          transform={`translate(${width / 2}, 0)`}
         />
         <Bars
           scales={{ xScale: xScaleMale, yScale }}
           margins={margins}
           data={maleData}
-          svgDimensions={{ width, height }}
+          svgDimensions={{ width: width / 2, height }}
         />
       </svg>
 

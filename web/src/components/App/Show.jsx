@@ -1,4 +1,4 @@
-import { MuiThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -40,6 +40,7 @@ const theme = createMuiTheme({
     caption: vollkornFF,
     headline: vollkornFF,
     title: vollkornFF,
+
   },
 });
 
