@@ -1,4 +1,3 @@
-const path = require('path');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
 
 module.exports = {
@@ -19,7 +18,7 @@ module.exports = {
     modules: ['/web/node_modules'],
   },
   plugins: [
-    new LiveReloadPlugin({})
+    new LiveReloadPlugin({}),
   ],
   watch: true,
   module: {

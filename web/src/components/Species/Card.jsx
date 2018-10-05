@@ -1,56 +1,88 @@
-import { Avatar, Card, CardContent, CardHeader, CircularProgress } from '@material-ui/core';
+import { Avatar, Card, CardContent, CardHeader, Fade } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import fetch from 'fetch-hoc';
 import inflection from 'inflection';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { BarChart } from '../Charts';
+import { compose } from 'redux';
+import WithLoading from '../App/WithLoading';
+import { ChromosomeShow } from '../Chromosome';
 
 const _ = require('underscore');
 
+const trans = theme => 'all 450ms cubic-bezier(0.23, 1, 0.32, 1)';
+
 const styles = theme => ({
-  root: {
-    minWidth: 300,
+  contracted: {
+    height: 100,
+    width: 250,
+    transition: trans(theme),
+  },
+  expanded: {
+    height: 800,
+    width: 500,
+    transition: trans(theme),
   },
   avatar: {
     backgroundColor: theme.palette.primary.main,
   },
 });
 
-const SpeciesCard = ({ data, classes, loading, error }) => {
-  if (loading) {
-    return (<CircularProgress className={classes.progress} />);
+class SpeciesCard extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      expanded: false,
+    };
+    this.handleToggle = this.handleToggle.bind(this);
   }
-  
-  if (error) {
-    return (<div>{error}</div>);
+
+  handleToggle() {
+    this.setState(state => ({ expanded: !state.expanded }));
   }
-  const { name, demography } = data;
-  const chartData = _.map(demography, d => ({ value: d.cumulative_percent, title: `${d.max_age}` }));
-  return (
-    <Card className={classes.root}>
-      <CardHeader
-        avatar={(<Avatar area-label="Species" className={classes.avatar}>S</Avatar>)}
-        title={inflection.titleize(name)}
-      />
-      <CardContent>
-        <BarChart
-          data={chartData}
+
+  render() {
+    const {
+      data, classes, error,
+    } = this.props;
+    const { expanded } = this.state;
+    const { name } = data;
+    if (Object.keys(error).length > 0) {
+      return (<div>{error.message}</div>);
+    }
+    return (
+      <Card className={expanded ? classes.expanded : classes.contracted}>
+        <CardHeader
+          onClick={this.handleToggle}
+          avatar={(<Avatar area-label="Species" className={classes.avatar}>S</Avatar>)}
+          title={inflection.titleize(name)}
         />
-      </CardContent>
-    </Card>
-  );
-};
+        <Fade in={expanded}>
+          <CardContent>
+            <ChromosomeShow speciesName={name} speciesID={data.id} traits={data.expression.traits} />
+          </CardContent>
+        </Fade>
+      </Card>
+    );
+  }
+}
 
 SpeciesCard.propTypes = {
-  data: PropTypes.object.isRequired,
+  data: PropTypes.object,
   classes: PropTypes.object.isRequired,
-  loading: PropTypes.bool.isRequired,
-  error: PropTypes.string.isRequired,
+  loading: PropTypes.bool,
+  error: PropTypes.string,
 };
 
-// SpeciesCard.defaultProps = {
-//   error: '',
-// };
+SpeciesCard.defaultProps = {
+  error: '',
+  data: {},
+  loading: true,
+};
 
-module.exports = fetch(({ id }) => `/api/species/${id}`)(withStyles(styles)(SpeciesCard));
+module.exports = compose(
+  fetch(({ id }) => `/api/species/${id}`),
+  WithLoading,
+  withStyles(styles),
+)(SpeciesCard);
+

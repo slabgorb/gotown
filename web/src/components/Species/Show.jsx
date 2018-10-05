@@ -46,7 +46,7 @@ class Species extends React.Component {
 
 
   render() {
-    const { genetics, value, name, id } = this.state;
+    const { genetics, name, id } = this.state;
     if (genetics.traits.length === 0) {
       return (<div />);
     }
