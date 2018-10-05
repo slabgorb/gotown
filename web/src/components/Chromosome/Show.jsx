@@ -123,7 +123,7 @@ class Show extends React.Component {
               ))}
             </FormControl>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={8}>
             <Expression expressionMap={this.state.expressionMap} traits={traits} />
           </Grid>
         </Grid>

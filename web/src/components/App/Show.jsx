@@ -2,9 +2,6 @@ import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/
 import PropTypes from 'prop-types';
 import React from 'react';
 
-
-const vollkornFF = ({ fontFamily: 'Vollkorn' });
-
 const styles = () => ({
   flex: { flex: 1 },
   main: {},
@@ -31,16 +28,9 @@ const theme = createMuiTheme({
   },
   typography: {
     fontFamily: 'Vollkorn',
-    body1: vollkornFF,
-    body2: vollkornFF,
-    display1: vollkornFF,
-    display2: vollkornFF,
-    display3: vollkornFF,
-    display4: vollkornFF,
-    caption: vollkornFF,
-    headline: vollkornFF,
-    title: vollkornFF,
-
+    display1: {
+      color: '#757ce8',
+    },
   },
 });
 

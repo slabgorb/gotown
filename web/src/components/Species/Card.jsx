@@ -1,27 +1,33 @@
-import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Fade } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, CardHeader, Fade } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import classnames from 'classnames';
 import fetch from 'fetch-hoc';
 import inflection from 'inflection';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { compose } from 'redux';
+import SelectCheck from '../App/SelectCheck';
 import WithLoading from '../App/WithLoading';
 import { ChromosomeShow } from '../Chromosome';
 
 const _ = require('underscore');
 
-const trans = theme => `all ${theme.transitions.duration.standard}ms ${theme.transitions.easing.easeInOut}`;
 
 const styles = theme => ({
-  contracted: {
+  root: {
+    margin: theme.spacing.unit,
+    transition: `all ${theme.transitions.duration.standard}ms ${theme.transitions.easing.easeInOut}`,
+  },
+  contract: {
     height: 150,
     width: 250,
-    transition: trans(theme),
   },
-  expanded: {
+  expand: {
     height: 800,
     width: 500,
-    transition: trans(theme),
+  },
+  selected: {
+    border: `2px solid ${theme.palette.primary.light}`,
   },
   avatar: {
     backgroundColor: theme.palette.primary.main,
@@ -33,29 +39,34 @@ class SpeciesCard extends React.Component {
     super(props);
     this.state = {
       expanded: false,
+      selected: false,
     };
     this.handleToggle = this.handleToggle.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
   }
 
   handleToggle() {
     this.setState(state => ({ expanded: !state.expanded }));
   }
 
+  handleSelect(selected) {
+    this.setState({ selected });
+  }
+
   render() {
     const {
       data, classes, error,
     } = this.props;
-    const { expanded } = this.state;
+    const { expanded, selected } = this.state;
     const { name } = data;
     if (Object.keys(error).length > 0) {
       return (<div>{error.message}</div>);
     }
+    const rootClasses = classnames([classes.root, { [classes.selected]: selected, [classes.expand]: expanded, [classes.contract]: !expanded }]);
     return (
-      <Card className={expanded ? classes.expanded : classes.contracted}>
+      <Card className={rootClasses}>
         <CardHeader
-
-          avatar={(<Avatar area-label="Species" className={classes.avatar}>S</Avatar>)}
-          title={inflection.titleize(name)}
+          title={<SelectCheck label={inflection.titleize(name)} onChange={this.handleSelect} />}
         />
         <CardActions>
           <Button onClick={this.handleToggle}>Chromosome</Button>
