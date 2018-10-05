@@ -9,7 +9,7 @@ const _ = require('underscore');
 const styles = theme => ({
   root: {
     margin: theme.spacing.unit,
-    minWidth: 300,
+    minWidth: 200,
   },
   listItem: {
     root: {

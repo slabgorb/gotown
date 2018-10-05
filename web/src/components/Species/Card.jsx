@@ -1,4 +1,4 @@
-import { Avatar, Card, CardContent, CardHeader, Fade } from '@material-ui/core';
+import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Fade } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import fetch from 'fetch-hoc';
 import inflection from 'inflection';
@@ -10,11 +10,11 @@ import { ChromosomeShow } from '../Chromosome';
 
 const _ = require('underscore');
 
-const trans = theme => 'all 450ms cubic-bezier(0.23, 1, 0.32, 1)';
+const trans = theme => `all ${theme.transitions.duration.standard}ms ${theme.transitions.easing.easeInOut}`;
 
 const styles = theme => ({
   contracted: {
-    height: 100,
+    height: 150,
     width: 250,
     transition: trans(theme),
   },
@@ -53,10 +53,13 @@ class SpeciesCard extends React.Component {
     return (
       <Card className={expanded ? classes.expanded : classes.contracted}>
         <CardHeader
-          onClick={this.handleToggle}
+
           avatar={(<Avatar area-label="Species" className={classes.avatar}>S</Avatar>)}
           title={inflection.titleize(name)}
         />
+        <CardActions>
+          <Button onClick={this.handleToggle}>Chromosome</Button>
+        </CardActions>
         <Fade in={expanded}>
           <CardContent>
             <ChromosomeShow speciesName={name} speciesID={data.id} traits={data.expression.traits} />
